@@ -1,0 +1,104 @@
+test name                                   output
+------------------------------------------- ------
+2-paragraphs-hard-return                    <p>
+2-paragraphs-hard-return-spaces             <p>
+2-paragraphs-line                           <p>
+2-paragraphs-line-returns                   <p>
+2-paragraphs-line-spaces                    <p>
+2-paragraphs-line-tab                       <p>
+ampersand-text-flow                         &amp;
+ampersand-uri                               &amp;
+asterisk                                    *
+asterisk-near-text                          *
+backslash-escape                            (various escaped characters)
+blockquote-added-markup                     <blockquote> <h1> <p>
+blockquote-line-2-paragraphs                <blockquote> <p>
+blockquote-line                             <p>
+blockquote-multiline-1-space-begin          <blockquote> <p>
+blockquote-multiline-1-space-end            <blockquote> <p>
+blockquote-multiline-2-paragraphs           <blockquote> <p>
+blockquote-multiline                        <blockquote> <p>
+blockquote-nested                           <blockquote> <blockquote> <p>
+blockquote-nested-multiplereturn-level1     <blockquote> <blockquote> <p>
+blockquote-nested-multiplereturn            <blockquote> <blockquote> <p>
+blockquote-nested-return-level1             <blockquote> <blockquote> <p>
+code-1-tab                                  <pre> <code>
+code-4-spaces-escaping                      <pre> <code> &lt; &gt; &amp;
+code-4-spaces                               <pre> <code> 
+em-middle-word                              <p> <em>
+em-star                                     <p> <em>
+em-underscore                               <p> <em>
+entities-text-flow                          <p> &copy;
+EOL-CR+LF                                   <p>
+EOL-CR                                      <p>
+EOL-LF                                      <p>
+header-level1-equal-underlined              <h1>
+header-level1-hash-sign-closed              <h1>
+header-level1-hash-sign                     <h1>
+header-level1-hash-sign-trailing-1-space    <p>
+header-level1-hash-sign-trailing-2-spaces   <h1> <p>
+header-level2-dash-underlined               <h2>
+header-level2-hash-sign-closed              <h2>
+header-level2-hash-sign                     <h2>
+header-level3-hash-sign-closed              <h3>
+header-level3-hash-sign                     <h3>
+header-level4-hash-sign-closed              <h4>
+header-level4-hash-sign                     <h4>
+header-level5-hash-sign-closed              <h5>
+header-level5-hash-sign                     <h5>
+header-level6-hash-sign-closed              <h6>
+header-level6-hash-sign                     <h6>
+horizontal-rule-3-dashes                    <hr />
+horizontal-rule-3-dashes-spaces             <hr />
+horizontal-rule-3-stars                     <hr />
+horizontal-rule-3-underscores               <hr />
+horizontal-rule-7-dashes                    <hr />
+img-idref                                   <p> <img>
+img-idref-title                             <p> <img>
+img                                         <p> <img>
+img-title                                   <p> <img>
+inline-code-escaping-entities               <p> <code> &lt; &gt; &amp;
+inline-code                                 <p> <code> ` `
+inline-code-with-visible-backtick           <p> <code ` `
+line-break-2-spaces                         <p> <br />
+line-break-5-spaces                         <p> <br />
+link-automatic-email                        <p> <a> &#x..;
+link-automatic                              <p> <a>
+link-bracket-paranthesis                    <p> <a>
+link-bracket-paranthesis-title              <p> <a>
+link-idref-angle-bracket                    <p> <a>
+link-idref-implicit                         <p> <a>
+link-idref-implicit-spaces                  <p> <a>
+link-idref                                  <p> <a>
+link-idref-space                            <p> <a>
+link-idref-title                            <p> <a>
+link-idref-title-next-line                  <p> <a>
+link-idref-title-paranthesis                <p> <a>
+link-idref-title-single-quote               <p> <a>
+list-blockquote                             <ul> <li> <blockquote> <p>
+list-code                                   <ul> <li> <p> <pre>
+list-multiparagraphs                        <ul> <li> <p>
+list-multiparagraphs-tab                    <ul> <li> <p>
+ordered-list-escaped                        <p>
+ordered-list-items                          <ol> <li>
+ordered-list-items-random-number            <ol> <li>
+paragraph-hard-return                       <p> \n
+paragraph-line                              <p>
+paragraphs-2-leading-spaces                 <p>
+paragraphs-3-leading-spaces                 <p>
+paragraphs-leading-space                    <p>
+paragraphs-trailing-spaces                  <p> and space
+paragraph-trailing-leading-spaces           <p> and space
+paragraph-trailing-tab                      <p> and spaces (?)
+strong-middle-word                          <p> <strong>
+strong-star                                 <p> <strong>
+strong-underscore                           <p> <strong>
+unordered-list-items-dashsign               <ul> <li>
+unordered-list-items-leading-1space         <ul> <li>
+unordered-list-items-leading-2spaces        <ul> <li>
+unordered-list-items-leading-3spaces        <ul> <li>
+unordered-list-items                        <ul> <li>
+unordered-list-items-plussign               <ul> <li>
+unordered-list-paragraphs                   <ul> <li> <p>
+unordered-list-unindented-content           <ul> <li>
+unordered-list-with-indented-content        <ul> <li>
