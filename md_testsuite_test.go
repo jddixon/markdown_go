@@ -23,11 +23,11 @@ const (
 var (
 	TEST_NAMES = []string{
 		"2-paragraphs-hard-return",
-		// "2-paragraphs-hard-return-spaces",
+		"2-paragraphs-hard-return-spaces",
 		"2-paragraphs-line",
-		// "2-paragraphs-line-returns",
-		// "2-paragraphs-line-spaces",
-		// "2-paragraphs-line-tab",
+		"2-paragraphs-line-returns",
+		"2-paragraphs-line-spaces",
+		"2-paragraphs-line-tab",
 
 		"EOL-CR+LF",
 		"EOL-CR",
@@ -35,12 +35,12 @@ var (
 
 		"paragraph-hard-return",
 		"paragraph-line",
-		// "paragraphs-2-leading-spaces",	// drop leading spaces in para
-		// "paragraphs-3-leading-spaces",
-		// "paragraphs-leading-space",
+		"paragraphs-2-leading-spaces", // drop leading spaces in para
+		"paragraphs-3-leading-spaces",
+		"paragraphs-leading-space",
 		"paragraphs-trailing-spaces",
-		// "paragraph-trailing-leading-spaces",
-		// "paragraph-trailing-tab",		// trailing tab becomes spaces?
+		"paragraph-trailing-leading-spaces",
+		"paragraph-trailing-tab", // trailing tab becomes spaces?
 	}
 )
 

@@ -1,4 +1,6 @@
 xgo/md/TODO
 
-2013-12-14
+2013-12-16
     * fix test
+        - 8/102 tests succeed                                           * DONE
+        - 17/102 tests succeed (all simple paragraph tests)             * DONE
