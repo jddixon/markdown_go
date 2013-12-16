@@ -7,8 +7,7 @@ import (
 )
 
 var (
-	PARA_START = []rune("<p>")
-	PARA_END   = []rune("</p>")
+	PARA_END = []rune("</p>")
 )
 
 type Para struct {

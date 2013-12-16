@@ -21,12 +21,17 @@ func IsSepChar(ch rune) bool {
 }
 
 // Make a new line separator container.
-func NewLineSep(ch rune) (ls *LineSep, err error) {
-	if !IsSepChar(ch) {
-		err = NotALineSeparator
+func NewLineSep(chars []rune) (ls *LineSep, err error) {
+	for i := 0; i < len(chars); i++ {
+		ch := chars[i]
+		if !IsSepChar(ch) {
+			err = NotALineSeparator
+			break
+		}
 	}
 	if err == nil {
-		runes := []rune{ch}
+		runes := make([]rune, len(chars))
+		copy(runes, chars)
 		ls = &LineSep{runes: runes}
 	}
 	return
