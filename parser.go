@@ -42,6 +42,7 @@ type Parser struct {
 	maybes           []rune
 	nonSeps          []rune
 	seps             []rune
+	bits             []MarkdownI
 
 	// for handling emphasis
 	emphChar    rune
@@ -59,20 +60,28 @@ func NewParser(reader io.Reader) (p *Parser, err error) {
 	return
 }
 
-func (p *Parser) Parse() (bits []MarkdownI, err error) {
+func (p *Parser) Parse() ([]MarkdownI, error) {
 	var (
-		ch rune
+		ch  rune
+		err error
 	)
 	lx := p.lexer
+	ch, err = lx.NextCh()
 	for err == nil {
-		ch, err = lx.NextCh()
 		if err != nil {
 			break
 		}
 		if p.state == START {
-			if len(p.nonSeps) == 0 && ch == ' ' { // leading tab?
-				// ignore
-			} else if ch == '_' || ch == '*' {
+			if len(p.nonSeps) == 0 {
+				if ch == ' ' { // leading tab?
+					// ignore
+					goto NEXT
+				} else if ch == '#' {
+					p.collectHeader()
+					goto NEXT
+				}
+			}
+			if ch == '_' || ch == '*' {
 				// scan ahead for matching ch; if we find it, we
 				// wrap it properly and append it to p.nonSeps and
 				// return true.  Otherwise we push whatever has been
@@ -110,7 +119,7 @@ func (p *Parser) Parse() (bits []MarkdownI, err error) {
 				p.seps = p.seps[:0]
 				p.crCount = 0
 				p.lfCount = 0
-				bits = append(bits, p.lineSep)
+				p.bits = append(p.bits, p.lineSep)
 				p.lineSep = nil
 				p.nonSeps = append(p.nonSeps, ch)
 				p.state = NONSEP_COLL
@@ -148,7 +157,7 @@ func (p *Parser) Parse() (bits []MarkdownI, err error) {
 					p.lfCount++
 				}
 				if p.crCount > 1 || p.lfCount > 1 {
-					bits = append(bits, NewPara(p.nonSeps))
+					p.bits = append(p.bits, NewPara(p.nonSeps))
 					p.nonSeps = p.nonSeps[:0]
 					p.seps = make([]rune, len(p.maybes))
 					copy(p.seps, p.maybes)
@@ -167,10 +176,10 @@ func (p *Parser) Parse() (bits []MarkdownI, err error) {
 						p.nonSeps = p.nonSeps[:len(p.nonSeps)-1]
 						p.nonSeps = append(p.nonSeps, FOUR_SPACES...)
 					}
-					bits = append(bits, NewPara(p.nonSeps))
+					p.bits = append(p.bits, NewPara(p.nonSeps))
 					p.nonSeps = p.nonSeps[:0]
 					p.lineSep, _ = NewLineSep(p.maybes)
-					bits = append(bits, p.lineSep)
+					p.bits = append(p.bits, p.lineSep)
 					p.maybes = p.maybes[:0]
 				} else {
 					p.nonSeps = append(p.nonSeps, p.maybes...)
@@ -180,6 +189,8 @@ func (p *Parser) Parse() (bits []MarkdownI, err error) {
 				p.state = NONSEP_COLL
 			}
 		}
+	NEXT:
+		ch, err = lx.NextCh()
 	}
 	if err == io.EOF {
 		if p.state == SEP_COLL {
@@ -191,14 +202,13 @@ func (p *Parser) Parse() (bits []MarkdownI, err error) {
 				p.nonSeps = p.nonSeps[:len(p.nonSeps)-1]
 				p.nonSeps = append(p.nonSeps, FOUR_SPACES...)
 			}
-			bits = append(bits, NewPara(p.nonSeps))
+			p.bits = append(p.bits, NewPara(p.nonSeps))
 			p.nonSeps = p.nonSeps[:0]
 		}
 		err = nil
 	}
-	// ALMOST CERTAINLY WRONG
 	if err == nil && len(p.nonSeps) > 0 {
-		bits = append(bits, NewPara(p.nonSeps))
+		p.bits = append(p.bits, NewPara(p.nonSeps))
 	}
-	return
+	return p.bits, err
 }

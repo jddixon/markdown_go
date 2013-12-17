@@ -37,6 +37,21 @@ var (
 		"EOL-CR",
 		"EOL-LF",
 
+		"header-level1-hash-sign-closed",
+		"header-level1-hash-sign",
+		//"header-level1-hash-sign-trailing-1-space",
+		//"header-level1-hash-sign-trailing-2-spaces",
+		//"header-level2-hash-sign-closed",
+		"header-level2-hash-sign",
+		//"header-level3-hash-sign-closed",
+		"header-level3-hash-sign",
+		//"header-level4-hash-sign-closed",
+		"header-level4-hash-sign",
+		//"header-level5-hash-sign-closed",
+		"header-level5-hash-sign",
+		//"header-level6-hash-sign-closed",
+		"header-level6-hash-sign",
+
 		"paragraph-hard-return",
 		"paragraph-line",
 		"paragraphs-2-leading-spaces", // drop leading spaces in para

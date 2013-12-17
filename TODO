@@ -6,4 +6,5 @@ xgo/md/TODO
         - 17/102 tests succeed (all simple paragraph tests)             * DONE
     * transform Parse() into type Parser with func Parse()              * DONE
     * 23/102 tests succeed (all em- and strong-)                        * DONE
+    * header.*hash tests (14)
     * horizontal rules (5 tests)
