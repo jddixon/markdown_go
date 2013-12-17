@@ -29,6 +29,10 @@ var (
 		"2-paragraphs-line-spaces",
 		"2-paragraphs-line-tab",
 
+		"em-middle-word",
+		"em-star",
+		"em-underscore",
+
 		"EOL-CR+LF",
 		"EOL-CR",
 		"EOL-LF",
@@ -41,6 +45,9 @@ var (
 		"paragraphs-trailing-spaces",
 		"paragraph-trailing-leading-spaces",
 		"paragraph-trailing-tab", // trailing tab becomes spaces?
+		"strong-middle-word",
+		"strong-star",
+		"strong-underscore",
 	}
 )
 
@@ -56,7 +63,10 @@ func (s *XLSuite) doMDTest(c *C, name string) {
 	c.Assert(err, IsNil)
 	c.Assert(in, NotNil)
 
-	bits, err := Parse(in)
+	p, err := NewParser(in)
+	c.Assert(err, IsNil)
+
+	bits, err := p.Parse()
 	c.Assert(err, IsNil)
 	c.Assert(len(bits) > 0, Equals, true)
 
@@ -71,7 +81,7 @@ func (s *XLSuite) doMDTest(c *C, name string) {
 	expectedRunes := bytes.Runes(expectedOut)
 
 	// DEBUG
-	fmt.Printf("EXPECTED: %s\nACTUAL: %s\n",
+	fmt.Printf("EXPECTED: %s\nACTUAL:   %s\n",
 		string(expectedRunes), string(output))
 	// END
 	c.Assert(len(output), Equals, len(expectedRunes))
