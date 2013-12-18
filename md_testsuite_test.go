@@ -5,6 +5,7 @@ package md
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	. "launchpad.net/gocheck"
 	"os"
@@ -28,11 +29,17 @@ var (
 		"2-paragraphs-line-returns",
 		"2-paragraphs-line-spaces",
 		"2-paragraphs-line-tab",
+		//"ampersand-text-flow",		// NEW
+		//"ampersand-uri",			// NEW
+		//"asterisk",					// NEW
+		//"asterisk-near-text",		// NEW
+		//"backslash-escape",			// NEW
 
 		"em-middle-word",
 		"em-star",
 		"em-underscore",
 
+		"entities-text-flow", // NEW
 		"EOL-CR+LF",
 		"EOL-CR",
 		"EOL-LF",
@@ -85,24 +92,28 @@ func (s *XLSuite) doMDTest(c *C, name string) {
 	c.Assert(err, IsNil)
 	c.Assert(len(bits) > 0, Equals, true)
 
-	// convert []MarkdownI to HTML == []rune
-	output, err := HtmlWrite(bits)
+	// convert []MarkdownI to bytes
+	var b bytes.Buffer
+	var wPtr io.Writer = &b
+	c.Assert(wPtr, NotNil)
+	wr, err := NewHtmlWriter(wPtr)
 	c.Assert(err, IsNil)
-	// outBytes := []byte(output)
+	c.Assert(wr, NotNil)
+	count, err := wr.Write(bits)
+	c.Assert(err, IsNil)
+	_ = count
+	actualOut := string(b.Bytes())
 
-	// verify equality
-	expectedOut, err := ioutil.ReadFile(outPath)
+	bytesFromDisk, err := ioutil.ReadFile(outPath)
 	c.Assert(err, IsNil)
-	expectedRunes := bytes.Runes(expectedOut)
+	expectedOut := string(bytesFromDisk)
 
 	// DEBUG
 	fmt.Printf("EXPECTED: %s\nACTUAL:   %s\n",
-		string(expectedRunes), string(output))
+		expectedOut, actualOut)
 	// END
-	c.Assert(len(output), Equals, len(expectedRunes))
-	for i := 0; i < len(output); i++ {
-		c.Assert(output[i], Equals, expectedRunes[i])
-	}
+	c.Assert(len(actualOut), Equals, len(expectedOut))
+	c.Assert(actualOut, Equals, expectedOut)
 }
 
 func (s *XLSuite) TestTestsInSuite(c *C) {

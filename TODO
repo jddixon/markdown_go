@@ -6,9 +6,17 @@ xgo/md/TODO
         - 17/102 tests succeed (all simple paragraph tests)             * DONE
     * transform Parse() into type Parser with func Parse()              * DONE
     * 23/102 tests succeed (all em- and strong-)                        * DONE
+    * header.*hash non-underlined tests (14)                            * DONE
 
-    * header.*hash tests (14)
+    * Entities should be handled in html_writer.  We run through the
+        runes, ignoring &...; sequences but replacing ambiguous 
+        characters with entities where required.
+    * To make this simpler, create an HtmlWriter struct with an         * DONE 
+        io.Writer for output                                            * DONE
+
     * current header collector only works on the first line; extend
         to other circumstances
-    
+    * a line consisting of nothing but hash signs should simply be 
+        output as text; in other words, it gets appended to nonSeps
+
     * horizontal rules (5 tests)

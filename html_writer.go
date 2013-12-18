@@ -4,21 +4,43 @@ package md
 
 import (
 	"fmt"
+	"io"
 )
 
 var _ = fmt.Print
 
-func HtmlWrite(bits []MarkdownI) (out []rune, err error) {
+type HtmlWriter struct {
+	wr io.Writer
+}
 
-	for i := 0; i < len(bits); i++ {
-		// DEBUG
-		runes := bits[i].Get()
+func NewHtmlWriter(w io.Writer) (hw *HtmlWriter, err error) {
+	if w == nil {
+		err = NilWriter
+	} else {
+		hw = &HtmlWriter{
+			wr: w,
+		}
+	}
+	return
+}
+
+func (hw *HtmlWriter) Write(downers []MarkdownI) (
+	bytesOut int, err error) {
+
+	for i := 0; err == nil && i < len(downers); i++ {
+		runes := downers[i].Get()
 		s := string(runes)
+		// DEBUG
 		n := len(s)
 		fmt.Printf("CHUNK %d, %d runes, %d bytes: '%s'\n",
 			i, len(runes), n, s)
 		// END
-		out = append(out, bits[i].Get()...)
+		var count int
+		data := []byte(s)
+		count, err = hw.wr.Write(data)
+		if err == nil {
+			bytesOut += count
+		}
 	}
 	return
 }

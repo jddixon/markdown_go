@@ -28,9 +28,9 @@ func (h *Header) Get() []rune {
 	return h.runes
 }
 
-// Collect headers preceded by 1-6 hash signs ('#') and optionally
-// terminated by one hash sign.
-//
+// Collect atx-style headers preceded by 1-6 hash signs ('#') and optionally
+// terminated by some number of hash signes.  Return a count of the number
+// of leading hashes seen.
 func (p *Parser) collectHeader() (collected bool, hashCount int, err error) {
 
 	fmt.Printf("Entering collectHeader()\n")
