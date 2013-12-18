@@ -36,12 +36,11 @@ func (p *Parser) collectHeader() (collected bool, hashCount int, err error) {
 	fmt.Printf("Entering collectHeader()\n")
 
 	lx := p.lexer
-
 	var (
-		atEOF bool
-		runes []rune
+		atEOF          bool
+		runes          []rune
+		trailingSpaces int
 	)
-
 	// count leading hashes -----------------------------------------
 	hashCount = 1 // we enter having seen one '#'
 	ch, err := lx.NextCh()
@@ -75,13 +74,20 @@ func (p *Parser) collectHeader() (collected bool, hashCount int, err error) {
 	// if we have a title -------------------------------------------
 	if err == nil && len(runes) > 0 {
 
+		fmt.Printf("RAW TITLE: '%s'\n", string(runes)) // DEBUG
+
 		// XXX UNDER AS-YET-UNDERSTOOD CIRCUMSTANCES we get a trailing
 		// null byte
 		if runes[len(runes)-1] == rune(0) {
 			runes = runes[:len(runes)-1]
 		}
-		// drop any trailing hash sign --------------------
-		if runes[len(runes)-1] == '#' {
+		// drop any trailing spaces -----------------------
+		for runes[len(runes)-1] == ' ' {
+			runes = runes[:len(runes)-1]
+			trailingSpaces++
+		}
+		// drop any trailing hash signs -------------------
+		for runes[len(runes)-1] == '#' {
 			runes = runes[:len(runes)-1]
 		}
 		title := strings.TrimSpace(string(runes))
@@ -92,6 +98,13 @@ func (p *Parser) collectHeader() (collected bool, hashCount int, err error) {
 		h, _ = NewHeader(hashCount, runes)
 		p.bits = append(p.bits, h)
 		collected = true
+
+		// XXX CAN'T TELL IF THIS COMPLIES WITH ANY SPECS -
+		if trailingSpaces > 1 {
+			seps := []rune{'\n', '\n'}
+			lineSep, _ := NewLineSep(seps)
+			p.bits = append(p.bits, lineSep)
+		}
 	}
 	return
 }

@@ -62,8 +62,13 @@ func NewParser(reader io.Reader) (p *Parser, err error) {
 
 func (p *Parser) Parse() ([]MarkdownI, error) {
 	var (
-		ch  rune
-		err error
+		ch           rune
+		err          error
+		leadingSpace bool
+
+		// header handling
+		collected bool
+		hashCount int
 	)
 	lx := p.lexer
 	ch, err = lx.NextCh()
@@ -74,10 +79,14 @@ func (p *Parser) Parse() ([]MarkdownI, error) {
 		if p.state == START {
 			if len(p.nonSeps) == 0 {
 				if ch == ' ' { // leading tab?
-					// ignore
+					leadingSpace = true
 					goto NEXT
-				} else if ch == '#' {
-					p.collectHeader()
+				} else if ch == '#' && !leadingSpace {
+					collected, hashCount, err = p.collectHeader()
+					if collected {
+						p.state = START // XXX
+					}
+					_ = hashCount
 					goto NEXT
 				}
 			}
