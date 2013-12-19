@@ -3,38 +3,36 @@ package md
 // xgo/md/para.go
 
 import (
-	"fmt"
+	// "fmt"
 )
 
 var (
-	PARA_END = []rune("</p>")
+	PARA_OPEN  = []rune("<p>")
+	PARA_CLOSE = []rune("</p>")
 )
 
 type Para struct {
-	runes []rune
+	spans []SpanI
 }
 
-// This definition allows any and all characters into a p element.
-func NewPara(chars []rune) (ls *Para) {
-	p := []rune("<p>")
-	p = append(p, chars...)
-	p = append(p, PARA_END...)
-	ls = &Para{runes: p}
-	// DEBUG
-	fmt.Printf("NewPara: '%s' => '%s'\n",
-		string(chars), string(ls.runes))
-	// END
-	return
-}
-
-// This definition allows any and all characters into a p element.
-func (ls *Para) Add(ch rune) (err error) {
-	if err == nil {
-		ls.runes = append(ls.runes, ch)
+func NewPara(span SpanI) (pa *Para) {
+	pa = &Para{}
+	if span != nil {
+		pa.spans = append(pa.spans, span)
 	}
 	return
 }
 
-func (ls *Para) Get() []rune {
-	return ls.runes
+func (p *Para) Add(span SpanI) (err error) {
+	p.spans = append(p.spans, span)
+	return
+}
+
+func (p *Para) Get() (runes []rune) {
+	runes = append(runes, PARA_OPEN...)
+	for i := 0; i < len(p.spans); i++ {
+		runes = append(runes, p.spans[i].Get()...)
+	}
+	runes = append(runes, PARA_CLOSE...)
+	return
 }

@@ -196,7 +196,9 @@ func (p *Parser) Parse() ([]MarkdownI, error) {
 					p.lfCount++
 				}
 				if p.crCount > 1 || p.lfCount > 1 {
-					p.downers = append(p.downers, NewPara(p.nonSeps))
+					t := NewText(p.nonSeps)
+					para := NewPara(t)
+					p.downers = append(p.downers, para)
 					p.nonSeps = p.nonSeps[:0]
 					p.seps = make([]rune, len(p.maybes))
 					copy(p.seps, p.maybes)
@@ -215,7 +217,9 @@ func (p *Parser) Parse() ([]MarkdownI, error) {
 						p.nonSeps = p.nonSeps[:len(p.nonSeps)-1]
 						p.nonSeps = append(p.nonSeps, FOUR_SPACES...)
 					}
-					p.downers = append(p.downers, NewPara(p.nonSeps))
+					t := NewText(p.nonSeps)
+					para := NewPara(t)
+					p.downers = append(p.downers, para)
 					p.nonSeps = p.nonSeps[:0]
 					p.lineSep, _ = NewLineSep(p.maybes)
 					p.downers = append(p.downers, p.lineSep)
@@ -241,13 +245,17 @@ func (p *Parser) Parse() ([]MarkdownI, error) {
 				p.nonSeps = p.nonSeps[:len(p.nonSeps)-1]
 				p.nonSeps = append(p.nonSeps, FOUR_SPACES...)
 			}
-			p.downers = append(p.downers, NewPara(p.nonSeps))
+			t := NewText(p.nonSeps)
+			para := NewPara(t)
+			p.downers = append(p.downers, para)
 			p.nonSeps = p.nonSeps[:0]
 		}
 		err = nil
 	}
 	if err == nil && len(p.nonSeps) > 0 {
-		p.downers = append(p.downers, NewPara(p.nonSeps))
+		t := NewText(p.nonSeps)
+		para := NewPara(t)
+		p.downers = append(p.downers, para)
 	}
 	return p.downers, err
 }
