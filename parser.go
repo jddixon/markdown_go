@@ -43,6 +43,9 @@ type Parser struct {
 	// for handling emphasis
 	emphChar    rune
 	emphDoubled bool
+
+	// our little dictionary
+	dict map[string]*Definition
 }
 
 func NewParser(reader io.Reader) (p *Parser, err error) {

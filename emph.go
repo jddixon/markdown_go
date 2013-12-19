@@ -1,5 +1,7 @@
 package md
 
+// xgo/md/emph.go
+
 import (
 	"fmt"
 	"io"
@@ -29,20 +31,25 @@ func (p *Parser) collectEmph(emphChar rune) (collected bool, err error) {
 				goto NEXT
 			}
 		}
-		if ch == '\r' || ch == '\n' {
-			fmt.Printf("    got CR|LF while collecting emph\n") // DEBUG
-
-			// we didn't collect the whole thing so just push it all back
-			lx.PushBack(emphChar)
+		if atEOF || ch == '\r' || ch == '\n' {
+			// DEBUG
+			if ch == CR || ch == LF {
+				fmt.Printf("    got CR|LF while collecting emph\n") // DEBUG
+			} else {
+				fmt.Printf("    collectEmph; at EOF;  PUSHING BACK '%s'\n",
+					string(runes))
+			}
+			// we didn't collect the whole thing so forward the emphChar(s)
+			// and push back the rest, including the current character, so
+			// long as it's not a null byte
+			p.nonSeps = append(p.nonSeps, emphChar)
 			if p.emphDoubled {
-				lx.PushBack(emphChar)
+				p.nonSeps = append(p.nonSeps, emphChar)
 			}
 			lx.PushBackChars(runes)
-			lx.PushBack(ch)
-			// DEBUG
-			fmt.Printf("    EOL in collectEmph: PUSHING BACK '%s'\n",
-				string(runes))
-			// END
+			if ch != rune(0) {
+				lx.PushBack(ch)
+			}
 			collected = false
 			break
 		} else if ch == emphChar {

@@ -34,15 +34,14 @@ var (
 		// This tests the interpretation of [ampersand] reference
 		// "ampersand-uri",
 
-		//"asterisk",					// NEW
-		//"asterisk-near-text",		// NEW
-		"backslash-escape", // NEW
+		"asterisk",           // NEW
+		"asterisk-near-text", // NEW
+		"backslash-escape",
 
 		"em-middle-word",
 		"em-star",
 		"em-underscore",
-
-		"entities-text-flow", // NEW
+		"entities-text-flow",
 		"EOL-CR+LF",
 		"EOL-CR",
 		"EOL-LF",
@@ -51,6 +50,7 @@ var (
 		"header-level1-hash-sign",
 		"header-level1-hash-sign-trailing-1-space",
 		"header-level1-hash-sign-trailing-2-spaces",
+
 		"header-level2-hash-sign-closed",
 		"header-level2-hash-sign",
 		"header-level3-hash-sign-closed",
@@ -61,6 +61,8 @@ var (
 		"header-level5-hash-sign",
 		"header-level6-hash-sign-closed",
 		"header-level6-hash-sign",
+
+		// "link-idref",				// NEW, BUT NOT YET
 
 		"paragraph-hard-return",
 		"paragraph-line",
