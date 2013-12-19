@@ -29,11 +29,14 @@ var (
 		"2-paragraphs-line-returns",
 		"2-paragraphs-line-spaces",
 		"2-paragraphs-line-tab",
-		//"ampersand-text-flow",		// NEW
-		//"ampersand-uri",			// NEW
+		"ampersand-text-flow", // NEW
+
+		// This tests the interpretation of [ampersand] reference
+		// "ampersand-uri",
+
 		//"asterisk",					// NEW
 		//"asterisk-near-text",		// NEW
-		//"backslash-escape",			// NEW
+		"backslash-escape", // NEW
 
 		"em-middle-word",
 		"em-star",

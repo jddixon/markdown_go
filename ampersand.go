@@ -16,9 +16,6 @@ func (p *Parser) handleAmpersand() (collected bool, err error) {
 	fmt.Printf("Entering handleAmpersand()\n")
 
 	lx := p.lexer
-	const (
-		MAX_ENTITY_CHAR = 6 // between & and ;
-	)
 	var (
 		atEOF bool
 		runes []rune

@@ -30,7 +30,7 @@ func (p *Parser) collectEmph(emphChar rune) (collected bool, err error) {
 			}
 		}
 		if ch == '\r' || ch == '\n' {
-			fmt.Printf("got CR|LF while collecting emph\n") // DEBUG
+			fmt.Printf("    got CR|LF while collecting emph\n") // DEBUG
 
 			// we didn't collect the whole thing so just push it all back
 			lx.PushBack(emphChar)
@@ -40,12 +40,13 @@ func (p *Parser) collectEmph(emphChar rune) (collected bool, err error) {
 			lx.PushBackChars(runes)
 			lx.PushBack(ch)
 			// DEBUG
-			fmt.Printf("EOL: PUSHING BACK %s\n", string(runes))
+			fmt.Printf("    EOL in collectEmph: PUSHING BACK '%s'\n",
+				string(runes))
 			// END
 			collected = false
 			break
 		} else if ch == emphChar {
-			fmt.Printf("got emph char %c while collecting\n", ch)
+			fmt.Printf("    got emph char %c while collecting\n", ch)
 			if p.emphDoubled {
 				if !haveSeenFirstCloser {
 					fmt.Printf("first of two closers seen\n") // DEBUG

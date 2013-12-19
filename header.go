@@ -96,14 +96,14 @@ func (p *Parser) collectHeader() (collected bool, hashCount int, err error) {
 		// create the object ------------------------------
 		var h *Header
 		h, _ = NewHeader(hashCount, runes)
-		p.bits = append(p.bits, h)
+		p.downers = append(p.downers, h)
 		collected = true
 
 		// XXX CAN'T TELL IF THIS COMPLIES WITH ANY SPECS -
 		if trailingSpaces > 1 {
 			seps := []rune{'\n', '\n'}
 			lineSep, _ := NewLineSep(seps)
-			p.bits = append(p.bits, lineSep)
+			p.downers = append(p.downers, lineSep)
 		}
 	}
 	return
