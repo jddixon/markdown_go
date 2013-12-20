@@ -3,7 +3,7 @@ package md
 // xgo/md/para.go
 
 import (
-	// "fmt"
+// "fmt"
 )
 
 var (

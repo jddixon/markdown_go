@@ -31,14 +31,17 @@ var (
 )
 
 type Parser struct {
-	lexer            *gl.LexInput
-	state            State
+	lexer *gl.LexInput
+	state State
+
 	lineSep          *LineSep
 	crCount, lfCount int
 	maybes           []rune
-	nonSeps          []rune
 	seps             []rune
-	downers          []MarkdownI
+
+	curText []rune
+	curPara *Para
+	downers []MarkdownI
 
 	// for handling emphasis
 	emphChar    rune
@@ -77,7 +80,7 @@ func (p *Parser) Parse() ([]MarkdownI, error) {
 		}
 		if p.state == START {
 			fmt.Printf("START: '%c' = %d\n", ch, ch) // DEBUG
-			if len(p.nonSeps) == 0 {
+			if len(p.curText) == 0 {
 				if ch == SPACE { // leading tab?
 					leadingSpace = true
 					goto NEXT
@@ -92,14 +95,14 @@ func (p *Parser) Parse() ([]MarkdownI, error) {
 			}
 			if ch == BACKSLASH {
 				var nextChar rune
-				p.nonSeps = append(p.nonSeps, BACKSLASH)
+				p.curText = append(p.curText, BACKSLASH)
 				nextChar, err = lx.PeekCh()
 				// DEBUG
 				fmt.Printf("Parser:START sees BACKSLASH + '%c'\n", nextChar)
 				// END
 				if escaped(nextChar) {
 					ch, err = lx.NextCh()
-					p.nonSeps = append(p.nonSeps, ch)
+					p.curText = append(p.curText, ch)
 					// DEBUG
 				} else {
 					fmt.Printf("    %c does not get escaped\n", nextChar)
@@ -108,11 +111,11 @@ func (p *Parser) Parse() ([]MarkdownI, error) {
 				p.state = NONSEP_COLL
 			} else if ch == '_' || ch == '*' {
 				// scan ahead for matching ch; if we find it, we
-				// wrap it properly and append it to p.nonSeps and
+				// wrap it properly and append it to p.curText and
 				// return true.  Otherwise we push whatever has been
-				// scanned back on input, append ch to p.nonSeps,
+				// scanned back on input, append ch to p.curText,
 				// and return false.
-				p.collectEmph(ch)
+				p.oldParseEmph(ch)
 			} else if ch == CR || ch == LF {
 				if ch == CR {
 					p.crCount++
@@ -122,7 +125,7 @@ func (p *Parser) Parse() ([]MarkdownI, error) {
 				p.seps = append(p.seps, ch)
 				p.state = SEP_COLL
 			} else {
-				p.nonSeps = append(p.nonSeps, ch)
+				p.curText = append(p.curText, ch)
 				p.state = NONSEP_COLL
 			}
 		} else if p.state == SEP_COLL {
@@ -147,14 +150,14 @@ func (p *Parser) Parse() ([]MarkdownI, error) {
 				p.lfCount = 0
 				p.downers = append(p.downers, p.lineSep)
 				p.lineSep = nil
-				p.nonSeps = append(p.nonSeps, ch)
+				p.curText = append(p.curText, ch)
 				p.state = NONSEP_COLL
 			}
 		} else if p.state == NONSEP_COLL {
 			fmt.Printf("NONSEP_COLL: '%c'\n", ch) // DEBUG
 			if ch == BACKSLASH {
 				var nextChar rune
-				p.nonSeps = append(p.nonSeps, BACKSLASH)
+				p.curText = append(p.curText, BACKSLASH)
 				nextChar, err = lx.PeekCh()
 				// DEBUG
 				fmt.Printf("    sees BACKSLASH + '%c'\n",
@@ -162,17 +165,17 @@ func (p *Parser) Parse() ([]MarkdownI, error) {
 				// END
 				if escaped(nextChar) {
 					ch, err = lx.NextCh()
-					p.nonSeps = append(p.nonSeps, ch)
+					p.curText = append(p.curText, ch)
 				}
-			} else if len(p.nonSeps) == 0 && ch == SPACE { // leading tab?
+			} else if len(p.curText) == 0 && ch == SPACE { // leading tab?
 				// ignore
 			} else if ch == '_' || ch == '*' {
 				// scan ahead for matching ch; if we find it, we
-				// wrap it properly and append it to p.nonSeps and
+				// wrap it properly and append it to p.curText and
 				// return true.  Otherwise we push whatever has been
-				// scanned back on input, append ch to p.nonSeps,
+				// scanned back on input, append ch to p.curText,
 				// and return false.
-				p.collectEmph(ch)
+				p.oldParseEmph(ch)
 			} else if ch == CR || ch == LF {
 				if ch == CR {
 					p.crCount = 1
@@ -182,7 +185,7 @@ func (p *Parser) Parse() ([]MarkdownI, error) {
 				p.maybes = append(p.maybes, ch)
 				p.state = MAYBE_COLL
 			} else {
-				p.nonSeps = append(p.nonSeps, ch)
+				p.curText = append(p.curText, ch)
 				// p.state unchanged
 			}
 		} else if p.state == MAYBE_COLL {
@@ -196,10 +199,10 @@ func (p *Parser) Parse() ([]MarkdownI, error) {
 					p.lfCount++
 				}
 				if p.crCount > 1 || p.lfCount > 1 {
-					t := NewText(p.nonSeps)
+					t := NewText(p.curText)
 					para := NewPara(t)
 					p.downers = append(p.downers, para)
-					p.nonSeps = p.nonSeps[:0]
+					p.curText = p.curText[:0]
 					p.seps = make([]rune, len(p.maybes))
 					copy(p.seps, p.maybes)
 					p.maybes = p.maybes[:0]
@@ -209,23 +212,23 @@ func (p *Parser) Parse() ([]MarkdownI, error) {
 				// If the last nonSep is a space (or tab?) we
 				// make the nonSep a para, insert a p.lineSep,
 				// and start a new para.
-				lastChar := p.nonSeps[len(p.nonSeps)-1]
+				lastChar := p.curText[len(p.curText)-1]
 				if lastChar == SPACE || lastChar == TAB {
 					fmt.Printf("SPACE AT END OF LINE\n") // DEBUG
 					if lastChar == TAB {
 						fmt.Printf("TAB AT END OF LINE\n") // DEBUG
-						p.nonSeps = p.nonSeps[:len(p.nonSeps)-1]
-						p.nonSeps = append(p.nonSeps, FOUR_SPACES...)
+						p.curText = p.curText[:len(p.curText)-1]
+						p.curText = append(p.curText, FOUR_SPACES...)
 					}
-					t := NewText(p.nonSeps)
+					t := NewText(p.curText)
 					para := NewPara(t)
 					p.downers = append(p.downers, para)
-					p.nonSeps = p.nonSeps[:0]
+					p.curText = p.curText[:0]
 					p.lineSep, _ = NewLineSep(p.maybes)
 					p.downers = append(p.downers, p.lineSep)
 					p.maybes = p.maybes[:0]
 				} else {
-					p.nonSeps = append(p.nonSeps, p.maybes...)
+					p.curText = append(p.curText, p.maybes...)
 					p.maybes = p.maybes[:0]
 				}
 				lx.PushBack(ch)
@@ -239,21 +242,21 @@ func (p *Parser) Parse() ([]MarkdownI, error) {
 		if p.state == SEP_COLL {
 			p.seps = p.seps[:0] // just discard
 		} else if p.state == NONSEP_COLL || p.state == MAYBE_COLL {
-			lastChar := p.nonSeps[len(p.nonSeps)-1]
+			lastChar := p.curText[len(p.curText)-1]
 			if lastChar == TAB {
 				fmt.Printf("TAB AT END OF LINE\n") // DEBUG
-				p.nonSeps = p.nonSeps[:len(p.nonSeps)-1]
-				p.nonSeps = append(p.nonSeps, FOUR_SPACES...)
+				p.curText = p.curText[:len(p.curText)-1]
+				p.curText = append(p.curText, FOUR_SPACES...)
 			}
-			t := NewText(p.nonSeps)
+			t := NewText(p.curText)
 			para := NewPara(t)
 			p.downers = append(p.downers, para)
-			p.nonSeps = p.nonSeps[:0]
+			p.curText = p.curText[:0]
 		}
 		err = nil
 	}
-	if err == nil && len(p.nonSeps) > 0 {
-		t := NewText(p.nonSeps)
+	if err == nil && len(p.curText) > 0 {
+		t := NewText(p.curText)
 		para := NewPara(t)
 		p.downers = append(p.downers, para)
 	}

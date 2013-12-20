@@ -53,15 +53,15 @@ func ValidID(text []rune) (validID string, err error) {
 }
 
 // We are at the beginning of a line (possiblly with up to three leading
-// spaces).  If we find
+// spaces) ahd have seen a left square bracket.  If we find the rest of
 //   [id]:\s+uri\s?("title")?(CR|LF)+
 // where the uri may be delimited with angle brackets and the title
 // may be delimited with DQUOTE or PAREN, then we absorb all of
 // these, adding id => DEF to the dictionary for the document.  That
 // is, a successful parse produces no output.
 //
-// If the parse fails, the initial left square bracket is output and
-// any other characters scanned are pushed back on input.
+// If the parse fails, we push all characters scanned here back onto the input
+// and returns collected == false.
 //
 func (p *Parser) parseDefinition() (collected bool, err error) {
 
@@ -97,8 +97,10 @@ func (p *Parser) parseDefinition() (collected bool, err error) {
 	// XXX STUB: if no err, collected = true
 
 	_, _, _ = atEOF, cantParse, id
+
+	// We push everything  back on the input and signal that the parse failed.
+	// The caller knows that the current char is '['
 	if !collected {
-		p.nonSeps = append(p.nonSeps, '[')
 		lx.PushBackChars(runes)
 	}
 	return

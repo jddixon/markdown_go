@@ -9,11 +9,10 @@ type Text struct {
 
 func NewText(runes []rune) (t *Text) {
 	txt := make([]rune, len(runes))
-	copy (txt, runes)
-	return &Text{runes:txt}
+	copy(txt, runes)
+	return &Text{runes: txt}
 }
 
 func (t *Text) Get() []rune {
 	return t.runes
 }
-

@@ -1,15 +1,21 @@
 package md
 
-// xgo/md/emph.go
+// xgo/md/old_emph.go
 
 import (
 	"fmt"
 	"io"
 )
 
-func (p *Parser) collectEmph(emphChar rune) (collected bool, err error) {
+// XXX CHANGE: Attempt to parse out an EmphSpan, returning a SpanI reference
+// to it on success and nil and possibly an error on failure.  If the parse
+// fails but there is no input error, push back all characters seen on the
+// input.  If the parse has succeeded, the SpanI will added to the current
+// Para's list of SpanIs.
+//
+func (p *Parser) oldParseEmph(emphChar rune) (collected bool, err error) {
 
-	fmt.Printf("Entering collectEmph(%c)\n", emphChar)
+	fmt.Printf("Entering parseEmph(%c)\n", emphChar)
 
 	p.emphChar = emphChar
 	p.emphDoubled = false
@@ -36,15 +42,15 @@ func (p *Parser) collectEmph(emphChar rune) (collected bool, err error) {
 			if ch == CR || ch == LF {
 				fmt.Printf("    got CR|LF while collecting emph\n") // DEBUG
 			} else {
-				fmt.Printf("    collectEmph; at EOF;  PUSHING BACK '%s'\n",
+				fmt.Printf("    parseEmph; at EOF;  PUSHING BACK '%s'\n",
 					string(runes))
 			}
 			// we didn't collect the whole thing so forward the emphChar(s)
 			// and push back the rest, including the current character, so
 			// long as it's not a null byte
-			p.nonSeps = append(p.nonSeps, emphChar)
+			p.curText = append(p.curText, emphChar)
 			if p.emphDoubled {
-				p.nonSeps = append(p.nonSeps, emphChar)
+				p.curText = append(p.curText, emphChar)
 			}
 			lx.PushBackChars(runes)
 			if ch != rune(0) {
@@ -61,15 +67,15 @@ func (p *Parser) collectEmph(emphChar rune) (collected bool, err error) {
 					goto NEXT
 				} else {
 					fmt.Printf("closing double-emph\n") // DEBUG
-					p.nonSeps = append(p.nonSeps, OPEN_STRONG...)
-					p.nonSeps = append(p.nonSeps, runes...)
-					p.nonSeps = append(p.nonSeps, CLOSE_STRONG...)
+					p.curText = append(p.curText, OPEN_STRONG...)
+					p.curText = append(p.curText, runes...)
+					p.curText = append(p.curText, CLOSE_STRONG...)
 				}
 			} else {
 				fmt.Printf("closing single-emph\n")
-				p.nonSeps = append(p.nonSeps, OPEN_EM...)
-				p.nonSeps = append(p.nonSeps, runes...)
-				p.nonSeps = append(p.nonSeps, CLOSE_EM...)
+				p.curText = append(p.curText, OPEN_EM...)
+				p.curText = append(p.curText, runes...)
+				p.curText = append(p.curText, CLOSE_EM...)
 			}
 			fmt.Println("COLLECTED") // DEBUG
 			collected = true
