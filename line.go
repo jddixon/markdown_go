@@ -42,6 +42,10 @@ func (q *Line) parseToSpans() (spans []SpanI, err error) {
 		// run through all candidate parsers ------------------------
 		if ch == '_' || ch == '*' {
 			span, _ = q.parseEmphSpan()
+		} else if ch == '`' {
+			span, _ = q.parseCodeSpan()
+		} else if ch == '[' {
+			span, _ = q.parseLinkSpan()
 		}
 
 		// handle any parse results ---------------------------------

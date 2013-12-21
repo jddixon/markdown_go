@@ -31,6 +31,7 @@ func NewCodeSpan(runes []rune) (t *CodeSpan) {
 // in the sense that they are converted to character entities here.
 func (p *CodeSpan) Get() (out []rune) {
 
+	out = append(out, []rune("<code>")...)
 	for i := 0; i < len(p.runes); i++ {
 		r := p.runes[i]
 		if r == '&' {
@@ -41,6 +42,39 @@ func (p *CodeSpan) Get() (out []rune) {
 			out = append(out, GT_ENTITY...)
 		} else {
 			out = append(out, r)
+		}
+	}
+	out = append(out, []rune("</code>")...)
+	return
+}
+
+// Attempt to parse out a CodeSpan, returning a SpanI reference
+// to it on success and nil and possibly an error on failure.  If the parse
+// fails but there is no input error, leave the line offset unchanged and
+// return a nil SpanI.  If the parse succeeds, return a SpanI and advance
+// the offset accordingly.
+//
+func (q *Line) parseCodeSpan() (span SpanI, err error) {
+
+	codeChar := q.runes[q.offset]
+	offset := q.offset
+	found := false
+
+	// look for the end of the span
+	for offset++; offset < len(q.runes); offset++ {
+		ch := q.runes[offset]
+		if ch == codeChar {
+			found = true
+			break
+		}
+	}
+	if found {
+		var start, end int
+		start = q.offset + 1
+		end = offset
+		q.offset = offset + 1
+		span = &CodeSpan{
+			runes: q.runes[start:end],
 		}
 	}
 	return
