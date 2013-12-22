@@ -6,10 +6,13 @@ type Line struct {
 	runes   []rune
 	offset  int
 	lineSep rune // CR, LF, or 0
+	p	*Parser
 }
 
-func NewLine(raw []rune, lineSep rune) (q *Line, err error) {
-	if lineSep != rune(0) && lineSep != CR && lineSep != LF {
+func NewLine(p *Parser, raw []rune, lineSep rune) (q *Line, err error) {
+	if p == nil {
+		err = NilParser
+	} else if lineSep != rune(0) && lineSep != CR && lineSep != LF {
 		err = InvalidLineSeparator
 	} else {
 		q = &Line{
@@ -46,6 +49,9 @@ func (q *Line) parseToSpans() (spans []SpanI, err error) {
 			span, _ = q.parseCodeSpan()
 		} else if ch == '[' {
 			span, _ = q.parseLinkSpan()
+			if span == nil {
+				span, _ = q.parseLinkRefSpan(q.p)
+			}
 		}
 
 		// handle any parse results ---------------------------------

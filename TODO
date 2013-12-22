@@ -1,9 +1,7 @@
 xgo/md/TODO
 
-2013-12-19
-    * parseEmph() should create an EmphSpan() object; the text in       * DONE
-        this should be wrapped in <em>..</em> or <strong>..</strong     * DONE
-        by HtmlWriter.Write()                                           * DONE
+2013-12-21
+    * linkRefSpan needs working linkRef and dictionary
 
 2013-12-16
     * fix test

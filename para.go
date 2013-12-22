@@ -15,6 +15,8 @@ type Para struct {
 	spans []SpanI
 }
 
+// A Para is a Block consisting of a number of SpanI, things that
+// implement the SpanI interface.
 func NewPara(span SpanI) (pa *Para) {
 	pa = &Para{}
 	if span != nil {
