@@ -17,14 +17,14 @@ var _ = fmt.Print
 type ImageRefSpan struct {
 	altText []rune
 	id       string
-	p        *Parser
+	doc      *Document
 }
 
-func NewImageRefSpan(p *Parser, altText []rune, id string) (
+func NewImageRefSpan(doc *Document, altText []rune, id string) (
 	t *ImageRefSpan, err error) {
 
-	if p == nil {
-		err = NilParser
+	if doc == nil {
+		err = NilDocument
 	} else {
 		image := make([]rune, len(altText))
 		copy(image, altText)
@@ -32,7 +32,7 @@ func NewImageRefSpan(p *Parser, altText []rune, id string) (
 		t = &ImageRefSpan{
 			altText: image,
 			id:       id,
-			p:        p,
+			doc:        doc,
 		}
 	}
 	return
@@ -42,7 +42,7 @@ func NewImageRefSpan(p *Parser, altText []rune, id string) (
 
 func (ls *ImageRefSpan) Get() (out []rune) {
 
-	def := ls.p.dict[ls.id]
+	def := ls.doc.dict[ls.id]
 	uri := def.uri
 	title := def.title
 
@@ -74,9 +74,9 @@ func (ls *ImageRefSpan) Get() (out []rune) {
 // is optionally followed by a space.  An id in square brackets follows.
 // We make no attempt to verify that the id is well-formed.
 //
-func (q *Line) parseImageRefSpan(p *Parser) (span SpanI, err error) {
+func (q *Line) parseImageRefSpan(doc *Document) (span SpanI, err error) {
 
-	if p == nil {
+	if doc == nil {
 		err = NilParser
 	} else {
 		offset := q.offset + 2	// Enter having seen ![
@@ -125,7 +125,7 @@ func (q *Line) parseImageRefSpan(p *Parser) (span SpanI, err error) {
 		if end > 0 {
 			altText = q.runes[altTextStart:altTextEnd]
 			id = q.runes[idStart:idEnd]
-			span, err = NewImageRefSpan(p, altText, string(id))
+			span, err = NewImageRefSpan(doc, altText, string(id))
 			q.offset = offset + 1
 		}
 	}

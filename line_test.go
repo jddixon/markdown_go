@@ -6,11 +6,11 @@ import (
 
 func (s *XLSuite) TestEmphAndCode(c *C) {
 
-	p := new(Parser)	// just a dummy
+	doc := new(Document)	// just a dummy
 
 	input := []rune("abc _def_ **ghi** __jkl mno__ qrs ")
 	input = append(input, []rune("`kode &a <b >c` foo")...)
-	q, err := NewLine(p, input, rune(0))
+	q, err := NewLine(doc, input, rune(0))
 	c.Assert(err, IsNil)
 	c.Assert(q, NotNil)
 
@@ -51,12 +51,12 @@ func (s *XLSuite) TestEmphAndCode(c *C) {
 }
 
 func (s *XLSuite) TestLinkSpan(c *C) {
-	p := new(Parser)	// just a dummy
+	doc := new(Document)	// just a dummy
 
 	input := []rune("abc [foo](http://example.com) ")
 	input2 := []rune("def [bar](/its/somewhere \"I hope\")")
 	input = append(input, input2...)
-	q, err := NewLine(p, input, CR)
+	q, err := NewLine(doc, input, CR)
 	c.Assert(err, IsNil)
 	c.Assert(q, NotNil)
 

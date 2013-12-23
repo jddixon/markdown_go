@@ -1,6 +1,6 @@
 package md
 
-// xgo/md/header.go
+// xgo/md/old_header.go
 
 import (
 	"fmt"
@@ -8,30 +8,30 @@ import (
 	"strings"
 )
 
-type Header struct {
+type OldHeader struct {
 	runes []rune
 }
 
-func NewHeader(n int, title []rune) (h *Header, err error) {
+func NewOldHeader(n int, title []rune) (h *OldHeader, err error) {
 	if n < 1 || 6 < n {
 		err = HeaderNOutOfRange
 	} else if len(title) == 0 {
 		err = EmptyHeaderTitle
 	} else {
 		text := fmt.Sprintf("<h%d>%s</h%d>", n, string(title), n)
-		h = &Header{runes: []rune(text)}
+		h = &OldHeader{runes: []rune(text)}
 	}
 	return
 }
 
-func (h *Header) Get() []rune {
+func (h *OldHeader) Get() []rune {
 	return h.runes
 }
 
 // Collect atx-style headers preceded by 1-6 hash signs ('#') and optionally
 // terminated by some number of hash signes.  Return a count of the number
 // of leading hashes seen.
-func (p *Parser) collectHeader() (collected bool, hashCount int, err error) {
+func (p *OldParser) collectHeader() (collected bool, hashCount int, err error) {
 
 	fmt.Printf("Entering collectHeader()\n")
 
@@ -94,8 +94,8 @@ func (p *Parser) collectHeader() (collected bool, hashCount int, err error) {
 		runes = []rune(title)
 
 		// create the object ------------------------------
-		var h *Header
-		h, _ = NewHeader(hashCount, runes)
+		var h *OldHeader
+		h, _ = NewOldHeader(hashCount, runes)
 		p.downers = append(p.downers, h)
 		collected = true
 

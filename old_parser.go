@@ -1,6 +1,6 @@
 package md
 
-// xgo/md/Parser.go
+// xgo/md/old_parser.go
 
 import (
 	"fmt"
@@ -30,7 +30,7 @@ var (
 	CLOSE_STRONG = []rune("</strong>")
 )
 
-type Parser struct {
+type OldParser struct {
 	lexer *gl.LexInput
 	state State
 
@@ -51,10 +51,10 @@ type Parser struct {
 	dict map[string]*Definition
 }
 
-func NewParser(reader io.Reader) (p *Parser, err error) {
+func NewOldParser(reader io.Reader) (p *OldParser, err error) {
 	lx, err := gl.NewNewLexInput(reader)
 	if err == nil {
-		p = &Parser{
+		p = &OldParser{
 			lexer: lx,
 			state: START,
 		}
@@ -62,7 +62,7 @@ func NewParser(reader io.Reader) (p *Parser, err error) {
 	return
 }
 
-func (p *Parser) Parse() ([]MarkdownI, error) {
+func (p *OldParser) Parse() ([]MarkdownI, error) {
 	var (
 		ch           rune
 		err          error
@@ -98,7 +98,7 @@ func (p *Parser) Parse() ([]MarkdownI, error) {
 				p.curText = append(p.curText, BACKSLASH)
 				nextChar, err = lx.PeekCh()
 				// DEBUG
-				fmt.Printf("Parser:START sees BACKSLASH + '%c'\n", nextChar)
+				fmt.Printf("OldParser:START sees BACKSLASH + '%c'\n", nextChar)
 				// END
 				if escaped(nextChar) {
 					ch, err = lx.NextCh()

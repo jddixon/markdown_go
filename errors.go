@@ -10,6 +10,7 @@ var (
 	HeaderNOutOfRange    = e.New("header N out of range")
 	InvalidCharInID      = e.New("invalid char in ID")
 	InvalidLineSeparator = e.New("invalid line separator (not LF, CR, zero")
+	NilDocument			= e.New("nil document parameter")
 	NilID                = e.New("nil id parameter")
 	NilParser            = e.New("nil parser parameter")
 	NilWriter            = e.New("nil writer parameter")

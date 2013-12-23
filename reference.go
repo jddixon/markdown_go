@@ -16,7 +16,7 @@ import (
 type Reference struct {
 	id       string
 	linkText []rune
-	p        *Parser
+	doc        *Document
 }
 
 // Return the link referred to, first looking up id in the parser
@@ -27,7 +27,7 @@ type Reference struct {
 //
 func (ref *Reference) Get() (runes []rune) {
 
-	def := ref.p.dict[ref.id]
+	def := ref.doc.dict[ref.id]
 	uri := def.uri
 	title := def.title
 

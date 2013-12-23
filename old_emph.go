@@ -13,7 +13,7 @@ import (
 // input.  If the parse has succeeded, the SpanI will added to the current
 // Para's list of SpanIs.
 //
-func (p *Parser) oldParseEmph(emphChar rune) (collected bool, err error) {
+func (p *OldParser) oldParseEmph(emphChar rune) (collected bool, err error) {
 
 	fmt.Printf("Entering parseEmph(%c)\n", emphChar)
 

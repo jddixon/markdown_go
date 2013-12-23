@@ -1,23 +1,26 @@
 package md
 
+// xgo/md/spans.go
+
 import ()
 
 type Line struct {
 	runes   []rune
-	offset  int
+	offset  int		// offset of current rune within this line
 	lineSep rune // CR, LF, or 0
-	p	*Parser
+	doc		*Document
 }
 
-func NewLine(p *Parser, raw []rune, lineSep rune) (q *Line, err error) {
-	if p == nil {
-		err = NilParser
+func NewLine(doc *Document, raw []rune, lineSep rune) (q *Line, err error) {
+	if doc == nil {
+		err = NilDocument
 	} else if lineSep != rune(0) && lineSep != CR && lineSep != LF {
 		err = InvalidLineSeparator
 	} else {
 		q = &Line{
 			runes:   raw,
 			lineSep: lineSep,
+			doc:		doc,
 		}
 	}
 	return
@@ -50,7 +53,7 @@ func (q *Line) parseToSpans() (spans []SpanI, err error) {
 		} else if ch == '[' {
 			span, _ = q.parseLinkSpan()
 			if span == nil {
-				span, _ = q.parseLinkRefSpan(q.p)
+				span, _ = q.parseLinkRefSpan(q.doc)
 			}
 		}
 

@@ -13,14 +13,14 @@ var _ = fmt.Print
 type LinkRefSpan struct {
 	linkText []rune
 	id       string
-	p        *Parser
+	doc      *Document
 }
 
-func NewLinkRefSpan(p *Parser, linkText []rune, id string) (
+func NewLinkRefSpan(doc *Document, linkText []rune, id string) (
 	t *LinkRefSpan, err error) {
 
-	if p == nil {
-		err = NilParser
+	if doc == nil {
+		err = NilDocument
 	} else {
 		link := make([]rune, len(linkText))
 		copy(link, linkText)
@@ -28,7 +28,7 @@ func NewLinkRefSpan(p *Parser, linkText []rune, id string) (
 		t = &LinkRefSpan{
 			linkText: link,
 			id:       id,
-			p:        p,
+			doc:        doc,
 		}
 	}
 	return
@@ -38,7 +38,7 @@ func NewLinkRefSpan(p *Parser, linkText []rune, id string) (
 
 func (ls *LinkRefSpan) Get() (out []rune) {
 
-	def := ls.p.dict[ls.id]
+	def := ls.doc.dict[ls.id]
 	uri := def.uri
 	title := def.title
 
@@ -70,9 +70,9 @@ func (ls *LinkRefSpan) Get() (out []rune) {
 // is optionally followed by a space.  An id in square brackets follows.
 // We make no attempt to verify that the id is well-formed.
 //
-func (q *Line) parseLinkRefSpan(p *Parser) (span SpanI, err error) {
+func (q *Line) parseLinkRefSpan(doc *Document) (span SpanI, err error) {
 
-	if p == nil {
+	if doc == nil {
 		err = NilParser
 	} else {
 		offset := q.offset + 1
@@ -119,9 +119,11 @@ func (q *Line) parseLinkRefSpan(p *Parser) (span SpanI, err error) {
 			}
 		}
 		if end > 0 {
+			var lrSpan *LinkRefSpan
 			linkText = q.runes[linkTextStart:linkTextEnd]
 			id = q.runes[idStart:idEnd]
-			span, err = NewLinkRefSpan(p, linkText, string(id))
+			lrSpan, err = NewLinkRefSpan(doc, linkText, string(id))
+			span = lrSpan
 			q.offset = offset + 1
 		}
 	}

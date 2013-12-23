@@ -63,7 +63,7 @@ func ValidID(text []rune) (validID string, err error) {
 // If the parse fails, we push all characters scanned here back onto the input
 // and returns collected == false.
 //
-func (p *Parser) parseDefinition() (collected bool, err error) {
+func (p *OldParser) parseDefinition() (collected bool, err error) {
 
 	lx := p.lexer
 	var (
