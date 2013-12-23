@@ -6,13 +6,11 @@ import ()
 
 type Document struct {
 	blocks []BlockI
-	dict map[string]*Definition
+	dict   map[string]*Definition
 }
 
 func NewDocument() (q *Document, err error) {
 
-	q = &Document{
-	}
+	q = &Document{}
 	return
 }
-

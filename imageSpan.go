@@ -10,7 +10,7 @@ var _ = fmt.Print
 
 type ImageSpan struct {
 	linkText []rune
-	path      []rune
+	path     []rune
 	title    []rune
 }
 
@@ -24,7 +24,7 @@ func NewImageSpan(linkText, path, title []rune) (t *ImageSpan) {
 
 	t = &ImageSpan{
 		linkText: link,
-		path:      where,
+		path:     where,
 	}
 	if title != nil && len(title) > 0 {
 		tt := make([]rune, len(title))
@@ -66,13 +66,13 @@ func (p *ImageSpan) Get() (out []rune) {
 //
 func (q *Line) parseImageSpan() (span SpanI, err error) {
 
-	offset := q.offset + 2	// enter having seen ![
+	offset := q.offset + 2 // enter having seen ![
 	var (
-		linkTextStart        int = offset
-		linkTextEnd          int
-		pathStart, pathEnd     int
-		titleStart, titleEnd int
-		end                  int // offset of closing paren, if found
+		linkTextStart         int = offset
+		linkTextEnd           int
+		pathStart, pathEnd    int
+		titleStart, titleEnd  int
+		end                   int // offset of closing paren, if found
 		linkText, path, title []rune
 	)
 

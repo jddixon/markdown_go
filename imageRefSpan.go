@@ -16,8 +16,8 @@ var _ = fmt.Print
 //     [altText][id]
 type ImageRefSpan struct {
 	altText []rune
-	id       string
-	doc      *Document
+	id      string
+	doc     *Document
 }
 
 func NewImageRefSpan(doc *Document, altText []rune, id string) (
@@ -31,8 +31,8 @@ func NewImageRefSpan(doc *Document, altText []rune, id string) (
 
 		t = &ImageRefSpan{
 			altText: image,
-			id:       id,
-			doc:        doc,
+			id:      id,
+			doc:     doc,
 		}
 	}
 	return
@@ -79,13 +79,13 @@ func (q *Line) parseImageRefSpan(doc *Document) (span SpanI, err error) {
 	if doc == nil {
 		err = NilParser
 	} else {
-		offset := q.offset + 2	// Enter having seen ![
+		offset := q.offset + 2 // Enter having seen ![
 		var (
-			altTextStart  int = offset
-			altTextEnd    int
+			altTextStart   int = offset
+			altTextEnd     int
 			idStart, idEnd int
 			end            int // offset of closing paren, if found
-			altText, id   []rune
+			altText, id    []rune
 		)
 
 		// look for the end of the altText -------------------------

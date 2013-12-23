@@ -1,5 +1,9 @@
 xgo/md/TODO
 
+2013-12-23
+    * consider changing lineSep in type Line to []rune, to allow for
+        CR-LF sequences at the end of a line
+
 2013-12-21
     * linkRefSpan needs working linkRef and dictionary
 

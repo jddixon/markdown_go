@@ -16,7 +16,7 @@ import (
 type Reference struct {
 	id       string
 	linkText []rune
-	doc        *Document
+	doc      *Document
 }
 
 // Return the link referred to, first looking up id in the parser

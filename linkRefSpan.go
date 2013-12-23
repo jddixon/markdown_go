@@ -28,7 +28,7 @@ func NewLinkRefSpan(doc *Document, linkText []rune, id string) (
 		t = &LinkRefSpan{
 			linkText: link,
 			id:       id,
-			doc:        doc,
+			doc:      doc,
 		}
 	}
 	return
