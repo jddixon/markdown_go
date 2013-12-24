@@ -4,6 +4,9 @@ xgo/md/TODO
     * consider changing lineSep in type Line to []rune, to allow for
         CR-LF sequences at the end of a line
 
+    * loops in parseLinkDefinition are messy; rework to follow 
+        those in parseImageDef
+
 2013-12-21
     * linkRefSpan needs working linkRef and dictionary
 

@@ -69,7 +69,7 @@ func (s *XLSuite) TestLinkDefinition(c *C) {
 	c.Assert(err, IsNil) // gets io.EOF
 	c.Assert(string(line1.runes), Equals, def1)
 
-	defn1, err := line1.parseDefinition(p)
+	defn1, err := line1.parseLinkDefinition(p)
 	c.Assert(err, IsNil)
 	c.Assert(defn1, NotNil)
 	c.Assert(defn1.GetURI(), Equals, uri1)
@@ -79,7 +79,48 @@ func (s *XLSuite) TestLinkDefinition(c *C) {
 	c.Assert(err, Equals, io.EOF)
 	c.Assert(string(line2.runes), Equals, def2)
 
-	defn2, err := line2.parseDefinition(p)
+	defn2, err := line2.parseLinkDefinition(p)
+	c.Assert(err, IsNil)
+	c.Assert(defn2, NotNil)
+	c.Assert(defn2.GetURI(), Equals, uri2)
+	c.Assert(defn2.GetTitle(), Equals, "")
+}
+
+func (s *XLSuite) TestImageDefinition(c *C) {
+
+	// 1: image definition with optional title
+	id1 := "pic1"
+	uri1 := "/images/pic1.png"
+	title1 := "img title one"
+	def1 := fmt.Sprintf("![%s]: (%s \"%s\")", id1, uri1, title1)
+
+	// 2: image definition without title
+	id2 := "secondPic"
+	uri2 := "/pictures/bar.jpg"
+	def2 := fmt.Sprintf("![%s]:(%s)", id2, uri2)
+
+	text := def1 + "\n" + def2
+
+	var rd io.Reader = strings.NewReader(text)
+	p, err := NewParser(rd)
+	c.Assert(err, IsNil)
+	c.Assert(p, NotNil)
+
+	line1, err := p.readLine()
+	c.Assert(err, IsNil) // gets io.EOF
+	c.Assert(string(line1.runes), Equals, def1)
+
+	defn1, err := line1.parseImageDefinition(p)
+	c.Assert(err, IsNil)
+	c.Assert(defn1, NotNil)
+	c.Assert(defn1.GetURI(), Equals, uri1)
+	c.Assert(defn1.GetTitle(), Equals, title1)
+
+	line2, err := p.readLine()
+	c.Assert(err, Equals, io.EOF)
+	c.Assert(string(line2.runes), Equals, def2)
+
+	defn2, err := line2.parseImageDefinition(p)
 	c.Assert(err, IsNil)
 	c.Assert(defn2, NotNil)
 	c.Assert(defn2.GetURI(), Equals, uri2)
