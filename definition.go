@@ -199,11 +199,7 @@ func (line *Line) parseImageDefinition(p *Parser) (def *Definition, err error) {
 		ch = line.runes[offset]
 		if ch == ']' {
 			idEnd = offset // exclusive end
-			// DEBUG
-			fmt.Printf("imageDef: idStart = %d, idEnd = %d\n",
-				idStart, idEnd)
-			// END
-			offset++ // position beyond right bracket
+			offset++       // position beyond right bracket
 			break
 		}
 	}
@@ -233,10 +229,6 @@ func (line *Line) parseImageDefinition(p *Parser) (def *Definition, err error) {
 		}
 		if offset < eol {
 			uriEnd = offset
-			// DEBUG
-			fmt.Printf("imageDef: uriStart = %d, uriEnd = %d\n",
-				uriStart, uriEnd)
-			// END
 		}
 	}
 	// collect any title
@@ -261,10 +253,6 @@ func (line *Line) parseImageDefinition(p *Parser) (def *Definition, err error) {
 				}
 				if ch == quote {
 					titleEnd = offset
-					// DEBUG
-					fmt.Printf("imageDef: uriStart = %d, uriEnd = %d\n",
-						uriStart, uriEnd)
-					// END
 					offset++
 				}
 			}

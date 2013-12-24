@@ -7,6 +7,8 @@ xgo/md/TODO
     * loops in parseLinkDefinition are messy; rework to follow 
         those in parseImageDef
 
+    * header.go COMPILES
+
 2013-12-21
     * linkRefSpan needs working linkRef and dictionary
 

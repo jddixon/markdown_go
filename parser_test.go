@@ -4,6 +4,7 @@ package md
 
 import (
 	"fmt"
+	xr "github.com/jddixon/xlattice_go/rnglib"
 	"io"
 	. "launchpad.net/gocheck"
 	"strings"
@@ -125,4 +126,47 @@ func (s *XLSuite) TestImageDefinition(c *C) {
 	c.Assert(defn2, NotNil)
 	c.Assert(defn2.GetURI(), Equals, uri2)
 	c.Assert(defn2.GetTitle(), Equals, "")
+}
+
+func (s *XLSuite) TestHeader(c *C) {
+	rng := xr.MakeSimpleRNG()
+
+	titles := make([]string, 6)
+	for i := 0; i < 6; i++ {
+		titles[i] = rng.NextFileName(16)
+	}
+	lines := make([]string, 6)
+	for i := 0; i < 6; i++ {
+		var hashes string
+		for j := 0; j < i+1; j++ {
+			hashes += "#"
+		}
+		lines[i] = hashes + titles[i]
+		// half get trailing hashes
+		if i%2 == 0 {
+			lines[i] += hashes
+		}
+	}
+	input := strings.Join(lines, "\n")
+
+	var rd io.Reader = strings.NewReader(input)
+	p, err := NewParser(rd)
+	c.Assert(err, IsNil)
+	c.Assert(p, NotNil)
+
+	for i := 0; i < 6; i++ {
+		line, err := p.readLine()
+		if i < 5 {
+			c.Assert(err, IsNil)
+		} else {
+			c.Assert(err, Equals, io.EOF)
+		}
+		c.Assert(line, NotNil)
+		b, err := line.parseHeader()
+		c.Assert(err, IsNil)
+		c.Assert(b, NotNil)
+		h := b.(*Header)
+		c.Assert(h.n, Equals, i+1)
+		c.Assert(string(h.runes), Equals, string(titles[i]))
+	}
 }
