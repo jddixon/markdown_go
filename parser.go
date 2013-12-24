@@ -33,15 +33,16 @@ func NewParser(reader io.Reader) (p *Parser, err error) {
 
 func (p *Parser) readLine() (line *Line, err error) {
 
+	var thisLine Line
 	var runes []rune
 	var atEOF bool
 
 	lx := p.lexer
 	ch, err := lx.NextCh()
 	for err == nil {
-		if ch == CR || ch == LF {
-			line.lineSep = ch
-			line.runes = runes
+		if ch == CR || ch == LF || ch == rune(0) {
+			thisLine.lineSep = ch
+			thisLine.runes = runes
 			break
 		}
 		runes = append(runes, ch)
@@ -54,8 +55,12 @@ func (p *Parser) readLine() (line *Line, err error) {
 			atEOF = true
 		}
 	}
-	if atEOF {
-		err = io.EOF
+	if err == nil {
+		thisLine.runes = runes
+		line = &thisLine
+		if atEOF {
+			err = io.EOF
+		}
 	}
 	return
 }

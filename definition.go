@@ -7,9 +7,20 @@ import (
 	u "unicode"
 )
 
+var _ = fmt.Print
+
+// We use the same data structure for both link and image defs.
 type Definition struct {
 	uri   []rune
 	title []rune
+}
+
+func (def *Definition) GetURI() string {
+	return string(def.uri)
+}
+
+func (def *Definition) GetTitle() string {
+	return string(def.title)
 }
 
 // Given a candidate ID in text, strip off leading and trailing spaces
@@ -52,56 +63,101 @@ func ValidID(text []rune) (validID string, err error) {
 	return
 }
 
+// DESCRIPTION CORRECT FOR LINK DEF:
 // We are at the beginning of a line (possiblly with up to three leading
-// spaces) ahd have seen a left square bracket.  If we find the rest of
-//   [id]:\s+uri\s?("title")?(CR|LF)+
+// spaces) and have seen a left square bracket.  If we find the rest of
+//   [id]:\s+uri\s?("title")
 // where the uri may be delimited with angle brackets and the title
 // may be delimited with DQUOTE or PAREN, then we absorb all of
 // these, adding id => DEF to the dictionary for the document.  That
 // is, a successful parse produces no output.
 //
-// If the parse fails, we push all characters scanned here back onto the input
-// and returns collected == false.
-//
-func (p *OldParser) parseDefinition() (collected bool, err error) {
+// If there is any deviation from the spec, we leave the offset where it
+// is and return a nil definition.  If the parse succeeds, we add the
+// definition to the parser's dictionary, set the offset, and return a
+// non-nil definition.
+func (line *Line) parseDefinition(p *Parser) (def *Definition, err error) {
 
-	lx := p.lexer
 	var (
-		atEOF     bool
-		cantParse bool
-		id        string
+		ch                   rune
+		idStart, idEnd       int
+		offset               int
+		uriStart, uriEnd     int
+		titleStart, titleEnd int
 	)
 	// Enter having seen a left square bracket ('[') at the beginning
-	// of a line, possibly preceded by up to three spaces.
-	var runes []rune
-	ch, err := lx.NextCh()
-	for err == nil {
-		runes = append(runes, ch)
-		if ch == CR || ch == LF {
-			cantParse = true
-		} else if ch == ']' {
-			id, err = ValidID(runes[:len(runes)-1])
-			// DEBUG
-			fmt.Printf("processIDRef: id is '%s'\n")
-			// END
+	// of a line, possibly preceded by up to three spaces.  The offset
+	// is on the bracket.
+
+	eol := len(line.runes)
+	offset = line.offset + 1 // just beyond the bracket
+
+	// collect the id -----------------------------------------------
+	for idStart = offset; offset < eol; offset++ {
+		ch = line.runes[offset]
+		if ch == ']' {
+			idEnd = offset // exclusive end
+			offset++       // position beyond right bracket
 			break
 		}
-		ch, err = lx.NextCh()
 	}
-	// XXX STUB: skip spaces
-	// XXX STUB: collect uri possibly enclosed in angle brackets
-	// XXX STUB: skip spaces
-	// XXX STUB: try to collect title delimited by DQUOTE or PAREN
-	// XXX STUB: expect EOL, which will be absorbed if reference collected
-	// XXX STUB: if no err, bulld Reference and add to dictionary
-	// XXX STUB: if no err, collected = true
+	// expect a colon and possibly a space --------------------------
+	if idEnd > 0 && offset < eol-3 {
+		if line.runes[offset] == ':' {
+			offset++
+			// skip any spaces
+			for ch = line.runes[offset]; offset < eol && u.IsSpace(ch); ch = line.runes[offset] {
 
-	_, _, _ = atEOF, cantParse, id
+				offset++
+			}
+			if offset < eol {
+				uriStart = offset
+			}
+		}
+	}
+	// collect the uri ----------------------------------------------
+	if uriStart > 0 {
+		// assume that a uri contains no spaces
+		for offset < eol && !u.IsSpace(line.runes[offset]) {
+			offset++
+		}
+		uriEnd = offset
+	}
+	// collect any title
+	if uriEnd > 0 && offset < eol {
+		// skip any spaces
+		for ch = line.runes[offset]; offset < eol && u.IsSpace(ch); ch = line.runes[offset] {
 
-	// We push everything  back on the input and signal that the parse failed.
-	// The caller knows that the current char is '['
-	if !collected {
-		lx.PushBackChars(runes)
+			offset++
+		}
+		if offset < eol {
+			if ch == '\'' || ch == '"' {
+				quote := ch
+				offset++
+				if offset < eol {
+					titleStart = offset
+					for ch = line.runes[offset]; offset < eol && ch != quote; ch = line.runes[offset] {
+
+						offset++
+					}
+				}
+				if ch == quote {
+					titleEnd = offset
+				}
+			}
+		}
+	}
+	// XXX IF titleStart > 0 but titleEnd == 0, abort parse
+
+	// XXX FOR STRICTNESS require offset = eol - 1
+	if uriEnd > 0 {
+		id := string(line.runes[idStart:idEnd])
+		uri := line.runes[uriStart:uriEnd]
+		var title []rune
+		if titleEnd > 0 {
+			title = line.runes[titleStart:titleEnd]
+		}
+		def, err = p.doc.addDefinition(id, uri, title)
 	}
 	return
 }

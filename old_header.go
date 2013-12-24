@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var _ = fmt.Print
+
 type OldHeader struct {
 	runes []rune
 }
@@ -32,8 +34,6 @@ func (h *OldHeader) Get() []rune {
 // terminated by some number of hash signes.  Return a count of the number
 // of leading hashes seen.
 func (p *OldParser) collectHeader() (collected bool, hashCount int, err error) {
-
-	fmt.Printf("Entering collectHeader()\n")
 
 	lx := p.lexer
 	var (
@@ -73,8 +73,6 @@ func (p *OldParser) collectHeader() (collected bool, hashCount int, err error) {
 	}
 	// if we have a title -------------------------------------------
 	if err == nil && len(runes) > 0 {
-
-		fmt.Printf("RAW TITLE: '%s'\n", string(runes)) // DEBUG
 
 		// XXX UNDER AS-YET-UNDERSTOOD CIRCUMSTANCES we get a trailing
 		// null byte

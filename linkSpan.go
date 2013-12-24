@@ -81,7 +81,7 @@ func (q *Line) parseLinkSpan() (span SpanI, err error) {
 		ch := q.runes[offset]
 		if ch == ']' {
 			linkTextEnd = offset
-			fmt.Printf("linkTextEnd = %d\n", offset) // DEBUG
+			// fmt.Printf("linkTextEnd = %d\n", offset) // DEBUG
 			offset++
 			break
 		}
@@ -94,7 +94,7 @@ func (q *Line) parseLinkSpan() (span SpanI, err error) {
 		if q.runes[offset] == '(' {
 			offset++
 			uriStart = offset
-			fmt.Printf("uriStart = %d\n", offset) // DEBUG
+			// fmt.Printf("uriStart = %d\n", offset) // DEBUG
 		}
 	}
 	if uriStart > 0 {

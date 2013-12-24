@@ -79,18 +79,17 @@ var (
 )
 
 func (s *XLSuite) doMDTest(c *C, name string) {
-	fmt.Printf("TEST %s\n", name)
+	// fmt.Printf("TEST %s\n", name)
 	path := path.Join(PATH_TO_TESTS, name)
 	mdPath := path + ".md"
 	outPath := path + ".out"
-	fmt.Printf("%s => %s\n", mdPath, outPath)
 
 	// convert []rune to []MarkdownI
 	in, err := os.Open(mdPath)
 	c.Assert(err, IsNil)
 	c.Assert(in, NotNil)
 
-	p, err := NewParser(in)
+	p, err := NewOldParser(in)
 	c.Assert(err, IsNil)
 
 	bits, err := p.Parse()
@@ -113,10 +112,6 @@ func (s *XLSuite) doMDTest(c *C, name string) {
 	c.Assert(err, IsNil)
 	expectedOut := string(bytesFromDisk)
 
-	// DEBUG
-	fmt.Printf("EXPECTED: %s\nACTUAL:   %s\n",
-		expectedOut, actualOut)
-	// END
 	c.Assert(len(actualOut), Equals, len(expectedOut))
 	c.Assert(actualOut, Equals, expectedOut)
 }

@@ -38,12 +38,6 @@ func (hw *HtmlWriter) Write(downers []MarkdownI) (
 	var count2 int
 	for i := 0; err == nil && i < len(downers); i++ {
 		runes := downers[i].Get()
-		// DEBUG
-		s := string(runes)
-		ns := len(s)
-		fmt.Printf("DOWNER %d, %d runes, %d bytes: '%s'\n",
-			i, len(runes), ns, s)
-		// END
 
 		var (
 			b     bytes.Buffer

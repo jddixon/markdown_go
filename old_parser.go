@@ -79,7 +79,6 @@ func (p *OldParser) Parse() ([]MarkdownI, error) {
 			break
 		}
 		if p.state == START {
-			fmt.Printf("START: '%c' = %d\n", ch, ch) // DEBUG
 			if len(p.curText) == 0 {
 				if ch == SPACE { // leading tab?
 					leadingSpace = true
@@ -97,16 +96,9 @@ func (p *OldParser) Parse() ([]MarkdownI, error) {
 				var nextChar rune
 				p.curText = append(p.curText, BACKSLASH)
 				nextChar, err = lx.PeekCh()
-				// DEBUG
-				fmt.Printf("OldParser:START sees BACKSLASH + '%c'\n", nextChar)
-				// END
 				if escaped(nextChar) {
 					ch, err = lx.NextCh()
 					p.curText = append(p.curText, ch)
-					// DEBUG
-				} else {
-					fmt.Printf("    %c does not get escaped\n", nextChar)
-					// END
 				}
 				p.state = NONSEP_COLL
 			} else if ch == '_' || ch == '*' {
@@ -129,7 +121,6 @@ func (p *OldParser) Parse() ([]MarkdownI, error) {
 				p.state = NONSEP_COLL
 			}
 		} else if p.state == SEP_COLL {
-			fmt.Printf("SEP_COLL: %d\n", ch) // DEBUG
 			if ch == CR || ch == LF {
 				if ch == CR {
 					p.crCount++
@@ -154,15 +145,10 @@ func (p *OldParser) Parse() ([]MarkdownI, error) {
 				p.state = NONSEP_COLL
 			}
 		} else if p.state == NONSEP_COLL {
-			fmt.Printf("NONSEP_COLL: '%c'\n", ch) // DEBUG
 			if ch == BACKSLASH {
 				var nextChar rune
 				p.curText = append(p.curText, BACKSLASH)
 				nextChar, err = lx.PeekCh()
-				// DEBUG
-				fmt.Printf("    sees BACKSLASH + '%c'\n",
-					nextChar)
-				// END
 				if escaped(nextChar) {
 					ch, err = lx.NextCh()
 					p.curText = append(p.curText, ch)
@@ -214,9 +200,7 @@ func (p *OldParser) Parse() ([]MarkdownI, error) {
 				// and start a new para.
 				lastChar := p.curText[len(p.curText)-1]
 				if lastChar == SPACE || lastChar == TAB {
-					fmt.Printf("SPACE AT END OF LINE\n") // DEBUG
 					if lastChar == TAB {
-						fmt.Printf("TAB AT END OF LINE\n") // DEBUG
 						p.curText = p.curText[:len(p.curText)-1]
 						p.curText = append(p.curText, FOUR_SPACES...)
 					}
@@ -244,7 +228,6 @@ func (p *OldParser) Parse() ([]MarkdownI, error) {
 		} else if p.state == NONSEP_COLL || p.state == MAYBE_COLL {
 			lastChar := p.curText[len(p.curText)-1]
 			if lastChar == TAB {
-				fmt.Printf("TAB AT END OF LINE\n") // DEBUG
 				p.curText = p.curText[:len(p.curText)-1]
 				p.curText = append(p.curText, FOUR_SPACES...)
 			}

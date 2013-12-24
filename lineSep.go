@@ -6,6 +6,8 @@ import (
 	"fmt"
 )
 
+var _ = fmt.Print
+
 type LineSep struct {
 	runes []rune
 }
@@ -55,12 +57,5 @@ func (ls *LineSep) Add(ch rune) (err error) {
 
 // Get the line separators collected so far.
 func (ls *LineSep) Get() []rune {
-	// DEBUG
-	fmt.Printf("LineSep.Get: %d separators: ", len(ls.runes))
-	for i := 0; i < len(ls.runes); i++ {
-		fmt.Printf("%d ", int(ls.runes[i]))
-	}
-	fmt.Println()
-	// END
 	return ls.runes
 }
