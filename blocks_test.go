@@ -12,6 +12,8 @@ import (
 
 var _ = fmt.Print
 
+// -- HEADER --------------------------------------------------------
+
 func (s *XLSuite) TestHeader(c *C) {
 	rng := xr.MakeSimpleRNG()
 
@@ -44,7 +46,7 @@ func (s *XLSuite) TestHeader(c *C) {
 	c.Assert(p, NotNil)
 
 	for i := 0; i < 6; i++ {
-		// test parse -----------------------------------------------
+		// test parse -------------------------------------
 		line, err := p.readLine()
 		if i < 5 {
 			c.Assert(err, IsNil)
@@ -59,13 +61,14 @@ func (s *XLSuite) TestHeader(c *C) {
 		c.Assert(h.n, Equals, i+1)
 		c.Assert(string(h.runes), Equals, string(titles[i]))
 
-		// test serialization ---------------------------------------
+		// test serialization -----------------------------
 		ser := string(b.Get())
 		expected := fmt.Sprintf("<h%d>%s</h%d>", i+1, titles[i], i+1)
 		c.Assert(ser, Equals, expected)
 	}
 }
 
+// -- HRULE ---------------------------------------------------------
 // XXX Tests only strings expected to succeed.
 func (s *XLSuite) doTestHRule(c *C, char rune, rng *xr.PRNG) {
 	var text []rune
@@ -93,7 +96,7 @@ func (s *XLSuite) doTestHRule(c *C, char rune, rng *xr.PRNG) {
 	c.Assert(b, NotNil)
 	h := b.(*HRule)
 
-	// test serialization ---------------------------------------
+	// test serialization -----------------------------
 	ser := string(h.Get())
 	c.Assert(ser, Equals, "<hr />")
 }

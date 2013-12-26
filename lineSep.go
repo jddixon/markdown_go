@@ -56,6 +56,7 @@ func (ls *LineSep) Add(ch rune) (err error) {
 }
 
 // Get the line separators collected so far.
+// XXX This may not accord with Markdown practice.
 func (ls *LineSep) Get() []rune {
 	return ls.runes
 }

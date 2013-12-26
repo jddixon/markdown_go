@@ -38,3 +38,22 @@ func (p *Para) Get() (runes []rune) {
 	runes = append(runes, PARA_CLOSE...)
 	return
 }
+
+// Parse a line known to begin a new Para.
+func (q *Line) parsePara() (b BlockI, err error) {
+	var pa *Para
+	spans, err := q.parseToSpans()
+	if err == nil {
+		pa = new(Para)
+		for i := 0; i < len(spans); i++ {
+			err = pa.Add(spans[i])
+			if err != nil {
+				break
+			}
+		}
+		if err == nil {
+			b = pa
+		}
+	}
+	return
+}

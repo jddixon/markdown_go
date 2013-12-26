@@ -4,9 +4,7 @@ import (
 	. "launchpad.net/gocheck"
 )
 
-// XXX OBSOLETE: THIS IS REPLACED BY para_test.go
-
-func (s *XLSuite) TestEmphAndCode(c *C) {
+func (s *XLSuite) TestParaEmphAndCode(c *C) {
 
 	doc := new(Document) // just a dummy
 	NULL_EOL := []rune{0}
@@ -18,10 +16,13 @@ func (s *XLSuite) TestEmphAndCode(c *C) {
 	c.Assert(q, NotNil)
 
 	eol := len(input)
-	spans, err := q.parseToSpans()
+	b, err := q.parsePara()
 	c.Assert(err, IsNil)
-	c.Assert(spans, NotNil)
+	c.Assert(b, NotNil)
 	c.Assert(q.offset, Equals, eol)
+	pa := b.(*Para)
+
+	spans := pa.spans
 	c.Assert(len(spans), Equals, 9)
 
 	s0 := string(spans[0].Get())
@@ -50,10 +51,9 @@ func (s *XLSuite) TestEmphAndCode(c *C) {
 
 	s8 := string(spans[8].Get())
 	c.Assert(s8, Equals, " foo")
-
 }
 
-func (s *XLSuite) TestLinkSpan(c *C) {
+func (s *XLSuite) TestParaLinkSpan(c *C) {
 	doc := new(Document) // just a dummy
 	EOL := []rune{CR}
 
@@ -65,8 +65,13 @@ func (s *XLSuite) TestLinkSpan(c *C) {
 	c.Assert(q, NotNil)
 
 	eol := len(input)
-	spans, err := q.parseToSpans()
+	b, err := q.parsePara()
 	c.Assert(err, IsNil)
+	c.Assert(b, NotNil)
+	c.Assert(q.offset, Equals, eol)
+	pa := b.(*Para)
+
+	spans := pa.spans
 	c.Assert(spans, NotNil)
 	c.Assert(q.offset, Equals, eol)
 
