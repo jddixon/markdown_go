@@ -41,7 +41,7 @@ func (p *Parser) readLine() (line *Line, err error) {
 	ch, err := lx.NextCh()
 	for err == nil {
 		if ch == CR || ch == LF || ch == rune(0) {
-			thisLine.lineSep = ch
+			thisLine.lineSep = append(thisLine.lineSep, ch)
 			thisLine.runes = runes
 			break
 		}

@@ -27,14 +27,16 @@ func (s *XLSuite) TestReadLine(c *C) {
 	c.Assert(line1, NotNil)
 	c.Assert(string(line1.runes), Equals, text1)
 	c.Assert(line1.offset, Equals, 0)
-	c.Assert(line1.lineSep, Equals, LF)
+	c.Assert(len(line1.lineSep), Equals, 1)
+	c.Assert(line1.lineSep[0], Equals, LF)
 
 	line2, err := p.readLine()
 	c.Assert(err, IsNil)
 	c.Assert(line2, NotNil)
 	c.Assert(string(line2.runes), Equals, text2)
 	c.Assert(line2.offset, Equals, 0)
-	c.Assert(line2.lineSep, Equals, CR)
+	c.Assert(len(line2.lineSep), Equals, 1)
+	c.Assert(line2.lineSep[0], Equals, CR)
 
 	// verify that we get (a) an io.EOF and (b) a terminating null byte
 	line3, err := p.readLine()
@@ -42,7 +44,8 @@ func (s *XLSuite) TestReadLine(c *C) {
 	c.Assert(line3, NotNil)
 	c.Assert(string(line3.runes), Equals, text3)
 	c.Assert(line3.offset, Equals, 0)
-	c.Assert(line3.lineSep, Equals, rune(0))
+	c.Assert(len(line3.lineSep), Equals, 1)
+	c.Assert(line3.lineSep[0], Equals, rune(0))
 
 }
 

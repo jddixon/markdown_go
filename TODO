@@ -1,25 +1,18 @@
 xgo/md/TODO
 
 2013-12-23
-    * consider changing lineSep in type Line to []rune, to allow for
-        CR-LF sequences at the end of a line
+    * consider changing lineSep in type Line to []rune, to allow for    * DONE
+        CR-LF sequences at the end of a line                            * DONE
 
     * loops in parseLinkDefinition are messy; rework to follow 
         those in parseImageDef
-
-    * header.go COMPILES
+    
+    * header.go compiles                                                * DONE
 
 2013-12-21
-    * linkRefSpan needs working linkRef and dictionary
+    * linkRefSpan needs working linkRef and dictionary                  * DONE
 
 2013-12-16
-    * fix test
-        - 8/102 tests succeed                                           * DONE
-        - 17/102 tests succeed (all simple paragraph tests)             * DONE
-    * transform Parse() into type Parser with func Parse()              * DONE
-    * 23/102 tests succeed (all em- and strong-)                        * DONE
-    * header.*hash non-underlined tests (14)                            * DONE
-
     * Entities should be handled in html_writer.  We run through the
         runes, ignoring &...; sequences but replacing ambiguous 
         characters with entities where required.

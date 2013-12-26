@@ -7,10 +7,11 @@ import (
 func (s *XLSuite) TestEmphAndCode(c *C) {
 
 	doc := new(Document) // just a dummy
+	NULL_EOL := []rune{0}
 
 	input := []rune("abc _def_ **ghi** __jkl mno__ qrs ")
 	input = append(input, []rune("`kode &a <b >c` foo")...)
-	q, err := NewLine(doc, input, rune(0))
+	q, err := NewLine(doc, input, NULL_EOL)
 	c.Assert(err, IsNil)
 	c.Assert(q, NotNil)
 
@@ -52,11 +53,12 @@ func (s *XLSuite) TestEmphAndCode(c *C) {
 
 func (s *XLSuite) TestLinkSpan(c *C) {
 	doc := new(Document) // just a dummy
+	EOL := []rune{CR}
 
 	input := []rune("abc [foo](http://example.com) ")
 	input2 := []rune("def [bar](/its/somewhere \"I hope\")")
 	input = append(input, input2...)
-	q, err := NewLine(doc, input, CR)
+	q, err := NewLine(doc, input, EOL)
 	c.Assert(err, IsNil)
 	c.Assert(q, NotNil)
 
