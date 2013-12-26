@@ -1,6 +1,6 @@
 package md
 
-// xgo/md/parser_test.go
+// xgo/md/definition_test.go
 
 import (
 	"fmt"
@@ -69,12 +69,13 @@ func (s *XLSuite) TestLinkDefinition(c *C) {
 	p, err := NewParser(rd)
 	c.Assert(err, IsNil)
 	c.Assert(p, NotNil)
+	doc := p.doc
 
 	line1, err := p.readLine()
 	c.Assert(err, IsNil) // gets io.EOF
 	c.Assert(string(line1.runes), Equals, def1)
 
-	defn1, err := line1.parseLinkDefinition(p)
+	defn1, err := line1.parseLinkDefinition(doc)
 	c.Assert(err, IsNil)
 	c.Assert(defn1, NotNil)
 	c.Assert(defn1.GetURI(), Equals, uri1)
@@ -84,7 +85,7 @@ func (s *XLSuite) TestLinkDefinition(c *C) {
 	c.Assert(err, Equals, io.EOF)
 	c.Assert(string(line2.runes), Equals, def2)
 
-	defn2, err := line2.parseLinkDefinition(p)
+	defn2, err := line2.parseLinkDefinition(doc)
 	c.Assert(err, IsNil)
 	c.Assert(defn2, NotNil)
 	c.Assert(defn2.GetURI(), Equals, uri2)
@@ -110,12 +111,13 @@ func (s *XLSuite) TestImageDefinition(c *C) {
 	p, err := NewParser(rd)
 	c.Assert(err, IsNil)
 	c.Assert(p, NotNil)
+	doc := p.doc
 
 	line1, err := p.readLine()
 	c.Assert(err, IsNil) // gets io.EOF
 	c.Assert(string(line1.runes), Equals, def1)
 
-	defn1, err := line1.parseImageDefinition(p)
+	defn1, err := line1.parseImageDefinition(doc)
 	c.Assert(err, IsNil)
 	c.Assert(defn1, NotNil)
 	c.Assert(defn1.GetURI(), Equals, uri1)
@@ -125,7 +127,7 @@ func (s *XLSuite) TestImageDefinition(c *C) {
 	c.Assert(err, Equals, io.EOF)
 	c.Assert(string(line2.runes), Equals, def2)
 
-	defn2, err := line2.parseImageDefinition(p)
+	defn2, err := line2.parseImageDefinition(doc)
 	c.Assert(err, IsNil)
 	c.Assert(defn2, NotNil)
 	c.Assert(defn2.GetURI(), Equals, uri2)

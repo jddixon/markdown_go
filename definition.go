@@ -78,7 +78,8 @@ func ValidID(text []rune) (validID string, err error) {
 // definition to the parser's dictionary, set the offset, and return a
 // non-nil definition.
 //
-func (line *Line) parseLinkDefinition(p *Parser) (def *Definition, err error) {
+func (line *Line) parseLinkDefinition(doc *Document) (
+	def *Definition, err error) {
 
 	var (
 		ch                   rune
@@ -159,7 +160,7 @@ func (line *Line) parseLinkDefinition(p *Parser) (def *Definition, err error) {
 		if titleEnd > 0 {
 			title = line.runes[titleStart:titleEnd]
 		}
-		def, err = p.doc.addDefinition(id, uri, title)
+		def, err = doc.addDefinition(id, uri, title)
 	}
 	return
 }
@@ -178,7 +179,8 @@ func (line *Line) parseLinkDefinition(p *Parser) (def *Definition, err error) {
 // definition to the parser's dictionary, set the offset, and return a
 // non-nil definition.
 //
-func (line *Line) parseImageDefinition(p *Parser) (def *Definition, err error) {
+func (line *Line) parseImageDefinition(doc *Document) (
+	def *Definition, err error) {
 
 	var (
 		ch                   rune
@@ -285,7 +287,7 @@ func (line *Line) parseImageDefinition(p *Parser) (def *Definition, err error) {
 		if titleEnd > 0 {
 			title = line.runes[titleStart:titleEnd]
 		}
-		def, err = p.doc.addDefinition(id, uri, title)
+		def, err = doc.addDefinition(id, uri, title)
 	}
 	return
 }

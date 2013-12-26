@@ -1,6 +1,6 @@
 package md
 
-// xgo/lex/lex_input_test.go
+// xgo/lex/old_md_testsuite_test.go
 
 import (
 	"bytes"

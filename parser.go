@@ -67,17 +67,30 @@ func (p *Parser) readLine() (line *Line, err error) {
 
 func (p *Parser) Parse() (doc *Document, err error) {
 	var (
-		line *Line
+		imageDefn *Definition
+		linkDefn  *Definition
+		q         *Line
 	)
-	line, err = p.readLine()
+	q, err = p.readLine()
+
+	// pass through the document line by line
 	for err == nil {
 
-		// DO GOOD THINGS
+		// rigidly require that definitions start in the first column
+		if q.runes[0] == '[' { // possible link definition
+			linkDefn, err = q.parseLinkDefinition(doc)
+		} else if err == nil && linkDefn == nil {
+			imageDefn, err = q.parseImageDefinition(doc)
+		} else if err == nil && imageDefn == nil {
 
-		line, err = p.readLine()
+			// XXX STUB : DO GOOD THINGS
+
+		}
+		if err != nil {
+			break
+		}
+
+		q, err = p.readLine()
 	}
-	// XXX STUB
-
-	_ = line // DEBUG
 	return
 }
