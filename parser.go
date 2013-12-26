@@ -73,6 +73,10 @@ func (p *Parser) Parse() (doc *Document, err error) {
 	)
 	q, err = p.readLine()
 
+	// DEBUG
+	fmt.Printf("Parse: first line is '%s'\n", string(q.runes))
+	// END
+
 	// pass through the document line by line
 	for err == nil {
 
@@ -91,6 +95,9 @@ func (p *Parser) Parse() (doc *Document, err error) {
 		}
 
 		q, err = p.readLine()
+		// DEBUG
+		fmt.Printf("Parse: next line is '%s'\n", string(q.runes))
+		// END
 	}
 	return
 }

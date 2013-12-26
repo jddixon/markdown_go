@@ -14,15 +14,11 @@ import (
 
 var _ = fmt.Print
 
-const (
-	PATH_TO_TESTS = "markdown-testsuite/tests"
-)
-
 // A subset of the markdown test suite.  Where test names are commented
 // out, they currently fail.  The converse is not necessarily true.
 
 var (
-	TEST_NAMES = []string{
+	OLD_TEST_NAMES = []string{
 		"2-paragraphs-hard-return",
 		"2-paragraphs-hard-return-spaces",
 		"2-paragraphs-line",
@@ -78,7 +74,7 @@ var (
 	}
 )
 
-func (s *XLSuite) doMDTest(c *C, name string) {
+func (s *XLSuite) doOldMDTest(c *C, name string) {
 	// fmt.Printf("TEST %s\n", name)
 	path := path.Join(PATH_TO_TESTS, name)
 	mdPath := path + ".md"
@@ -116,10 +112,10 @@ func (s *XLSuite) doMDTest(c *C, name string) {
 	c.Assert(actualOut, Equals, expectedOut)
 }
 
-func (s *XLSuite) TestTestsInSuite(c *C) {
+func (s *XLSuite) TestTestsInSuiteForOldParser(c *C) {
 
-	for i := 0; i < len(TEST_NAMES); i++ {
-		name := TEST_NAMES[i]
-		s.doMDTest(c, name)
+	for i := 0; i < len(OLD_TEST_NAMES); i++ {
+		name := OLD_TEST_NAMES[i]
+		s.doOldMDTest(c, name)
 	}
 }

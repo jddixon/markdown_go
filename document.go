@@ -7,7 +7,8 @@ import (
 )
 
 type Document struct {
-	blocks []BlockI
+	// blocks []BlockI
+	blocks []MarkdownI
 	dict   map[string]*Definition
 }
 
@@ -31,6 +32,13 @@ func (q *Document) addDefinition(id string, uri, title []rune) (
 		// XXX Note that this allows duplicate definitions
 		def = &Definition{uri: uri, title: title}
 		q.dict[id] = def
+	}
+	return
+}
+
+func (q *Document) Get() (body []rune) {
+	for i := 0; i < len(q.blocks); i++ {
+		body = append(body, q.blocks[i].Get()...)
 	}
 	return
 }

@@ -1,5 +1,11 @@
 xgo/md/TODO
 
+2013-12-26
+    * in order to serialize Document to string, must be able to
+        serialize its dictionary; which means that the dict must
+        distinguish link and image definitions
+    * why can't I declare Document.blocks as []BlockI ?
+
 2013-12-23
     * consider changing lineSep in type Line to []rune, to allow for    * DONE
         CR-LF sequences at the end of a line                            * DONE
