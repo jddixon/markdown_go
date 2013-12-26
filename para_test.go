@@ -4,6 +4,7 @@ import (
 	. "launchpad.net/gocheck"
 )
 
+// Test various kinds of emphasis spans with intermixed text.
 func (s *XLSuite) TestParaEmphAndCode(c *C) {
 
 	doc := new(Document) // just a dummy
@@ -53,6 +54,7 @@ func (s *XLSuite) TestParaEmphAndCode(c *C) {
 	c.Assert(s8, Equals, " foo")
 }
 
+// test link span with and without title
 func (s *XLSuite) TestParaLinkSpan(c *C) {
 	doc := new(Document) // just a dummy
 	EOL := []rune{CR}
@@ -86,5 +88,42 @@ func (s *XLSuite) TestParaLinkSpan(c *C) {
 
 	s3 := string(spans[3].Get())
 	c.Assert(s3, Equals, "<a href=\"/its/somewhere\" title=\"I hope\">bar</a>")
+
+}
+
+// test image span with and without title
+func (s *XLSuite) TestParaImageSpan(c *C) {
+	doc := new(Document) // just a dummy
+	EOL := []rune{CR}
+
+	input := []rune("abc ![foo](/images/example.jpg) ")
+	input2 := []rune("def ![bar](/its/somewhere.png \"I hope\")")
+	input = append(input, input2...)
+	q, err := NewLine(doc, input, EOL)
+	c.Assert(err, IsNil)
+	c.Assert(q, NotNil)
+
+	eol := len(input)
+	b, err := q.parsePara()
+	c.Assert(err, IsNil)
+	c.Assert(b, NotNil)
+	c.Assert(q.offset, Equals, eol)
+	pa := b.(*Para)
+
+	spans := pa.spans
+	c.Assert(spans, NotNil)
+	c.Assert(q.offset, Equals, eol)
+
+	s0 := string(spans[0].Get())
+	c.Assert(s0, Equals, "abc ")
+
+	s1 := string(spans[1].Get())
+	c.Assert(s1, Equals, "<a href=\"/images/example.jpg\">foo</a>")
+
+	s2 := string(spans[2].Get())
+	c.Assert(s2, Equals, " def ")
+
+	s3 := string(spans[3].Get())
+	c.Assert(s3, Equals, "<a href=\"/its/somewhere.png\" title=\"I hope\">bar</a>")
 
 }

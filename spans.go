@@ -33,6 +33,11 @@ func (q *Line) parseToSpans() (spans []SpanI, err error) {
 			if span == nil {
 				span, _ = q.parseLinkRefSpan(q.doc)
 			}
+		} else if ch == '!' {
+			span, _ = q.parseImageSpan()
+			if span == nil {
+				span, _ = q.parseImageRefSpan(q.doc)
+			}
 		}
 
 		// handle any parse results ---------------------------------
