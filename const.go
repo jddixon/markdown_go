@@ -10,3 +10,7 @@ const (
 	SPACE           = ' '
 	TAB             = '\t'
 )
+
+var (
+	HRULE = []rune("<hr />")
+)
