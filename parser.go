@@ -6,6 +6,7 @@ import (
 	"fmt"
 	gl "github.com/jddixon/xgo/lex"
 	"io"
+	u "unicode"
 )
 
 var _ = fmt.Print
@@ -33,17 +34,36 @@ func NewParser(reader io.Reader) (p *Parser, err error) {
 
 func (p *Parser) readLine() (line *Line, err error) {
 
-	var thisLine Line
-	var runes []rune
-	var atEOF bool
+	var (
+		allSpaces bool = true // if a line is all spaces, we ignore them
+		atEOF     bool
+		runes     []rune
+		thisLine  Line
+	)
 
 	lx := p.lexer
 	ch, err := lx.NextCh()
 	for err == nil {
 		if ch == CR || ch == LF || ch == rune(0) {
 			thisLine.lineSep = append(thisLine.lineSep, ch)
-			thisLine.runes = runes
+			if ch == CR {
+				var ch2 rune
+				ch2, err = lx.PeekCh()
+				if err == nil && ch2 == LF {
+					ch2, _ = lx.NextCh()
+					thisLine.lineSep = append(thisLine.lineSep, ch2)
+				}
+			}
+			if !allSpaces {
+				// DEBUG
+				fmt.Printf("LINE: '%s'\n", string(runes))
+				// END
+				thisLine.runes = runes
+			}
 			break
+		}
+		if !u.IsSpace(ch) {
+			allSpaces = false
 		}
 		runes = append(runes, ch)
 		if atEOF {
@@ -56,7 +76,6 @@ func (p *Parser) readLine() (line *Line, err error) {
 		}
 	}
 	if err == nil {
-		thisLine.runes = runes
 		line = &thisLine
 		if atEOF {
 			err = io.EOF
@@ -67,11 +86,12 @@ func (p *Parser) readLine() (line *Line, err error) {
 
 func (p *Parser) Parse() (doc *Document, err error) {
 	var (
-		imageDefn *Definition
-		linkDefn  *Definition
-		curPara   *Para
-		q         *Line
-		thisDoc   Document
+		imageDefn        *Definition
+		linkDefn         *Definition
+		curPara          *Para
+		q                *Line
+		thisDoc          Document
+		lastBlockLineSep bool
 	)
 	docPtr := &thisDoc
 
@@ -82,7 +102,7 @@ func (p *Parser) Parse() (doc *Document, err error) {
 	// END
 
 	// pass through the document line by line
-	for err == nil {
+	for err == nil || err == io.EOF {
 		if len(q.runes) > 0 {
 
 			// rigidly require that definitions start in the first column
@@ -92,7 +112,7 @@ func (p *Parser) Parse() (doc *Document, err error) {
 			if err == nil && linkDefn == nil && q.runes[0] == '!' {
 				imageDefn, err = q.parseImageDefinition(docPtr)
 			}
-			if err == nil && linkDefn == nil && imageDefn == nil {
+			if (err == nil || err == io.EOF) && linkDefn == nil && imageDefn == nil {
 				var b BlockI
 
 				_ = b
@@ -100,34 +120,44 @@ func (p *Parser) Parse() (doc *Document, err error) {
 				// XXX STUB : DO GOOD THINGS
 
 				// DEBUG
-				fmt.Printf("invoking parseSpanSeq()\n")
+				fmt.Printf("== invoking parseSpanSeq() ==\n")
 				// END
 				var seq *SpanSeq
 				seq, err = q.parseSpanSeq()
-				if err == nil {
+				if err == nil || err == io.EOF {
 					if curPara == nil {
 						curPara = new(Para)
 					}
+					fmt.Printf("* adding seq to curPara\n") // DEBUG
 					curPara.seqs = append(curPara.seqs, *seq)
+					fmt.Printf("  curPara has %d seqs\n", len(curPara.seqs))
 				}
 			}
 
 		} else {
 			// we got a blank line
-			ls, err := NewLineSep(q.lineSep)
-			if err == nil {
-				if curPara != nil {
-					docPtr.addBlock(curPara)
-					curPara = nil
+			// XXX REVISIT THIS -- once lastBlockLineSep is true, it never
+			// becomes false!
+			if !lastBlockLineSep {
+				ls, err := NewLineSep(q.lineSep)
+				if err == nil {
+					if curPara != nil {
+						docPtr.addBlock(curPara)
+						curPara = nil
+					}
+					fmt.Printf("adding LineSep to document\n") // DEBUG
+					docPtr.addBlock(ls)
 				}
-				docPtr.addBlock(ls)
 			}
+			lastBlockLineSep = true
 		}
 		if err != nil {
 			break
 		}
-
 		q, err = p.readLine()
+		if (err != nil && err != io.EOF) || q == nil {
+			break
+		}
 		if len(q.runes) == 0 {
 			fmt.Printf("ZERO-LENGTH LINE")
 			if len(q.lineSep) == 0 && q.lineSep[0] == rune(0) {

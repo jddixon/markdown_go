@@ -79,7 +79,7 @@ var (
 )
 
 func (s *XLSuite) doMDTest(c *C, name string) {
-	// fmt.Printf("TEST %s\n", name)
+	fmt.Printf("TEST %s\n", name)
 	path := path.Join(PATH_TO_TESTS, name)
 	mdPath := path + ".md"
 	outPath := path + ".out"

@@ -38,6 +38,7 @@ func (p *Para) Get() (runes []rune) {
 		}
 	}
 	runes = append(runes, PARA_CLOSE...)
+	runes = append(runes, p.seqs[len(p.seqs)-1].lineSep...)
 	return
 }
 
