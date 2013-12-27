@@ -93,8 +93,13 @@ func (s *XLSuite) doMDTest(c *C, name string) {
 	c.Assert(err, IsNil)
 
 	doc, err := p.Parse()
-	c.Assert(err, IsNil)
+	c.Assert(err, Equals, io.EOF)
 	c.Assert(doc, NotNil)
+
+	// DEBUG ?
+	html := doc.Get()
+	fmt.Printf("HTML: '%s'\n", string(html))
+	// END
 
 	// convert []MarkdownI to bytes
 	var b bytes.Buffer
@@ -112,7 +117,7 @@ func (s *XLSuite) doMDTest(c *C, name string) {
 	c.Assert(err, IsNil)
 	expectedOut := string(bytesFromDisk)
 
-	c.Assert(len(actualOut), Equals, len(expectedOut))
+	// c.Assert(len(actualOut), Equals, len(expectedOut))
 	c.Assert(actualOut, Equals, expectedOut)
 }
 

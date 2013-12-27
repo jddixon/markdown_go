@@ -12,5 +12,12 @@ const (
 )
 
 var (
-	HRULE = []rune("<hr />")
+	SEP_CHAR    = []rune{CR, LF}
+	FOUR_SPACES = []rune("    ")
+
+	OPEN_EM      = []rune("<em>")
+	CLOSE_EM     = []rune("</em>")
+	H_RULE       = []rune("<hr />")
+	OPEN_STRONG  = []rune("<strong>")
+	CLOSE_STRONG = []rune("</strong>")
 )

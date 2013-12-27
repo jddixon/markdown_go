@@ -3,57 +3,66 @@ package md
 // xgo/md/para.go
 
 import (
-// "fmt"
+	"fmt"
 )
+
+var _ = fmt.Print
 
 var (
 	PARA_OPEN  = []rune("<p>")
 	PARA_CLOSE = []rune("</p>")
 )
 
+// A Para is a Block consisting of a number of SpanSeq, each of which is
+// a sequence of SpanI, things that implement the SpanI interface.  In
+// addition, each SpanSeq has an associated lineSeq, a slice of line
+// terminators (null, CR, or LF)
 type Para struct {
-	spans []SpanI
+	seqs []SpanSeq
 }
 
-// A Para is a Block consisting of a number of SpanI, things that
-// implement the SpanI interface.
-func NewPara(span SpanI) (pa *Para) {
-	pa = &Para{}
-	if span != nil {
-		pa.spans = append(pa.spans, span)
-	}
-	return
-}
-
-func (p *Para) Add(span SpanI) (err error) {
-	p.spans = append(p.spans, span)
+func (p *Para) Add(seq SpanSeq) (err error) {
+	p.seqs = append(p.seqs, seq)
 	return
 }
 
 func (p *Para) Get() (runes []rune) {
 	runes = append(runes, PARA_OPEN...)
-	for i := 0; i < len(p.spans); i++ {
-		runes = append(runes, p.spans[i].Get()...)
+	for i := 0; i < len(p.seqs); i++ {
+		spans := p.seqs[i].spans
+		for j := 0; j < len(spans); j++ {
+			runes = append(runes, spans[j].Get()...)
+		}
+		if i < len(p.seqs)-1 {
+			runes = append(runes, p.seqs[i].lineSep...)
+		}
 	}
 	runes = append(runes, PARA_CLOSE...)
 	return
 }
 
-// Parse a line known to begin a new Para.
-func (q *Line) parsePara() (b BlockI, err error) {
-	var pa *Para
-	spans, err := q.parseToSpans()
-	if err == nil {
-		pa = new(Para)
-		for i := 0; i < len(spans); i++ {
-			err = pa.Add(spans[i])
-			if err != nil {
-				break
-			}
-		}
-		if err == nil {
-			b = pa
-		}
-	}
-	return
-}
+// // Parse a line known to begin a new Para.
+// func (q *Line) parsePara() (b BlockI, err error) {
+// 	var pa *Para
+// 	spans, err := q.parseSpanSeq()
+// 	if err == nil {
+// 		// DEBUG
+// 		fmt.Printf("parsePara() finds %d spans\n", len(spans))
+// 		// END
+// 		pa = new(Para)
+// 		for i := 0; i < len(spans); i++ {
+// 			err = pa.Add(spans[i])
+// 			if err != nil {
+// 				break
+// 			}
+// 		}
+// 		if err == nil {
+// 			// DEBUG
+// 			fmt.Printf("  parsePara() returning Para with %d spans\n",
+// 				len(pa.spans))
+// 			// END
+// 			b = pa
+// 		}
+// 	}
+// 	return
+// }

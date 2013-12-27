@@ -69,8 +69,12 @@ func (p *Parser) Parse() (doc *Document, err error) {
 	var (
 		imageDefn *Definition
 		linkDefn  *Definition
+		curPara   *Para
 		q         *Line
+		thisDoc   Document
 	)
+	docPtr := &thisDoc
+
 	q, err = p.readLine()
 
 	// DEBUG
@@ -79,25 +83,71 @@ func (p *Parser) Parse() (doc *Document, err error) {
 
 	// pass through the document line by line
 	for err == nil {
+		if len(q.runes) > 0 {
 
-		// rigidly require that definitions start in the first column
-		if q.runes[0] == '[' { // possible link definition
-			linkDefn, err = q.parseLinkDefinition(doc)
-		} else if err == nil && linkDefn == nil {
-			imageDefn, err = q.parseImageDefinition(doc)
-		} else if err == nil && imageDefn == nil {
+			// rigidly require that definitions start in the first column
+			if q.runes[0] == '[' { // possible link definition
+				linkDefn, err = q.parseLinkDefinition(docPtr)
+			}
+			if err == nil && linkDefn == nil && q.runes[0] == '!' {
+				imageDefn, err = q.parseImageDefinition(docPtr)
+			}
+			if err == nil && linkDefn == nil && imageDefn == nil {
+				var b BlockI
 
-			// XXX STUB : DO GOOD THINGS
+				_ = b
 
+				// XXX STUB : DO GOOD THINGS
+
+				// DEBUG
+				fmt.Printf("invoking parseSpanSeq()\n")
+				// END
+				var seq *SpanSeq
+				seq, err = q.parseSpanSeq()
+				if err == nil {
+					if curPara == nil {
+						curPara = new(Para)
+					}
+					curPara.seqs = append(curPara.seqs, *seq)
+				}
+			}
+
+		} else {
+			// we got a blank line
+			ls, err := NewLineSep(q.lineSep)
+			if err == nil {
+				if curPara != nil {
+					docPtr.addBlock(curPara)
+					curPara = nil
+				}
+				docPtr.addBlock(ls)
+			}
 		}
 		if err != nil {
 			break
 		}
 
 		q, err = p.readLine()
+		if len(q.runes) == 0 {
+			fmt.Printf("ZERO-LENGTH LINE")
+			if len(q.lineSep) == 0 && q.lineSep[0] == rune(0) {
+				break
+			}
+			fmt.Printf("  lineSep is 0x%x\n", q.lineSep[0])
+		}
 		// DEBUG
 		fmt.Printf("Parse: next line is '%s'\n", string(q.runes))
 		// END
+	}
+	if err == nil || err == io.EOF {
+		if curPara != nil {
+			docPtr.addBlock(curPara)
+			curPara = nil
+		}
+		// DEBUG
+		fmt.Printf("returning thisDoc with %d blocks\n", len(docPtr.blocks))
+		// END
+		doc = docPtr
 	}
 	return
 }

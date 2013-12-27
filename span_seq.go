@@ -1,8 +1,13 @@
 package md
 
-// xgo/md/spans.go
+// xgo/md/span_seq.go
 
 import ()
+
+type SpanSeq struct {
+	spans   []SpanI
+	lineSep []rune
+}
 
 // Advance down the line.  If a special character is encountered,
 // invoke the parser(s) associated with the character (leaving the
@@ -13,12 +18,12 @@ import ()
 // is converted to a Text object and appended to the spans output
 // slice, followed by the SpanI.
 
-func (q *Line) parseToSpans() (spans []SpanI, err error) {
+func (q *Line) parseSpanSeq() (seq *SpanSeq, err error) {
 
 	var (
 		curText []rune
 	)
-
+	seq = new(SpanSeq)
 	for q.offset < len(q.runes) {
 		var span SpanI
 		ch := q.runes[q.offset]
@@ -46,15 +51,21 @@ func (q *Line) parseToSpans() (spans []SpanI, err error) {
 			q.offset++
 		} else {
 			if len(curText) > 0 {
-				spans = append(spans, NewText(curText))
+				seq.spans = append(seq.spans, NewText(curText))
 				curText = curText[:0]
 			}
-			spans = append(spans, span)
+			seq.spans = append(seq.spans, span)
 		}
 	}
 	if len(curText) > 0 {
-		spans = append(spans, NewText(curText))
-		// curText = curText[:0]
+		seq.spans = append(seq.spans, NewText(curText))
+	}
+	ls := q.lineSep
+	for i := 0; i < len(ls); i++ {
+		ch := ls[i]
+		if ch != rune(0) {
+			seq.lineSep = append(seq.lineSep, ch)
+		}
 	}
 	return
 }

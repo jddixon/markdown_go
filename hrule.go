@@ -20,7 +20,7 @@ func NewHRule() (h BlockI, err error) {
 }
 
 func (h *HRule) Get() []rune {
-	return HRULE
+	return H_RULE
 }
 
 // In this implementation, a Markdown horizontal rule is denoted by

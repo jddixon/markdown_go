@@ -3,8 +3,10 @@ package md
 // xgo/md/document.go
 
 import (
-//"fmt"
+	"fmt"
 )
+
+var _ = fmt.Print
 
 type Document struct {
 	// blocks []BlockI
@@ -18,6 +20,10 @@ func NewDocument() (q *Document, err error) {
 		dict: make(map[string]*Definition),
 	}
 	return
+}
+
+func (q *Document) addBlock(block MarkdownI) {
+	q.blocks = append(q.blocks, block)
 }
 
 // A pointer to the definition is returned to signal success.
@@ -37,6 +43,9 @@ func (q *Document) addDefinition(id string, uri, title []rune) (
 }
 
 func (q *Document) Get() (body []rune) {
+	// DEBUG
+	fmt.Printf("Document.Get() sees %d blocks\n", len(q.blocks))
+	// END
 	for i := 0; i < len(q.blocks); i++ {
 		body = append(body, q.blocks[i].Get()...)
 	}
