@@ -120,10 +120,10 @@ func (p *Parser) Parse() (doc *Document, err error) {
 				// XXX STUB : DO GOOD THINGS
 
 				// DEBUG
-				fmt.Printf("== invoking parseSpanSeq() ==\n")
+				fmt.Printf("== invoking parseSpanSeq(true) ==\n")
 				// END
 				var seq *SpanSeq
-				seq, err = q.parseSpanSeq()
+				seq, err = q.parseSpanSeq(true)
 				if err == nil || err == io.EOF {
 					if curPara == nil {
 						curPara = new(Para)

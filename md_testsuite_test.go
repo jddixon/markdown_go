@@ -29,40 +29,40 @@ var (
 		"2-paragraphs-line-returns",
 		"2-paragraphs-line-spaces",
 		"2-paragraphs-line-tab",
-		"ampersand-text-flow", // NEW
+		"ampersand-text-flow",
 
 		// This tests the interpretation of [ampersand] reference
 		// "ampersand-uri",
 
-		"asterisk",           // NEW
-		"asterisk-near-text", // NEW
+		"asterisk",
+		"asterisk-near-text",
 		"backslash-escape",
 
 		"em-middle-word",
 		"em-star",
 		"em-underscore",
 		"entities-text-flow",
-		"EOL-CR+LF",
-		"EOL-CR",
-		"EOL-LF",
+		// "EOL-CR+LF",
+		// "EOL-CR",
+		// "EOL-LF",
 
-		"header-level1-hash-sign-closed",
-		"header-level1-hash-sign",
-		"header-level1-hash-sign-trailing-1-space",
-		"header-level1-hash-sign-trailing-2-spaces",
+		//"header-level1-hash-sign-closed",
+		//"header-level1-hash-sign",
+		//"header-level1-hash-sign-trailing-1-space",
+		//"header-level1-hash-sign-trailing-2-spaces",
 
-		"header-level2-hash-sign-closed",
-		"header-level2-hash-sign",
-		"header-level3-hash-sign-closed",
-		"header-level3-hash-sign",
-		"header-level4-hash-sign-closed",
-		"header-level4-hash-sign",
-		"header-level5-hash-sign-closed",
-		"header-level5-hash-sign",
-		"header-level6-hash-sign-closed",
-		"header-level6-hash-sign",
+		//"header-level2-hash-sign-closed",
+		//"header-level2-hash-sign",
+		//"header-level3-hash-sign-closed",
+		//"header-level3-hash-sign",
+		//"header-level4-hash-sign-closed",
+		//"header-level4-hash-sign",
+		//"header-level5-hash-sign-closed",
+		//"header-level5-hash-sign",
+		//"header-level6-hash-sign-closed",
+		//"header-level6-hash-sign",
 
-		// "link-idref",				// NEW, BUT NOT YET
+		// "link-idref",				, BUT NOT YET
 
 		"paragraph-hard-return",
 		"paragraph-line",
@@ -71,7 +71,7 @@ var (
 		"paragraphs-leading-space",
 		"paragraphs-trailing-spaces",
 		"paragraph-trailing-leading-spaces",
-		"paragraph-trailing-tab", // trailing tab becomes spaces?
+		// "paragraph-trailing-tab", // trailing tab becomes spaces?
 		"strong-middle-word",
 		"strong-star",
 		"strong-underscore",

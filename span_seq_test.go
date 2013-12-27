@@ -19,7 +19,7 @@ func (s *XLSuite) TestParaEmphAndCode(c *C) {
 	c.Assert(q, NotNil)
 
 	eol := len(input)
-	seq, err := q.parseSpanSeq()
+	seq, err := q.parseSpanSeq(true)
 	c.Assert(err, IsNil)
 	c.Assert(seq, NotNil)
 	c.Assert(q.offset, Equals, eol)
@@ -68,7 +68,7 @@ func (s *XLSuite) TestParaLinkSpan(c *C) {
 	c.Assert(q, NotNil)
 
 	eol := len(input)
-	seq, err := q.parseSpanSeq()
+	seq, err := q.parseSpanSeq(true)
 	c.Assert(err, IsNil)
 	c.Assert(seq, NotNil)
 	c.Assert(q.offset, Equals, eol)
@@ -96,7 +96,8 @@ func (s *XLSuite) TestParaImageSpan(c *C) {
 	doc := new(Document) // just a dummy
 	EOL := []rune{CR}
 
-	input := []rune("abc ![foo](/images/example.jpg) ")
+	// we expect to left-trim the abc
+	input := []rune("   abc ![foo](/images/example.jpg) ")
 	input2 := []rune("def ![bar](/its/somewhere.png \"I hope\")")
 	input = append(input, input2...)
 	q, err := NewLine(doc, input, EOL)
@@ -104,7 +105,7 @@ func (s *XLSuite) TestParaImageSpan(c *C) {
 	c.Assert(q, NotNil)
 
 	eol := len(input)
-	seq, err := q.parseSpanSeq()
+	seq, err := q.parseSpanSeq(true)
 	c.Assert(err, IsNil)
 	c.Assert(seq, NotNil)
 	c.Assert(q.offset, Equals, eol)

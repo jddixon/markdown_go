@@ -2,7 +2,12 @@ package md
 
 // xgo/md/span_seq.go
 
-import ()
+import (
+	"fmt"
+	u "unicode"
+)
+
+var _ = fmt.Print
 
 type SpanSeq struct {
 	spans   []SpanI
@@ -18,12 +23,13 @@ type SpanSeq struct {
 // is converted to a Text object and appended to the spans output
 // slice, followed by the SpanI.
 
-func (q *Line) parseSpanSeq() (seq *SpanSeq, err error) {
+func (q *Line) parseSpanSeq(leftTrim bool) (seq *SpanSeq, err error) {
 
 	var (
 		curText []rune
 	)
 	seq = new(SpanSeq)
+	firstSpan := true
 	for q.offset < len(q.runes) {
 		var span SpanI
 		ch := q.runes[q.offset]
@@ -51,14 +57,43 @@ func (q *Line) parseSpanSeq() (seq *SpanSeq, err error) {
 			q.offset++
 		} else {
 			if len(curText) > 0 {
-				seq.spans = append(seq.spans, NewText(curText))
-				curText = curText[:0]
+				if firstSpan && leftTrim {
+					fmt.Println("LEFT-TRIMMING")
+					// get rid of any leading spaces
+					for len(curText) > 0 {
+						if u.IsSpace(curText[0]) {
+							curText = curText[1:]
+						} else {
+							break
+						}
+					}
+				}
+				if len(curText) > 0 { // GEEP
+					seq.spans = append(seq.spans, NewText(curText))
+					curText = curText[:0]
+				}
 			}
 			seq.spans = append(seq.spans, span)
+			firstSpan = false
 		}
 	}
 	if len(curText) > 0 {
-		seq.spans = append(seq.spans, NewText(curText))
+		if len(curText) > 0 {
+			if firstSpan && leftTrim {
+				fmt.Println("LEFT-TRIMMING")
+				// get rid of any leading spaces
+				for len(curText) > 0 {
+					if u.IsSpace(curText[0]) {
+						curText = curText[1:]
+					} else {
+						break
+					}
+				}
+			}
+			if len(curText) > 0 { // GEEP
+				seq.spans = append(seq.spans, NewText(curText))
+			}
+		}
 	}
 	ls := q.lineSep
 	for i := 0; i < len(ls); i++ {
