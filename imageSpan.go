@@ -36,17 +36,20 @@ func NewImageSpan(linkText, path, title []rune) (t *ImageSpan) {
 
 func (p *ImageSpan) Get() (out []rune) {
 
-	out = append(out, []rune("<a href=\"")...)
+	out = append(out, []rune("<img src=\"")...)
 	out = append(out, p.path...)
-	if p.title != nil {
-		out = append(out, []rune("\" title=\"")...)
-		out = append(out, p.title...)
-	}
-	out = append(out, []rune("\">")...)
+	out = append(out, []rune("\"")...)
 	if p.linkText != nil {
+		out = append(out, []rune(" alt=\"")...)
 		out = append(out, p.linkText...)
+		out = append(out, '"')
 	}
-	out = append(out, []rune("</a>")...)
+	if p.title != nil {
+		out = append(out, []rune(" title=\"")...)
+		out = append(out, p.title...)
+		out = append(out, '"')
+	}
+	out = append(out, []rune(" />")...)
 	return
 }
 

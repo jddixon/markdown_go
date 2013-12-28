@@ -102,6 +102,7 @@ func (p *Parser) Parse() (doc *Document, err error) {
 		linkDefn         *Definition
 		curPara          *Para
 		q                *Line
+		ch1              rune
 		thisDoc          Document
 		lastBlockLineSep bool
 	)
@@ -126,12 +127,16 @@ func (p *Parser) Parse() (doc *Document, err error) {
 			}
 			if (err == nil || err == io.EOF) && linkDefn == nil && imageDefn == nil {
 				var b BlockI
+				ch1 = q.runes[0]
 
-				_ = b
-
-				if q.runes[0] == '#' {
+				if ch1 == '#' {
 					b, err = q.parseHeader()
 				}
+				if b == nil && (err == nil || err == io.EOF) &&
+					(ch1 == '-' || ch1 == '*' || ch1 == '_') {
+					b, err = q.parseHRule()
+				}
+
 				// XXX STUB : TRY OTHER PARSERS
 
 				if err == nil || err == io.EOF {

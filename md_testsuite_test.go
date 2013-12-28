@@ -61,8 +61,25 @@ var (
 		"header-level5-hash-sign",
 		"header-level6-hash-sign-closed",
 		"header-level6-hash-sign",
+		"horizontal-rule-3-dashes",
+		"horizontal-rule-3-dashes-spaces",
+		"horizontal-rule-3-stars",
+		"horizontal-rule-3-underscores",
+		"horizontal-rule-7-dashes",
 
-		// "link-idref",				, BUT NOT YET
+		"img", // ERROR
+		"img-title",
+
+		"inline-code-escaping-entities",
+		// "inline-code",				// tests doubled backtick
+		//"inline-code-with-visible-backtick",
+
+		// "line-break-2-spaces",		// spaces at end of line => <br />
+
+		"link-bracket-paranthesis",
+		"link-bracket-paranthesis-title",
+
+		// "link-idref",				//  NOT YET ??
 
 		"paragraph-hard-return",
 		"paragraph-line",
