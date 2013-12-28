@@ -43,12 +43,19 @@ func (p *Parser) readLine() (line *Line, err error) {
 
 	lx := p.lexer
 	ch, err := lx.NextCh()
+	if err == io.EOF {
+		err = nil
+		atEOF = true
+	}
 	for err == nil {
 		if ch == CR || ch == LF || ch == rune(0) {
 			thisLine.lineSep = append(thisLine.lineSep, ch)
 			if ch == CR {
 				var ch2 rune
 				ch2, err = lx.PeekCh()
+				if err == io.EOF {
+					err = nil
+				}
 				if err == nil && ch2 == LF {
 					ch2, _ = lx.NextCh()
 					thisLine.lineSep = append(thisLine.lineSep, ch2)
@@ -60,7 +67,7 @@ func (p *Parser) readLine() (line *Line, err error) {
 				// END
 				thisLine.runes = runes
 			}
-			break
+			break // eol has been seen
 		}
 		if !u.IsSpace(ch) {
 			allSpaces = false
@@ -75,6 +82,11 @@ func (p *Parser) readLine() (line *Line, err error) {
 			atEOF = true
 		}
 	}
+	// DEBUG
+	if err != nil {
+		fmt.Printf("Parser.readLine(): err = %s\n", err.Error())
+	}
+	// END
 	if err == nil {
 		line = &thisLine
 		if atEOF {
@@ -117,27 +129,37 @@ func (p *Parser) Parse() (doc *Document, err error) {
 
 				_ = b
 
-				// XXX STUB : DO GOOD THINGS
+				if q.runes[0] == '#' {
+					b, err = q.parseHeader()
+				}
+				// XXX STUB : TRY OTHER PARSERS
 
-				// DEBUG
-				fmt.Printf("== invoking parseSpanSeq(true) ==\n")
-				// END
-				var seq *SpanSeq
-				seq, err = q.parseSpanSeq(true)
 				if err == nil || err == io.EOF {
-					if curPara == nil {
-						curPara = new(Para)
+					if b != nil {
+						docPtr.addBlock(b)
+						lastBlockLineSep = false
+					} else {
+						// default parser
+						// DEBUG
+						fmt.Printf("== invoking parseSpanSeq(true) ==\n")
+						// END
+						var seq *SpanSeq
+						seq, err = q.parseSpanSeq(true)
+						if err == nil || err == io.EOF {
+							if curPara == nil {
+								curPara = new(Para)
+							}
+							fmt.Printf("* adding seq to curPara\n") // DEBUG
+							curPara.seqs = append(curPara.seqs, *seq)
+							fmt.Printf("  curPara has %d seqs\n",
+								len(curPara.seqs))
+						}
 					}
-					fmt.Printf("* adding seq to curPara\n") // DEBUG
-					curPara.seqs = append(curPara.seqs, *seq)
-					fmt.Printf("  curPara has %d seqs\n", len(curPara.seqs))
 				}
 			}
 
 		} else {
 			// we got a blank line
-			// XXX REVISIT THIS -- once lastBlockLineSep is true, it never
-			// becomes false!
 			if !lastBlockLineSep {
 				ls, err := NewLineSep(q.lineSep)
 				if err == nil {
@@ -171,6 +193,7 @@ func (p *Parser) Parse() (doc *Document, err error) {
 	}
 	if err == nil || err == io.EOF {
 		if curPara != nil {
+			fmt.Println("have dangling curPara") // DEBUG
 			docPtr.addBlock(curPara)
 			curPara = nil
 		}
