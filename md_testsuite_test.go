@@ -42,7 +42,7 @@ var (
 		"em-star",
 		"em-underscore",
 		"entities-text-flow",
-		// "EOL-CR+LF",
+		// "EOL-CR+LF",				// THE NEXT FRONTIER
 		// "EOL-CR",
 		// "EOL-LF",
 
@@ -67,7 +67,7 @@ var (
 		"horizontal-rule-3-underscores",
 		"horizontal-rule-7-dashes",
 
-		"img", // ERROR
+		"img",
 		"img-title",
 
 		"inline-code-escaping-entities",
@@ -80,15 +80,15 @@ var (
 		// "link-automatic",
 		"link-bracket-paranthesis",
 		"link-bracket-paranthesis-title",
-		// "link-idref-angle-bracket",	// panic, index out of range
-		// "link-idref-implicit",		// -ditto-
-		//"link-idref-implicit-spaces",	// -ditto-
-		//"link-idref",
-		//"link-idref-space",
-		//"link-idref-title",
+		"link-idref-angle-bracket",
+		"link-idref-implicit",
+		"link-idref-implicit-spaces",
+		"link-idref",
+		"link-idref-space",
+		"link-idref-title",
 		//"link-idref-title-next-line",
-		//"link-idref-title-paranthesis",
-		//"link-idref-title-single-quote",
+		"link-idref-title-paranthesis",
+		"link-idref-title-single-quote",
 
 		"paragraph-hard-return",
 		"paragraph-line",
@@ -122,11 +122,8 @@ func (s *XLSuite) doMDTest(c *C, name string) {
 	c.Assert(err, Equals, io.EOF)
 	c.Assert(doc, NotNil)
 
-	// DEBUG ?
-	html := string(doc.Get())
-	fmt.Printf("HTML: '%s'\n", html)
-	//actualOut := html
-	// END
+	html := doc.Get()
+	fmt.Printf("HTML: '%s'\n", string(html))
 
 	// convert []MarkdownI to bytes REDUNDANT CODE ?
 	var b bytes.Buffer
@@ -135,7 +132,7 @@ func (s *XLSuite) doMDTest(c *C, name string) {
 	wr, err := NewHtmlWriter(wPtr)
 	c.Assert(err, IsNil)
 	c.Assert(wr, NotNil)
-	count, err := wr.Write(doc.blocks)
+	count, err := wr.Write(html)
 	c.Assert(err, IsNil)
 	_ = count
 	actualOut := string(b.Bytes())

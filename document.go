@@ -62,11 +62,10 @@ func (q *Document) Get() (body []rune) {
 		// END
 		body = append(body, lastBlock.Get()...)
 	}
-	// XXX HACK
-	if body[len(body)-1] == '\n' || body[len(body)-1] == '\r' {
+	// drop any terminating CR/LF
+	for body[len(body)-1] == '\n' || body[len(body)-1] == '\r' {
 		body = body[:len(body)-1]
 	}
-	// END HACK
 
 	// DEBUG
 	fmt.Printf("Doc.Get returning '%s'\n", string(body))

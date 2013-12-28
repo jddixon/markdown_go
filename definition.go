@@ -67,7 +67,7 @@ func ValidID(text []rune) (validID string, err error) {
 
 // We are at the beginning of a line (possiblly with up to three leading
 // spaces) and have seen a left square bracket.  If we find the rest of
-//   [id]:\s+uri\s?("title")
+//   [id]:\s+uri\s?("title")?
 // where the uri may be delimited with angle brackets and the title
 // may be delimited with DQUOTE or PAREN, then we absorb all of
 // these, adding id => DEF to the dictionary for the document.  That
@@ -125,6 +125,15 @@ func (line *Line) parseLinkDefinition(doc *Document) (
 			offset++
 		}
 		uriEnd = offset
+		if line.runes[uriStart] == '<' {
+			uriStart++
+			if line.runes[uriEnd-1] == '>' { // end is exclusive
+				uriEnd--
+			} else {
+				// an error, so force the parse to fail
+				uriEnd = 0
+			}
+		}
 	}
 	// collect any title
 	if uriEnd > 0 && offset < eol {
@@ -134,17 +143,23 @@ func (line *Line) parseLinkDefinition(doc *Document) (
 			offset++
 		}
 		if offset < eol {
-			if ch == '\'' || ch == '"' {
-				quote := ch
+			if ch == '\'' || ch == '"' || ch == '(' {
+				openQuote := ch
+				var closeQuote rune
+				if openQuote == '(' {
+					closeQuote = ')'
+				} else {
+					closeQuote = openQuote
+				}
 				offset++
 				if offset < eol {
 					titleStart = offset
-					for ch = line.runes[offset]; offset < eol && ch != quote; ch = line.runes[offset] {
+					for ch = line.runes[offset]; offset < eol && ch != closeQuote; ch = line.runes[offset] {
 
 						offset++
 					}
 				}
-				if ch == quote {
+				if ch == closeQuote { // GEEP
 					titleEnd = offset
 				}
 			}

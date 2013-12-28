@@ -36,7 +36,14 @@ func NewLinkRefSpan(doc *Document, linkText []rune, id string) (
 
 func (ls *LinkRefSpan) Get() (out []rune) {
 
-	def := ls.doc.dict[ls.id]
+	// handle implicit idRef, where id is an empty string
+	var key string
+	if ls.id == "" {
+		key = string(ls.linkText)
+	} else {
+		key = ls.id
+	}
+	def := ls.doc.dict[key]
 	uri := def.uri
 	title := def.title
 
@@ -101,7 +108,7 @@ func (q *Line) parseLinkRefSpan(doc *Document) (span SpanI, err error) {
 		}
 		if linkTextEnd > 0 {
 			// optional space
-			if offset < len(q.runes)-1 && q.runes[offset+1] == ' ' {
+			if offset < len(q.runes)-1 && q.runes[offset] == ' ' {
 				offset++
 			}
 			if q.runes[offset] == '[' {

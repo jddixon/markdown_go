@@ -1,18 +1,15 @@
 xgo/md/TODO
 
 2013-12-27
-    * need to suppress any lineSep in the last block of Document.Get()
-        to conform to tests
-    * md*test line 127 appears correct, error is later
+    * need to suppress any lineSep in the last block of Document.Get()  * DONE
+        to conform to tests                                             * DONE
+    * md*test line 127 appears correct, error is later                  * DONE
 
 2013-12-26
     * in order to serialize Document to string, must be able to
         serialize its dictionary; which means that the dict must
         distinguish link and image definitions
     * why can't I declare Document.blocks as []BlockI ?
-    * FIX: missing LF between Paras                                     * DONE
-    * FIX: missing second line from second para                         * DONE
-    * add horizontal rule to Parser                                     * DONE
     * test linkRefSpan with dictionary
 
 2013-12-23
@@ -23,9 +20,5 @@ xgo/md/TODO
     * Entities should be handled in html_writer.  We run through the
         runes, ignoring &...; sequences but replacing ambiguous 
         characters with entities where required.
-    * current header collector only works on the first line; extend     * DONE
-        to other circumstances                                          * DONE
     * a line consisting of nothing but hash signs should simply be 
         output as text; in other words, it gets appended to nonSeps
-
-    * horizontal rules (5 tests)                                        * DONE
