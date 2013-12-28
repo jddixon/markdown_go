@@ -76,19 +76,28 @@ func (q *Line) parseLinkSpan() (span SpanI, err error) {
 		linkText, uri, title []rune
 	)
 
+	// DEBUG
+	fmt.Printf("parseLinkSpan: offset %d, text %s\n",
+		offset, string(q.runes[offset:]))
+	// END
+
 	// look for the end of the linkText
 	for ; offset < len(q.runes); offset++ {
 		ch := q.runes[offset]
 		if ch == ']' {
 			linkTextEnd = offset
-			// fmt.Printf("linkTextEnd = %d\n", offset) // DEBUG
+			// DEBUG
+			fmt.Printf("linkTextEnd = %d; end is %d\n",
+				offset, len(q.runes)) // DEBUG
+			// END
 			offset++
 			break
 		}
 	}
-	if linkTextEnd > 0 {
+	if (offset < len(q.runes)-1) && linkTextEnd > 0 {
 		// optional space
-		if offset < len(q.runes)-1 && q.runes[offset+1] == ' ' {
+		if q.runes[offset] == ' ' {
+			fmt.Printf("skipping space at %d\n", offset)
 			offset++
 		}
 		if q.runes[offset] == '(' {
@@ -102,6 +111,7 @@ func (q *Line) parseLinkSpan() (span SpanI, err error) {
 			ch := q.runes[offset]
 			if ch == ')' {
 				end = offset
+				fmt.Printf("FOUND RPAREN LinkSpan END at %d\n", end)
 				if uriEnd == 0 {
 					uriEnd = end
 				}
@@ -122,6 +132,7 @@ func (q *Line) parseLinkSpan() (span SpanI, err error) {
 	}
 	if end > 0 {
 		if titleStart > 0 && titleEnd == 0 {
+			fmt.Printf("found start of title but not end\n") // DEBUG
 			// just give up
 			end = 0
 		}

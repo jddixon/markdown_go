@@ -34,8 +34,6 @@ func NewLinkRefSpan(doc *Document, linkText []rune, id string) (
 	return
 }
 
-// XXX WE NEED A DICTIONARY TO MAKE THIS WORK
-
 func (ls *LinkRefSpan) Get() (out []rune) {
 
 	def := ls.doc.dict[ls.id]
@@ -72,8 +70,15 @@ func (ls *LinkRefSpan) Get() (out []rune) {
 //
 func (q *Line) parseLinkRefSpan(doc *Document) (span SpanI, err error) {
 
+	// DEBUG
+	fmt.Printf("parseLinkRefSpan, offset = %d, line '%s'\n",
+		q.offset+1, string(q.runes[q.offset:]))
+	// END
 	if doc == nil {
-		err = NilParser
+		// DEBUG
+		fmt.Printf("parseLinkRefSpan: nil document!\n")
+		// END
+		err = NilDocument
 	} else {
 		offset := q.offset + 1
 		var (
@@ -89,7 +94,7 @@ func (q *Line) parseLinkRefSpan(doc *Document) (span SpanI, err error) {
 			ch := q.runes[offset]
 			if ch == ']' {
 				linkTextEnd = offset
-				fmt.Printf("linkTextEnd = %d\n", offset) // DEBUG
+				fmt.Printf("parseLinkRefSpan: linkTextEnd = %d\n", offset) // DEBUG
 				offset++
 				break
 			}
@@ -102,7 +107,7 @@ func (q *Line) parseLinkRefSpan(doc *Document) (span SpanI, err error) {
 			if q.runes[offset] == '[' {
 				offset++
 				idStart = offset
-				fmt.Printf("idStart = %d\n", offset) // DEBUG
+				fmt.Printf("parseLinkRefSpan: idStart = %d\n", offset) // DEBUG
 			}
 		}
 		// find the end of the ID -----------------------------------
@@ -124,6 +129,10 @@ func (q *Line) parseLinkRefSpan(doc *Document) (span SpanI, err error) {
 			id = q.runes[idStart:idEnd]
 			lrSpan, err = NewLinkRefSpan(doc, linkText, string(id))
 			span = lrSpan
+			// DEBUG
+			fmt.Printf("parseLinkRefSpan succeeded, setting offset to %d\n",
+				offset+1)
+			// END
 			q.offset = offset + 1
 		}
 	}

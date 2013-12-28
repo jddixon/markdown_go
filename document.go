@@ -46,8 +46,30 @@ func (q *Document) Get() (body []rune) {
 	// DEBUG
 	fmt.Printf("Document.Get() sees %d blocks\n", len(q.blocks))
 	// END
-	for i := 0; i < len(q.blocks); i++ {
+	for i := 0; i < len(q.blocks)-1; i++ {
+		fmt.Printf("BLOCK %d\n", i)
 		body = append(body, q.blocks[i].Get()...)
 	}
+	// output last block IF it is not a LineSep
+	lastBlock := q.blocks[len(q.blocks)-1]
+	switch lastBlock.(type) {
+	case *LineSep:
+		// do nothing
+		fmt.Printf("skipping final LineSep\n") // DEBUG
+	default:
+		// DEBUG
+		fmt.Printf("outputting '%s'\n", string(lastBlock.Get()))
+		// END
+		body = append(body, lastBlock.Get()...)
+	}
+	// XXX HACK
+	if body[len(body)-1] == '\n' || body[len(body)-1] == '\r' {
+		body = body[:len(body)-1]
+	}
+	// END HACK
+
+	// DEBUG
+	fmt.Printf("Doc.Get returning '%s'\n", string(body))
+	// END
 	return
 }

@@ -9,17 +9,17 @@ import (
 // Test various kinds of emphasis spans with intermixed text.
 func (s *XLSuite) TestParaEmphAndCode(c *C) {
 
-	doc := new(Document) // just a dummy
+	doc, _ := NewDocument() // just a dummy
 	NULL_EOL := []rune{0}
 
 	input := []rune("abc _def_ **ghi** __jkl mno__ qrs ")
 	input = append(input, []rune("`kode &a <b >c` foo")...)
-	q, err := NewLine(doc, input, NULL_EOL)
+	q, err := NewLine(input, NULL_EOL)
 	c.Assert(err, IsNil)
 	c.Assert(q, NotNil)
 
 	eol := len(input)
-	seq, err := q.parseSpanSeq(true)
+	seq, err := q.parseSpanSeq(doc, true)
 	c.Assert(err, IsNil)
 	c.Assert(seq, NotNil)
 	c.Assert(q.offset, Equals, eol)
@@ -57,18 +57,18 @@ func (s *XLSuite) TestParaEmphAndCode(c *C) {
 
 // test link span with and without title
 func (s *XLSuite) TestParaLinkSpan(c *C) {
-	doc := new(Document) // just a dummy
+	doc, _ := NewDocument() // just a dummy
 	EOL := []rune{CR}
 
 	input := []rune("abc [foo](http://example.com) ")
 	input2 := []rune("def [bar](/its/somewhere \"I hope\")")
 	input = append(input, input2...)
-	q, err := NewLine(doc, input, EOL)
+	q, err := NewLine(input, EOL)
 	c.Assert(err, IsNil)
 	c.Assert(q, NotNil)
 
 	eol := len(input)
-	seq, err := q.parseSpanSeq(true)
+	seq, err := q.parseSpanSeq(doc, true)
 	c.Assert(err, IsNil)
 	c.Assert(seq, NotNil)
 	c.Assert(q.offset, Equals, eol)
@@ -93,19 +93,19 @@ func (s *XLSuite) TestParaLinkSpan(c *C) {
 
 // test image span with and without title
 func (s *XLSuite) TestParaImageSpan(c *C) {
-	doc := new(Document) // just a dummy
+	doc, _ := NewDocument() // just a dummy
 	EOL := []rune{CR}
 
 	// we expect to left-trim the abc
 	input := []rune("   abc ![foo](/images/example.jpg) ")
 	input2 := []rune("def ![bar](/its/somewhere.png \"I hope\")")
 	input = append(input, input2...)
-	q, err := NewLine(doc, input, EOL)
+	q, err := NewLine(input, EOL)
 	c.Assert(err, IsNil)
 	c.Assert(q, NotNil)
 
 	eol := len(input)
-	seq, err := q.parseSpanSeq(true)
+	seq, err := q.parseSpanSeq(doc, true)
 	c.Assert(err, IsNil)
 	c.Assert(seq, NotNil)
 	c.Assert(q.offset, Equals, eol)

@@ -23,7 +23,8 @@ type SpanSeq struct {
 // is converted to a Text object and appended to the spans output
 // slice, followed by the SpanI.
 
-func (q *Line) parseSpanSeq(leftTrim bool) (seq *SpanSeq, err error) {
+func (q *Line) parseSpanSeq(doc *Document, leftTrim bool) (
+	seq *SpanSeq, err error) {
 
 	var (
 		curText []rune
@@ -42,12 +43,12 @@ func (q *Line) parseSpanSeq(leftTrim bool) (seq *SpanSeq, err error) {
 		} else if ch == '[' {
 			span, _ = q.parseLinkSpan()
 			if span == nil {
-				span, _ = q.parseLinkRefSpan(q.doc)
+				span, _ = q.parseLinkRefSpan(doc)
 			}
 		} else if ch == '!' {
 			span, _ = q.parseImageSpan()
 			if span == nil {
-				span, _ = q.parseImageRefSpan(q.doc)
+				span, _ = q.parseImageRefSpan(doc)
 			}
 		}
 

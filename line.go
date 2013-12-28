@@ -8,21 +8,16 @@ type Line struct {
 	runes   []rune
 	offset  int    // offset of current rune within this line
 	lineSep []rune // CR, LF, or both; or 0
-	doc     *Document
 }
 
 // Used to pass a line for further processing.  The raw slice is not copied
 // here, and so should be copied by using code.  lineSep _is_ copied here.
-func NewLine(doc *Document, raw []rune, lineSep []rune) (q *Line, err error) {
-	if doc == nil {
-		err = NilDocument
-	} else {
-		for i := 0; i < len(lineSep); i++ {
-			sep := lineSep[i]
-			if sep != rune(0) && sep != CR && sep != LF {
-				err = InvalidLineSeparator
-				break
-			}
+func NewLine(raw []rune, lineSep []rune) (q *Line, err error) {
+	for i := 0; i < len(lineSep); i++ {
+		sep := lineSep[i]
+		if sep != rune(0) && sep != CR && sep != LF {
+			err = InvalidLineSeparator
+			break
 		}
 	}
 	if err == nil {
@@ -31,7 +26,6 @@ func NewLine(doc *Document, raw []rune, lineSep []rune) (q *Line, err error) {
 		q = &Line{
 			runes:   raw,
 			lineSep: ls,
-			doc:     doc,
 		}
 	}
 	return

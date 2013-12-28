@@ -76,10 +76,19 @@ var (
 
 		// "line-break-2-spaces",		// spaces at end of line => <br />
 
+		// "link-automatic-email",
+		// "link-automatic",
 		"link-bracket-paranthesis",
 		"link-bracket-paranthesis-title",
-
-		// "link-idref",				//  NOT YET ??
+		// "link-idref-angle-bracket",	// panic, index out of range
+		// "link-idref-implicit",		// -ditto-
+		//"link-idref-implicit-spaces",	// -ditto-
+		//"link-idref",
+		//"link-idref-space",
+		//"link-idref-title",
+		//"link-idref-title-next-line",
+		//"link-idref-title-paranthesis",
+		//"link-idref-title-single-quote",
 
 		"paragraph-hard-return",
 		"paragraph-line",
@@ -114,11 +123,12 @@ func (s *XLSuite) doMDTest(c *C, name string) {
 	c.Assert(doc, NotNil)
 
 	// DEBUG ?
-	html := doc.Get()
-	fmt.Printf("HTML: '%s'\n", string(html))
+	html := string(doc.Get())
+	fmt.Printf("HTML: '%s'\n", html)
+	//actualOut := html
 	// END
 
-	// convert []MarkdownI to bytes
+	// convert []MarkdownI to bytes REDUNDANT CODE ?
 	var b bytes.Buffer
 	var wPtr io.Writer = &b
 	c.Assert(wPtr, NotNil)

@@ -103,10 +103,9 @@ func (p *Parser) Parse() (doc *Document, err error) {
 		curPara          *Para
 		q                *Line
 		ch1              rune
-		thisDoc          Document
 		lastBlockLineSep bool
 	)
-	docPtr := &thisDoc
+	docPtr := p.doc
 
 	q, err = p.readLine()
 
@@ -149,7 +148,7 @@ func (p *Parser) Parse() (doc *Document, err error) {
 						fmt.Printf("== invoking parseSpanSeq(true) ==\n")
 						// END
 						var seq *SpanSeq
-						seq, err = q.parseSpanSeq(true)
+						seq, err = q.parseSpanSeq(docPtr, true)
 						if err == nil || err == io.EOF {
 							if curPara == nil {
 								curPara = new(Para)
