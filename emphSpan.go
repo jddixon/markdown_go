@@ -11,13 +11,13 @@ type EmphSpan struct {
 
 func (e *EmphSpan) Get() (out []rune) {
 	if e.emphDoubled {
-		out = append(out, OPEN_STRONG...)
+		out = append(out, STRONG_OPEN...)
 		out = append(out, e.runes...)
-		out = append(out, CLOSE_STRONG...)
+		out = append(out, STRONG_CLOSE...)
 	} else {
-		out = append(out, OPEN_EM...)
+		out = append(out, EM_OPEN...)
 		out = append(out, e.runes...)
-		out = append(out, CLOSE_EM...)
+		out = append(out, EM_CLOSE...)
 	}
 	return
 }

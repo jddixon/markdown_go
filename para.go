@@ -8,11 +8,6 @@ import (
 
 var _ = fmt.Print
 
-var (
-	PARA_OPEN  = []rune("<p>")
-	PARA_CLOSE = []rune("</p>")
-)
-
 // A Para is a Block consisting of a number of SpanSeq, each of which is
 // a sequence of SpanI, things that implement the SpanI interface.  In
 // addition, each SpanSeq has an associated lineSeq, a slice of line

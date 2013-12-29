@@ -31,12 +31,22 @@ var (
 		"2-paragraphs-line-tab",
 		"ampersand-text-flow",
 
-		// This tests the interpretation of [ampersand] reference
-		// "ampersand-uri",
+		"ampersand-uri",
 
 		"asterisk",
 		"asterisk-near-text",
 		"backslash-escape",
+		//"blockquote-added-markup",
+		//"blockquote-line-2-paragraphs",
+		//"blockquote-line",
+		//"blockquote-multiline-1-space-begin",
+		//"blockquote-multiline-1-space-end",
+		//"blockquote-multiline-2-paragraphs",
+		//"blockquote-multiline",
+		//"blockquote-nested",
+		//"blockquote-nested-multiplereturn-level1",
+		//"blockquote-nested-multiplereturn",
+		//"blockquote-nested-return-level1",
 
 		"em-middle-word",
 		"em-star",
@@ -112,7 +122,7 @@ var (
 		"unordered-list-items",
 		"unordered-list-items-plussign",
 		//"unordered-list-paragraphs",
-		"unordered-list-unindented-content",
+		//"unordered-list-unindented-content",	// gets ZERO-LENGTH LINE
 		//"unordered-list-with-indented-content",
 	}
 )

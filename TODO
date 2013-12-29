@@ -4,6 +4,9 @@ xgo/md/TODO
     * FIX ordered.go, which was just hacked from unordered.go           * DONE
         - needs from parameter                                          * DONE
 
+    * handle the 11 blockquote tests
+    * add xgo/cmd/xgoMarkDown
+
 2013-12-27
     * need to suppress any lineSep in the last block of Document.Get()  * DONE
         to conform to tests                                             * DONE

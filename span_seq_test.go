@@ -118,12 +118,12 @@ func (s *XLSuite) TestParaImageSpan(c *C) {
 	c.Assert(s0, Equals, "abc ")
 
 	s1 := string(spans[1].Get())
-	c.Assert(s1, Equals, "<a href=\"/images/example.jpg\">foo</a>")
+	c.Assert(s1, Equals, "<img src=\"/images/example.jpg\" alt=\"foo\" />")
 
 	s2 := string(spans[2].Get())
 	c.Assert(s2, Equals, " def ")
 
 	s3 := string(spans[3].Get())
-	c.Assert(s3, Equals, "<a href=\"/its/somewhere.png\" title=\"I hope\">bar</a>")
+	c.Assert(s3, Equals, "<img src=\"/its/somewhere.png\" alt=\"bar\" title=\"I hope\" />")
 
 }
