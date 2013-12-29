@@ -42,9 +42,9 @@ var (
 		"em-star",
 		"em-underscore",
 		"entities-text-flow",
-		// "EOL-CR+LF",				// THE NEXT FRONTIER
-		// "EOL-CR",
-		// "EOL-LF",
+		"EOL-CR+LF",
+		"EOL-CR",
+		"EOL-LF",
 
 		"header-level1-hash-sign-closed",
 		"header-level1-hash-sign",
@@ -75,6 +75,7 @@ var (
 		//"inline-code-with-visible-backtick",
 
 		// "line-break-2-spaces",		// spaces at end of line => <br />
+		// "line-break-5-spaces",		// spaces at end of line => <br />
 
 		// "link-automatic-email",
 		// "link-automatic",
@@ -101,6 +102,15 @@ var (
 		"strong-middle-word",
 		"strong-star",
 		"strong-underscore",
+		"unordered-list-items-dashsign",
+		//"unordered-list-items-leading-1space",
+		"unordered-list-items-leading-2spaces",
+		"unordered-list-items-leading-3spaces",
+		"unordered-list-items",
+		"unordered-list-items-plussign",
+		//"unordered-list-paragraphs",
+		"unordered-list-unindented-content",
+		//"unordered-list-with-indented-content",
 	}
 )
 

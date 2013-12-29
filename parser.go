@@ -51,14 +51,14 @@ func (p *Parser) readLine() (line *Line, err error) {
 		if ch == CR || ch == LF || ch == rune(0) {
 			thisLine.lineSep = append(thisLine.lineSep, ch)
 			if ch == CR {
-				var ch2 rune
-				ch2, err = lx.PeekCh()
+				var ch1 rune
+				ch1, err = lx.PeekCh()
 				if err == io.EOF {
 					err = nil
 				}
-				if err == nil && ch2 == LF {
-					ch2, _ = lx.NextCh()
-					thisLine.lineSep = append(thisLine.lineSep, ch2)
+				if err == nil && ch1 == LF {
+					ch1, _ = lx.NextCh()
+					thisLine.lineSep = append(thisLine.lineSep, ch1)
 				}
 			}
 			if !allSpaces {
@@ -102,7 +102,7 @@ func (p *Parser) Parse() (doc *Document, err error) {
 		linkDefn         *Definition
 		curPara          *Para
 		q                *Line
-		ch1              rune
+		ch0              rune
 		lastBlockLineSep bool
 	)
 	docPtr := p.doc
@@ -117,6 +117,8 @@ func (p *Parser) Parse() (doc *Document, err error) {
 	for err == nil || err == io.EOF {
 		if len(q.runes) > 0 {
 
+			// HANDLE DEFINITIONS -----------------------------------
+
 			// rigidly require that definitions start in the first column
 			if q.runes[0] == '[' { // possible link definition
 				linkDefn, err = q.parseLinkDefinition(docPtr)
@@ -124,20 +126,47 @@ func (p *Parser) Parse() (doc *Document, err error) {
 			if err == nil && linkDefn == nil && q.runes[0] == '!' {
 				imageDefn, err = q.parseImageDefinition(docPtr)
 			}
+			// HANDLE BLOCKS ----------------------------------------
+
 			if (err == nil || err == io.EOF) && linkDefn == nil && imageDefn == nil {
 				var b BlockI
-				ch1 = q.runes[0]
+				ch0 = q.runes[0]
+				eol := len(q.runes)
 
-				if ch1 == '#' {
+				// HEADERS --------------------------------
+				if ch0 == '#' {
 					b, err = q.parseHeader()
 				}
+
+				// HORIZONTAL RULES ----------------------
 				if b == nil && (err == nil || err == io.EOF) &&
-					(ch1 == '-' || ch1 == '*' || ch1 == '_') {
+					(ch0 == '-' || ch0 == '*' || ch0 == '_') {
 					b, err = q.parseHRule()
 				}
 
 				// XXX STUB : TRY OTHER PARSERS
 
+				// UNORDERED LISTS ------------------------
+
+				// XXX We require a space after these starting characters
+				if b == nil && (err == nil || err == io.EOF) {
+					var from int
+					for from = 0; from < 3 && from < eol; from++ {
+						if !u.IsSpace(q.runes[from]) {
+							break
+						}
+					}
+					if from < eol-1 {
+						// we are positioned on a non-space character
+						ch0 := q.runes[from]
+						ch1 := q.runes[from+1]
+						if (ch0 == '*' || ch0 == '+' || ch0 == '-') && ch1 == ' ' {
+							b, err = q.parseUnordered(from + 2)
+						}
+					}
+				}
+
+				// DEFAULT: PARA --------------------------
 				if err == nil || err == io.EOF {
 					if b != nil {
 						docPtr.addBlock(b)
@@ -164,18 +193,19 @@ func (p *Parser) Parse() (doc *Document, err error) {
 
 		} else {
 			// we got a blank line
-			if !lastBlockLineSep {
-				ls, err := NewLineSep(q.lineSep)
-				if err == nil {
-					if curPara != nil {
-						docPtr.addBlock(curPara)
-						curPara = nil
-					}
-					fmt.Printf("adding LineSep to document\n") // DEBUG
+			ls, err := NewLineSep(q.lineSep)
+			if err == nil {
+				if curPara != nil {
+					docPtr.addBlock(curPara)
+					curPara = nil
+					lastBlockLineSep = false
+				}
+				fmt.Printf("adding LineSep to document\n") // DEBUG
+				if !lastBlockLineSep {
 					docPtr.addBlock(ls)
+					lastBlockLineSep = true
 				}
 			}
-			lastBlockLineSep = true
 		}
 		if err != nil {
 			break

@@ -7,6 +7,8 @@ import (
 var (
 	EmptyHeaderTitle     = e.New("empty header title")
 	EmptyID              = e.New("empty id parameter")
+	EmptyOrderedItem     = e.New("empty ordered item")
+	EmptyUnorderedItem   = e.New("empty unordered item")
 	EmptyURI             = e.New("empty uri parameter")
 	HeaderNOutOfRange    = e.New("header N out of range")
 	InvalidCharInID      = e.New("invalid char in ID")

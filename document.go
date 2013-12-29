@@ -43,13 +43,51 @@ func (q *Document) addDefinition(id string, uri, title []rune) (
 }
 
 func (q *Document) Get() (body []rune) {
-	// DEBUG
-	fmt.Printf("Document.Get() sees %d blocks\n", len(q.blocks))
-	// END
+	var (
+		inUnordered bool
+		inOrdered   bool
+	)
 	for i := 0; i < len(q.blocks)-1; i++ {
 		fmt.Printf("BLOCK %d\n", i)
-		body = append(body, q.blocks[i].Get()...)
+
+		var ()
+
+		block := q.blocks[i]
+		content := block.Get()
+
+		switch block.(type) {
+		case *Ordered:
+			if inUnordered {
+				inUnordered = false
+				body = append(body, UL_CLOSE...)
+			}
+			if !inOrdered {
+				inOrdered = true
+				body = append(body, OL_OPEN...)
+			}
+		case *Unordered:
+			if inOrdered {
+				inOrdered = false
+				body = append(body, OL_CLOSE...)
+			}
+			if !inUnordered {
+				inUnordered = true
+				body = append(body, UL_OPEN...)
+			}
+		default:
+			if inUnordered {
+				body = append(body, UL_CLOSE...)
+				inUnordered = false
+			}
+			if inOrdered {
+				body = append(body, OL_CLOSE...)
+				inOrdered = false
+			}
+		}
+		body = append(body, content...)
+
 	}
+
 	// output last block IF it is not a LineSep
 	lastBlock := q.blocks[len(q.blocks)-1]
 	switch lastBlock.(type) {
@@ -61,6 +99,12 @@ func (q *Document) Get() (body []rune) {
 		fmt.Printf("outputting '%s'\n", string(lastBlock.Get()))
 		// END
 		body = append(body, lastBlock.Get()...)
+	}
+	if inOrdered {
+		body = append(body, OL_CLOSE...)
+	}
+	if inUnordered {
+		body = append(body, UL_CLOSE...)
 	}
 	// drop any terminating CR/LF
 	for body[len(body)-1] == '\n' || body[len(body)-1] == '\r' {
