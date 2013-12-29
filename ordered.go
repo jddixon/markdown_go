@@ -34,10 +34,8 @@ func (h *Ordered) Get() (r []rune) {
 	return
 }
 
-// XXX JUST COPIED FROM UNORDERED: TRUST ME NOT!
-
 // Parse a line beginning with a digit followed by a dot followed by a space.
-func (q *Line) parseOrdered() (b BlockI, err error) {
+func (q *Line) parseOrdered(from int) (b BlockI, err error) {
 
 	var (
 		bodyStart int
@@ -45,8 +43,11 @@ func (q *Line) parseOrdered() (b BlockI, err error) {
 		offset    int
 	)
 
+	// Enter with the offset set to the first character after
+	//   \s*\d+\.\s
+
 	// skip leading spaces ------------------------------------------
-	for offset = 1; offset < eol; offset++ {
+	for offset = from; offset < eol; offset++ {
 		ch := q.runes[offset]
 		if !u.IsSpace(ch) {
 			bodyStart = offset

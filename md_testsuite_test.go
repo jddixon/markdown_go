@@ -91,6 +91,9 @@ var (
 		"link-idref-title-paranthesis",
 		"link-idref-title-single-quote",
 
+		"ordered-list-escaped",
+		"ordered-list-items",
+		"ordered-list-items-random-number",
 		"paragraph-hard-return",
 		"paragraph-line",
 		"paragraphs-2-leading-spaces", // drop leading spaces in para

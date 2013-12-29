@@ -1,5 +1,9 @@
 xgo/md/TODO
 
+2013-12-28
+    * FIX ordered.go, which was just hacked from unordered.go           * DONE
+        - needs from parameter                                          * DONE
+
 2013-12-27
     * need to suppress any lineSep in the last block of Document.Get()  * DONE
         to conform to tests                                             * DONE

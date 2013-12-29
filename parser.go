@@ -146,6 +146,29 @@ func (p *Parser) Parse() (doc *Document, err error) {
 
 				// XXX STUB : TRY OTHER PARSERS
 
+				// ORDERED LISTS --------------------------
+
+				// XXX We require a space after these starting characters
+				if b == nil && (err == nil || err == io.EOF) {
+					var from int
+					for from = 0; from < 3 && from < eol; from++ {
+						if !u.IsSpace(q.runes[from]) {
+							break
+						}
+					}
+					if from < eol-2 {
+
+						// we are positioned on a non-space character
+						ch0 := q.runes[from]
+						ch1 := q.runes[from+1]
+						ch2 := q.runes[from+2]
+						if u.IsDigit(ch0) && ch1 == '.' && ch2 == ' ' {
+							b, err = q.parseOrdered(from + 2)
+
+						}
+					}
+				}
+
 				// UNORDERED LISTS ------------------------
 
 				// XXX We require a space after these starting characters
@@ -164,7 +187,7 @@ func (p *Parser) Parse() (doc *Document, err error) {
 							b, err = q.parseUnordered(from + 2)
 						}
 					}
-				}
+				} // GEEP
 
 				// DEFAULT: PARA --------------------------
 				if err == nil || err == io.EOF {
