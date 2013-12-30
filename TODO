@@ -1,5 +1,11 @@
 xgo/md/TODO
 
+2013-12-29
+    * add holder.go, where Holder is something that can have children
+    * then parser should have context stack
+    * the various Get() routines should return HTML5 OM, not text
+    * need a String() for everything
+
 2013-12-28
     * FIX ordered.go, which was just hacked from unordered.go           * DONE
         - needs from parameter                                          * DONE
