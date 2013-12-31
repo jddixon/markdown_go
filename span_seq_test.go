@@ -19,7 +19,7 @@ func (s *XLSuite) TestParaEmphAndCode(c *C) {
 	c.Assert(q, NotNil)
 
 	eol := len(input)
-	seq, err := q.parseSpanSeq(doc, true)
+	seq, err := q.parseSpanSeq(doc, 0, true)
 	c.Assert(err, IsNil)
 	c.Assert(seq, NotNil)
 	c.Assert(q.offset, Equals, eol)
@@ -68,7 +68,7 @@ func (s *XLSuite) TestParaLinkSpan(c *C) {
 	c.Assert(q, NotNil)
 
 	eol := len(input)
-	seq, err := q.parseSpanSeq(doc, true)
+	seq, err := q.parseSpanSeq(doc, 0, true)
 	c.Assert(err, IsNil)
 	c.Assert(seq, NotNil)
 	c.Assert(q.offset, Equals, eol)
@@ -105,7 +105,7 @@ func (s *XLSuite) TestParaImageSpan(c *C) {
 	c.Assert(q, NotNil)
 
 	eol := len(input)
-	seq, err := q.parseSpanSeq(doc, true)
+	seq, err := q.parseSpanSeq(doc, 0, true)
 	c.Assert(err, IsNil)
 	c.Assert(seq, NotNil)
 	c.Assert(q.offset, Equals, eol)

@@ -146,6 +146,10 @@ func (p *Parser) Parse() (doc *Document, err error) {
 
 				// XXX STUB : TRY OTHER PARSERS
 
+				// BLOCKQUOTE -----------------------------
+				if b == nil && (err == nil || err == io.EOF) && ch0 == '>' {
+					b, err = q.parseBlockquote(doc, 1)
+				}
 				// ORDERED LISTS --------------------------
 
 				// XXX We require a space after these starting characters
@@ -190,6 +194,9 @@ func (p *Parser) Parse() (doc *Document, err error) {
 				} // GEEP
 
 				// DEFAULT: PARA --------------------------
+				// If we have parsed the line, we hang the block off
+				// the document.  Otherwise, we treat whatever we have
+				// as a sequence of spans and make a Para out of it.
 				if err == nil || err == io.EOF {
 					if b != nil {
 						docPtr.addBlock(b)
@@ -200,7 +207,7 @@ func (p *Parser) Parse() (doc *Document, err error) {
 						fmt.Printf("== invoking parseSpanSeq(true) ==\n")
 						// END
 						var seq *SpanSeq
-						seq, err = q.parseSpanSeq(docPtr, true)
+						seq, err = q.parseSpanSeq(docPtr, 0, true)
 						if err == nil || err == io.EOF {
 							if curPara == nil {
 								curPara = new(Para)

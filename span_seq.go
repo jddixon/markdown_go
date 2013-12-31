@@ -23,12 +23,13 @@ type SpanSeq struct {
 // is converted to a Text object and appended to the spans output
 // slice, followed by the SpanI.
 
-func (q *Line) parseSpanSeq(doc *Document, leftTrim bool) (
+func (q *Line) parseSpanSeq(doc *Document, from int, leftTrim bool) (
 	seq *SpanSeq, err error) {
 
 	var (
 		curText []rune
 	)
+	q.offset = from
 	seq = new(SpanSeq)
 	firstSpan := true
 	for q.offset < len(q.runes) {
