@@ -38,7 +38,7 @@ var (
 		"backslash-escape",
 		//"blockquote-added-markup",
 		//"blockquote-line-2-paragraphs",
-		"blockquote-line",
+		//"blockquote-line",
 		//"blockquote-multiline-1-space-begin",
 		//"blockquote-multiline-1-space-end",
 		//"blockquote-multiline-2-paragraphs",

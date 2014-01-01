@@ -14,8 +14,8 @@ func (s *XLSuite) TestParaEmphAndCode(c *C) {
 
 	input := []rune("abc _def_ **ghi** __jkl mno__ qrs ")
 	input = append(input, []rune("`kode &a <b >c` foo")...)
-	q, err := NewLine(input, NULL_EOL)
-	c.Assert(err, IsNil)
+	q := NewLine(input, NULL_EOL)
+	c.Assert(q.Err, IsNil)
 	c.Assert(q, NotNil)
 
 	eol := len(input)
@@ -63,8 +63,8 @@ func (s *XLSuite) TestParaLinkSpan(c *C) {
 	input := []rune("abc [foo](http://example.com) ")
 	input2 := []rune("def [bar](/its/somewhere \"I hope\")")
 	input = append(input, input2...)
-	q, err := NewLine(input, EOL)
-	c.Assert(err, IsNil)
+	q := NewLine(input, EOL)
+	c.Assert(q.Err, IsNil)
 	c.Assert(q, NotNil)
 
 	eol := len(input)
@@ -100,8 +100,8 @@ func (s *XLSuite) TestParaImageSpan(c *C) {
 	input := []rune("   abc ![foo](/images/example.jpg) ")
 	input2 := []rune("def ![bar](/its/somewhere.png \"I hope\")")
 	input = append(input, input2...)
-	q, err := NewLine(input, EOL)
-	c.Assert(err, IsNil)
+	q := NewLine(input, EOL)
+	c.Assert(q.Err, IsNil)
 	c.Assert(q, NotNil)
 
 	eol := len(input)

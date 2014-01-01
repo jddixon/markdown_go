@@ -32,11 +32,12 @@ func NewParser(reader io.Reader) (p *Parser, err error) {
 	return
 }
 
-func (p *Parser) readLine() (line *Line, err error) {
+func (p *Parser) readLine() (line *Line) {
 
 	var (
 		allSpaces bool = true // if a line is all spaces, we ignore them
 		atEOF     bool
+		err       error
 		runes     []rune
 		thisLine  Line
 	)
@@ -92,11 +93,16 @@ func (p *Parser) readLine() (line *Line, err error) {
 		if atEOF {
 			err = io.EOF
 		}
+	} else {
+		line = new(Line)
 	}
+	line.Err = err
+
 	return
 }
 
 func (p *Parser) Parse() (doc *Document, err error) {
+
 	var (
 		imageDefn        *Definition
 		linkDefn         *Definition
@@ -107,7 +113,8 @@ func (p *Parser) Parse() (doc *Document, err error) {
 	)
 	docPtr := p.doc
 
-	q, err = p.readLine()
+	q = p.readLine()
+	err = q.Err
 
 	// DEBUG
 	fmt.Printf("Parse: first line is '%s'\n", string(q.runes))
@@ -199,7 +206,7 @@ func (p *Parser) Parse() (doc *Document, err error) {
 				// as a sequence of spans and make a Para out of it.
 				if err == nil || err == io.EOF {
 					if b != nil {
-						docPtr.addBlock(b)
+						docPtr.AddChild(b)
 						lastBlockLineSep = false
 					} else {
 						// default parser
@@ -226,13 +233,13 @@ func (p *Parser) Parse() (doc *Document, err error) {
 			ls, err := NewLineSep(q.lineSep)
 			if err == nil {
 				if curPara != nil {
-					docPtr.addBlock(curPara)
+					docPtr.AddChild(curPara)
 					curPara = nil
 					lastBlockLineSep = false
 				}
 				fmt.Printf("adding LineSep to document\n") // DEBUG
 				if !lastBlockLineSep {
-					docPtr.addBlock(ls)
+					docPtr.AddChild(ls)
 					lastBlockLineSep = true
 				}
 			}
@@ -240,7 +247,8 @@ func (p *Parser) Parse() (doc *Document, err error) {
 		if err != nil {
 			break
 		}
-		q, err = p.readLine()
+		q = p.readLine()
+		err = q.Err
 		if (err != nil && err != io.EOF) || q == nil {
 			break
 		}
@@ -258,11 +266,11 @@ func (p *Parser) Parse() (doc *Document, err error) {
 	if err == nil || err == io.EOF {
 		if curPara != nil {
 			fmt.Println("have dangling curPara") // DEBUG
-			docPtr.addBlock(curPara)
+			docPtr.AddChild(curPara)
 			curPara = nil
 		}
 		// DEBUG
-		fmt.Printf("returning thisDoc with %d blocks\n", len(docPtr.blocks))
+		fmt.Printf("returning thisDoc with %d children\n", len(docPtr.children))
 		// END
 		doc = docPtr
 	}

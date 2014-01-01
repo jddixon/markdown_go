@@ -23,7 +23,8 @@ func (s *XLSuite) TestReadLine(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(p, NotNil)
 
-	line1, err := p.readLine()
+	line1 := p.readLine()
+	err = line1.Err
 	c.Assert(err, IsNil)
 	c.Assert(line1, NotNil)
 	c.Assert(string(line1.runes), Equals, text1)
@@ -31,7 +32,8 @@ func (s *XLSuite) TestReadLine(c *C) {
 	c.Assert(len(line1.lineSep), Equals, 1)
 	c.Assert(line1.lineSep[0], Equals, LF)
 
-	line2, err := p.readLine()
+	line2 := p.readLine()
+	err = line2.Err
 	c.Assert(err, IsNil)
 	c.Assert(line2, NotNil)
 	c.Assert(string(line2.runes), Equals, text2)
@@ -40,7 +42,8 @@ func (s *XLSuite) TestReadLine(c *C) {
 	c.Assert(line2.lineSep[0], Equals, CR)
 
 	// verify that we get (a) an io.EOF and (b) a terminating null byte
-	line3, err := p.readLine()
+	line3 := p.readLine()
+	err = line3.Err
 	c.Assert(err, Equals, io.EOF)
 	c.Assert(line3, NotNil)
 	c.Assert(string(line3.runes), Equals, text3)
@@ -71,7 +74,8 @@ func (s *XLSuite) TestLinkDefinition(c *C) {
 	c.Assert(p, NotNil)
 	doc := p.doc
 
-	line1, err := p.readLine()
+	line1 := p.readLine()
+	err = line1.Err
 	c.Assert(err, IsNil) // gets io.EOF
 	c.Assert(string(line1.runes), Equals, def1)
 
@@ -81,7 +85,8 @@ func (s *XLSuite) TestLinkDefinition(c *C) {
 	c.Assert(defn1.GetURI(), Equals, uri1)
 	c.Assert(defn1.GetTitle(), Equals, title1)
 
-	line2, err := p.readLine()
+	line2 := p.readLine()
+	err = line2.Err
 	c.Assert(err, Equals, io.EOF)
 	c.Assert(string(line2.runes), Equals, def2)
 
@@ -113,7 +118,8 @@ func (s *XLSuite) TestImageDefinition(c *C) {
 	c.Assert(p, NotNil)
 	doc := p.doc
 
-	line1, err := p.readLine()
+	line1 := p.readLine()
+	err = line1.Err
 	c.Assert(err, IsNil) // gets io.EOF
 	c.Assert(string(line1.runes), Equals, def1)
 
@@ -123,7 +129,8 @@ func (s *XLSuite) TestImageDefinition(c *C) {
 	c.Assert(defn1.GetURI(), Equals, uri1)
 	c.Assert(defn1.GetTitle(), Equals, title1)
 
-	line2, err := p.readLine()
+	line2 := p.readLine()
+	err = line2.Err
 	c.Assert(err, Equals, io.EOF)
 	c.Assert(string(line2.runes), Equals, def2)
 

@@ -47,7 +47,8 @@ func (s *XLSuite) TestHeader(c *C) {
 
 	for i := 0; i < 6; i++ {
 		// test parse -------------------------------------
-		line, err := p.readLine()
+		line := p.readLine()
+		err = line.Err
 		if i < 5 {
 			c.Assert(err, IsNil)
 		} else {
@@ -89,7 +90,8 @@ func (s *XLSuite) doTestHRule(c *C, char rune, rng *xr.PRNG) {
 	c.Assert(err, IsNil)
 	c.Assert(p, NotNil)
 
-	line, err := p.readLine()
+	line := p.readLine()
+	err = line.Err
 	c.Assert(err, Equals, nil)
 	c.Assert(line, NotNil)
 

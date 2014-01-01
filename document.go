@@ -9,9 +9,8 @@ import (
 var _ = fmt.Print
 
 type Document struct {
-	// blocks []BlockI
-	blocks []MarkdownI
-	dict   map[string]*Definition
+	dict map[string]*Definition
+	Holder
 }
 
 func NewDocument() (q *Document, err error) {
@@ -20,10 +19,6 @@ func NewDocument() (q *Document, err error) {
 		dict: make(map[string]*Definition),
 	}
 	return
-}
-
-func (q *Document) addBlock(block MarkdownI) {
-	q.blocks = append(q.blocks, block)
 }
 
 // A pointer to the definition is returned to signal success.
@@ -47,12 +42,12 @@ func (q *Document) Get() (body []rune) {
 		inUnordered bool
 		inOrdered   bool
 	)
-	for i := 0; i < len(q.blocks)-1; i++ {
+	for i := 0; i < len(q.children)-1; i++ {
 		fmt.Printf("BLOCK %d\n", i)
 
 		var ()
 
-		block := q.blocks[i]
+		block := q.children[i]
 		content := block.Get()
 
 		switch block.(type) {
@@ -89,7 +84,7 @@ func (q *Document) Get() (body []rune) {
 	}
 
 	// output last block IF it is not a LineSep
-	lastBlock := q.blocks[len(q.blocks)-1]
+	lastBlock := q.children[len(q.children)-1]
 	switch lastBlock.(type) {
 	case *LineSep:
 		// do nothing

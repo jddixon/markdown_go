@@ -1,5 +1,12 @@
 xgo/md/TODO
 
+2013-12-31
+    * Document needs to become a HolderI                                * DONE
+        - step 1: []blocks are BlockI, not MarkdownI                    * DONE
+    * top level parseHolder
+    * possibly lower level parseSpanHolder
+    * don't forget clj :-(
+
 2013-12-29
     * add holder.go, where Holder is something that can have children
     * then parser should have context stack
