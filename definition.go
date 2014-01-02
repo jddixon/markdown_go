@@ -175,7 +175,7 @@ func (line *Line) parseLinkDefinition(doc *Document) (
 		if titleEnd > 0 {
 			title = line.runes[titleStart:titleEnd]
 		}
-		def, err = doc.addDefinition(id, uri, title)
+		def, err = doc.AddDefinition(id, uri, title)
 	}
 	return
 }
@@ -302,7 +302,7 @@ func (line *Line) parseImageDefinition(doc *Document) (
 		if titleEnd > 0 {
 			title = line.runes[titleStart:titleEnd]
 		}
-		def, err = doc.addDefinition(id, uri, title)
+		def, err = doc.AddDefinition(id, uri, title)
 	}
 	return
 }

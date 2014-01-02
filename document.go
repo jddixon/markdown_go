@@ -15,14 +15,16 @@ type Document struct {
 
 func NewDocument() (q *Document, err error) {
 
+	h := NewHolder()
 	q = &Document{
-		dict: make(map[string]*Definition),
+		dict:   make(map[string]*Definition),
+		Holder: *h,
 	}
 	return
 }
 
 // A pointer to the definition is returned to signal success.
-func (q *Document) addDefinition(id string, uri, title []rune) (
+func (q *Document) AddDefinition(id string, uri, title []rune) (
 	def *Definition, err error) {
 
 	if id == "" {
