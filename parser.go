@@ -106,15 +106,23 @@ func (p *Parser) readLine() (line *Line) {
 
 func (p *Parser) Parse() (doc *Document, err error) {
 
+	var (
+		eofSeen    bool
+		lastWasDef bool
+	)
 	doc = p.doc
 	out := make(chan *Line)
 	resp := make(chan int)
+	stop := make(chan bool)
 
-	go ParseHolder(doc, p, out, resp)
+	go ParseHolder(doc, p, out, resp, stop)
 	status := <-resp
 
 	q := p.readLine()
 	err = q.Err
+	if err == io.EOF {
+		eofSeen = true
+	}
 	// DEBUG
 	fmt.Printf("Parser: LINE: '%s'\n", string(q.runes))
 	if err == nil {
@@ -140,17 +148,28 @@ func (p *Parser) Parse() (doc *Document, err error) {
 			}
 		}
 		if imageDefn == nil && linkDefn == nil {
-			out <- q // DEADLOCK
+			lastWasDef = false
+			out <- q // send-send DEADLOCK
 			status = <-resp
+		} else {
+			lastWasDef = true
 		}
-		if err == io.EOF {
+		if err == io.EOF || eofSeen {
 			break
 		}
 		q = p.readLine()
 		err = q.Err
+		if err == io.EOF {
+			eofSeen = true
+		}
 	}
-
+	if lastWasDef {
+		stop <- true
+	}
 	status = <-resp
 	_ = status // UNUSED
+	if err == nil && eofSeen {
+		err = io.EOF
+	}
 	return
 }

@@ -38,7 +38,8 @@ func (h *Holder) GetChild(n int) (child BlockI, err error) {
 	return
 }
 
-func ParseHolder(holder HolderI, p *Parser, in chan *Line, resp chan int) {
+func ParseHolder(holder HolderI, p *Parser,
+	in chan *Line, resp chan int, stop chan bool) {
 
 	doc := holder.(*Document)
 	var (
@@ -48,6 +49,7 @@ func ParseHolder(holder HolderI, p *Parser, in chan *Line, resp chan int) {
 		q                *Line
 		ch0              rune
 		lastBlockLineSep bool
+		stopped          bool
 	)
 	resp <- OK // OK, setup complete
 
@@ -194,8 +196,22 @@ func ParseHolder(holder HolderI, p *Parser, in chan *Line, resp chan int) {
 			// END
 			break
 		}
-		q = <-in // WAS: q = p.readLine()
-		err = q.Err
+		var ok bool
+		select {
+		case q, ok = <-in:
+			if ok {
+				err = q.Err
+			} else {
+				goto JUST_DIE
+			}
+		case stopped, ok = <-stop:
+			if !ok {
+				goto JUST_DIE
+			} else {
+				_ = stopped // not yet used - and so far unnecessary
+				goto SAYOONARA
+			}
+		}
 		// DEBUG
 		if err == io.EOF {
 			eofSeen = true
@@ -227,6 +243,10 @@ func ParseHolder(holder HolderI, p *Parser, in chan *Line, resp chan int) {
 		fmt.Printf("returning thisDoc with %d children\n", len(doc.children))
 		// END
 	}
+
+SAYOONARA:
 	resp <- DONE // DEADLOCK send-send
 	return
+
+JUST_DIE:
 }

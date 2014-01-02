@@ -66,6 +66,10 @@ func (p *LinkSpan) Get() (out []rune) {
 //
 func (q *Line) parseLinkSpan() (span SpanI, err error) {
 
+	// DEBUG
+	fmt.Printf("Entering parseLinkSpan, offset is %d\n", q.offset)
+	// END
+
 	offset := q.offset + 1
 	var (
 		linkTextStart        int = offset

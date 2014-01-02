@@ -89,8 +89,8 @@ var (
 
 		// "link-automatic-email",
 		// "link-automatic",
-		// "link-bracket-paranthesis",		// WORKED BEFORE
-		// "link-bracket-paranthesis-title",	// DITTO
+		"link-bracket-paranthesis",
+		"link-bracket-paranthesis-title",
 		"link-idref-angle-bracket",
 		"link-idref-implicit",
 		"link-idref-implicit-spaces",

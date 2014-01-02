@@ -1,5 +1,9 @@
 xgo/md/TODO
 
+2014-01-01
+    * link-idref-angle-bracket represents argument for channel 
+        to tell parseHolder() that we are done
+
 2013-12-31
     * Document needs to become a HolderI                                * DONE
         - step 1: []blocks are BlockI, not MarkdownI                    * DONE
