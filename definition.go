@@ -176,6 +176,14 @@ func (line *Line) parseLinkDefinition(doc *Document) (
 			title = line.runes[titleStart:titleEnd]
 		}
 		def, err = doc.AddDefinition(id, uri, title)
+		// DEBUG
+		if def == nil {
+			fmt.Printf("parseLinkDefn returning NIL, error %s\n",
+				err.Error())
+		} else {
+			fmt.Println("parseLinkDefn returning definition")
+		}
+		// END
 	}
 	return
 }
@@ -197,6 +205,9 @@ func (line *Line) parseLinkDefinition(doc *Document) (
 func (line *Line) parseImageDefinition(doc *Document) (
 	def *Definition, err error) {
 
+	// DEBUG
+	fmt.Println("Entering parseImageDefinition")
+	// END
 	var (
 		ch                   rune
 		idStart, idEnd       int
@@ -303,6 +314,18 @@ func (line *Line) parseImageDefinition(doc *Document) (
 			title = line.runes[titleStart:titleEnd]
 		}
 		def, err = doc.AddDefinition(id, uri, title)
+		// DEBUG
+		if def == nil {
+			fmt.Printf("parseImageDefn returning NIL, error %s\n",
+				err.Error())
+		} else {
+			fmt.Println("parseImageDefn returning definition")
+		}
+		// END
+		// DEBUG
+	} else {
+		fmt.Println("ImageDef parse failed, uriEnd is zero")
+		// END
 	}
 	return
 }

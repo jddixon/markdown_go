@@ -42,6 +42,7 @@ func ParseHolder(holder HolderI, p *Parser, in chan *Line, resp chan int) {
 
 	doc := holder.(*Document)
 	var (
+		eofSeen          bool
 		err              error
 		curPara          *Para
 		q                *Line
@@ -52,10 +53,18 @@ func ParseHolder(holder HolderI, p *Parser, in chan *Line, resp chan int) {
 
 	q = <-in // WAS q = p.readLine()
 	err = q.Err
+	if err == io.EOF {
+		eofSeen = true
+	}
 	resp <- ACK // MOVE ME
 
 	// DEBUG
-	fmt.Printf("Parse: first line is '%s'\n", string(q.runes))
+	fmt.Printf("ParseHolder: first line is '%s'\n", string(q.runes))
+	if err == nil {
+		fmt.Println("    nil error")
+	} else {
+		fmt.Printf("    error = %s\n", err.Error())
+	}
 	// END
 
 	// pass through the document line by line
@@ -173,11 +182,26 @@ func ParseHolder(holder HolderI, p *Parser, in chan *Line, resp chan int) {
 				}
 			}
 		}
-		if err != nil {
+		if err != nil || eofSeen {
+			// DEBUG
+			fmt.Println("parseHolder breaking, error or EOF seen")
+			if err != nil {
+				fmt.Printf("    ERROR: %s\n", err.Error())
+			}
+			if eofSeen {
+				fmt.Println("    EOF SEEN, so breaking")
+			}
+			// END
 			break
 		}
 		q = <-in // WAS: q = p.readLine()
 		err = q.Err
+		// DEBUG
+		if err == io.EOF {
+			eofSeen = true
+			fmt.Println("*** EOF SEEN ***")
+		}
+		// END
 		resp <- ACK // MOVE ME
 		if (err != nil && err != io.EOF) || q == nil {
 			break
@@ -203,6 +227,6 @@ func ParseHolder(holder HolderI, p *Parser, in chan *Line, resp chan int) {
 		fmt.Printf("returning thisDoc with %d children\n", len(doc.children))
 		// END
 	}
-	resp <- DONE
+	resp <- DONE // DEADLOCK send-send
 	return
 }

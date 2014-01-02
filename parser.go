@@ -69,9 +69,6 @@ func (p *Parser) readLine() (line *Line) {
 				}
 			}
 			if !allSpaces {
-				// DEBUG
-				fmt.Printf("LINE: '%s'\n", string(runes))
-				// END
 				thisLine.runes = runes
 			}
 			break // eol has been seen
@@ -118,6 +115,14 @@ func (p *Parser) Parse() (doc *Document, err error) {
 
 	q := p.readLine()
 	err = q.Err
+	// DEBUG
+	fmt.Printf("Parser: LINE: '%s'\n", string(q.runes))
+	if err == nil {
+		fmt.Println("    NIL error")
+	} else {
+		fmt.Printf("    error = '%s'\n", err.Error())
+	}
+	// END
 	for err == nil || err == io.EOF {
 		var (
 			imageDefn *Definition
@@ -135,7 +140,7 @@ func (p *Parser) Parse() (doc *Document, err error) {
 			}
 		}
 		if imageDefn == nil && linkDefn == nil {
-			out <- q
+			out <- q // DEADLOCK
 			status = <-resp
 		}
 		if err == io.EOF {
