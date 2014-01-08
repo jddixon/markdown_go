@@ -15,7 +15,7 @@ type Document struct {
 
 func NewDocument() (q *Document, err error) {
 
-	h := NewHolder()
+	h, _ := NewHolder(false, uint(0)) // not Blockquote, depth 0
 	q = &Document{
 		dict:   make(map[string]*Definition),
 		Holder: *h,

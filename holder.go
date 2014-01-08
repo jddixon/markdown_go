@@ -6,13 +6,26 @@ import (
 	u "unicode"
 )
 
+// A holder is a syntactic structure, a collection of BlockIs, things with
+// a BlockI interface.
+//
+// Remember that a top level holder has definitions and is called a Document.
 type Holder struct {
-	children []BlockI
+	isBlockquote bool
+	depth        uint
+	children     []BlockI
 }
 
-func NewHolder() *Holder {
-	var h = new(Holder)
-	return h
+func NewHolder(isBq bool, depth uint) (h *Holder, err error) {
+	if depth > 0 && !isBq {
+		err = OnlyBlockquoteSupported
+	} else {
+		h = &Holder{
+			isBlockquote: isBq,
+			depth:        depth,
+		}
+	}
+	return
 }
 
 func (h *Holder) AddChild(child BlockI) (err error) {
@@ -38,10 +51,10 @@ func (h *Holder) GetChild(n int) (child BlockI, err error) {
 	return
 }
 
-func ParseHolder(holder HolderI, p *Parser,
+func (h *Holder) ParseHolder(p *Parser,
 	in chan *Line, resp chan int, stop chan bool) {
 
-	doc := holder.(*Document)
+	doc := p.GetDocument()
 	var (
 		eofSeen          bool
 		err              error
@@ -82,7 +95,7 @@ func ParseHolder(holder HolderI, p *Parser,
 
 				// HEADERS --------------------------------
 				if ch0 == '#' {
-					b, err = q.parseHeader()
+					b, err = q.parseHeader(uint(1))
 				}
 
 				// HORIZONTAL RULES ----------------------
@@ -94,9 +107,9 @@ func ParseHolder(holder HolderI, p *Parser,
 				// XXX STUB : TRY OTHER PARSERS
 
 				// BLOCKQUOTE -----------------------------
-				if b == nil && (err == nil || err == io.EOF) && ch0 == '>' {
-					b, err = q.parseBlockquote(doc, 1)
-				}
+				//if b == nil && (err == nil || err == io.EOF) && ch0 == '>' {
+				//	b, err = q.parseBlockquote(doc, 1)
+				//}
 				// ORDERED LISTS --------------------------
 
 				// XXX We require a space after these starting characters
@@ -138,7 +151,7 @@ func ParseHolder(holder HolderI, p *Parser,
 							b, err = q.parseUnordered(from + 2)
 						}
 					}
-				} // GEEP
+				}
 
 				// DEFAULT: PARA --------------------------
 				// If we have parsed the line, we hang the block off
@@ -177,7 +190,7 @@ func ParseHolder(holder HolderI, p *Parser,
 					curPara = nil
 					lastBlockLineSep = false
 				}
-				fmt.Printf("adding LineSep to document\n") // DEBUG
+				fmt.Printf("adding LineSep to holder\n") // DEBUG
 				if !lastBlockLineSep {
 					doc.AddChild(ls)
 					lastBlockLineSep = true
@@ -212,12 +225,12 @@ func ParseHolder(holder HolderI, p *Parser,
 				goto SAYOONARA
 			}
 		}
-		// DEBUG
 		if err == io.EOF {
 			eofSeen = true
+			// DEBUG
 			fmt.Println("*** EOF SEEN ***")
+			// END
 		}
-		// END
 		resp <- ACK // MOVE ME
 		if (err != nil && err != io.EOF) || q == nil {
 			break
@@ -240,13 +253,14 @@ func ParseHolder(holder HolderI, p *Parser,
 			curPara = nil
 		}
 		// DEBUG
-		fmt.Printf("returning thisDoc with %d children\n", len(doc.children))
+		fmt.Printf("parseHolder returning; document has %d children\n",
+			len(doc.children))
 		// END
 	}
 
 SAYOONARA:
-	resp <- DONE // DEADLOCK send-send
-	return
+	resp <- DONE
 
 JUST_DIE:
+	return
 }

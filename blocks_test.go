@@ -55,7 +55,7 @@ func (s *XLSuite) TestHeader(c *C) {
 			c.Assert(err, Equals, io.EOF)
 		}
 		c.Assert(line, NotNil)
-		b, err := line.parseHeader()
+		b, err := line.parseHeader(uint(1))
 		c.Assert(err, IsNil)
 		c.Assert(b, NotNil)
 		h := b.(*Header)

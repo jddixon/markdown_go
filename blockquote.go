@@ -13,6 +13,20 @@ type Blockquote struct {
 	Holder
 }
 
+func (bq *Blockquote) Get() (runes []rune) {
+	runes = append(runes, BLOCKQUOTE_OPEN...)
+	for i := 0; i < bq.Size(); i++ {
+		child, _ := bq.GetChild(i)
+		runes = append(runes, child.Get()...)
+	}
+	// XXX A HACK
+	runes = append(runes, '\n')
+	// END HACK
+	runes = append(runes, BLOCKQUOTE_CLOSE...)
+	return
+}
+
+// OBSOLETE =========================================================
 func (q *Line) parseBlockquote(doc *Document, from int) (
 	h HolderI, err error) {
 
@@ -28,18 +42,5 @@ func (q *Line) parseBlockquote(doc *Document, from int) (
 			h = bq
 		}
 	}
-	return
-}
-
-func (bq *Blockquote) Get() (runes []rune) {
-	runes = append(runes, BLOCKQUOTE_OPEN...)
-	for i := 0; i < bq.Size(); i++ {
-		child, _ := bq.GetChild(i)
-		runes = append(runes, child.Get()...)
-	}
-	// XXX A HACK
-	runes = append(runes, '\n')
-	// END HACK
-	runes = append(runes, BLOCKQUOTE_CLOSE...)
 	return
 }

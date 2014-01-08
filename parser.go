@@ -12,9 +12,10 @@ import (
 var _ = fmt.Print
 
 const (
-	OK int = iota
+	OK int = 1 << iota
 	ACK
 	DONE
+	LAST_LINE_PROCESSED
 )
 
 type Parser struct {
@@ -36,6 +37,10 @@ func NewParser(reader io.Reader) (p *Parser, err error) {
 		}
 	}
 	return
+}
+
+func (p *Parser) GetDocument() *Document {
+	return p.doc
 }
 
 func (p *Parser) readLine() (line *Line) {
@@ -115,7 +120,8 @@ func (p *Parser) Parse() (doc *Document, err error) {
 	resp := make(chan int)
 	stop := make(chan bool)
 
-	go ParseHolder(doc, p, out, resp, stop)
+	root, _ := NewHolder(false, uint(0)) // not blockquote, depth 0
+	go root.ParseHolder(p, out, resp, stop)
 	status := <-resp
 
 	q := p.readLine()
@@ -149,7 +155,7 @@ func (p *Parser) Parse() (doc *Document, err error) {
 		}
 		if imageDefn == nil && linkDefn == nil {
 			lastWasDef = false
-			out <- q // send-send DEADLOCK
+			out <- q // pass line to ParseHolder goroutine
 			status = <-resp
 		} else {
 			lastWasDef = true
@@ -163,6 +169,9 @@ func (p *Parser) Parse() (doc *Document, err error) {
 			eofSeen = true
 		}
 	}
+	// we do no handshaking with ParseHolder if the last line was
+	// a definition, so we explicitly tell it that we're done and
+	// wait for an acknowledgement.
 	if lastWasDef {
 		stop <- true
 	}

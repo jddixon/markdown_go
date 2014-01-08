@@ -41,7 +41,7 @@ func (h *Header) Get() []rune {
 // is no other error, return nil for both Header and error.  If the parse
 // succeeds, return a non-nil Header.
 //
-func (q *Line) parseHeader() (b BlockI, err error) {
+func (q *Line) parseHeader(from uint) (b BlockI, err error) {
 
 	var (
 		eol                  int = len(q.runes)
