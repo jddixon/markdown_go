@@ -84,24 +84,25 @@ func (h *Holder) ParseHolder(p *Parser,
 
 	// pass through the document line by line
 	for err == nil || err == io.EOF {
+		var from uint
 		if len(q.runes) > 0 {
 
 			// HANDLE BLOCKS ----------------------------------------
 
 			if err == nil || err == io.EOF {
 				var b BlockI
-				ch0 = q.runes[0]
-				eol := len(q.runes)
+				ch0 = q.runes[from]
+				eol := uint(len(q.runes))
 
 				// HEADERS --------------------------------
 				if ch0 == '#' {
-					b, err = q.parseHeader(uint(1))
+					b, err = q.parseHeader(from + 1)
 				}
 
 				// HORIZONTAL RULES ----------------------
 				if b == nil && (err == nil || err == io.EOF) &&
 					(ch0 == '-' || ch0 == '*' || ch0 == '_') {
-					b, err = q.parseHRule()
+					b, err = q.parseHRule(from)
 				}
 
 				// XXX STUB : TRY OTHER PARSERS
@@ -114,20 +115,20 @@ func (h *Holder) ParseHolder(p *Parser,
 
 				// XXX We require a space after these starting characters
 				if b == nil && (err == nil || err == io.EOF) {
-					var from int
-					for from = 0; from < 3 && from < eol; from++ {
-						if !u.IsSpace(q.runes[from]) {
+					myFrom := from
+					for ; myFrom < from+3 && myFrom < eol; myFrom++ {
+						if !u.IsSpace(q.runes[myFrom]) {
 							break
 						}
 					}
-					if from < eol-2 {
+					if myFrom < eol-2 {
 
 						// we are positioned on a non-space character
-						ch0 := q.runes[from]
-						ch1 := q.runes[from+1]
-						ch2 := q.runes[from+2]
+						ch0 := q.runes[myFrom]
+						ch1 := q.runes[myFrom+1]
+						ch2 := q.runes[myFrom+2]
 						if u.IsDigit(ch0) && ch1 == '.' && ch2 == ' ' {
-							b, err = q.parseOrdered(from + 2)
+							b, err = q.parseOrdered(myFrom + 2)
 
 						}
 					}
@@ -137,18 +138,18 @@ func (h *Holder) ParseHolder(p *Parser,
 
 				// XXX We require a space after these starting characters
 				if b == nil && (err == nil || err == io.EOF) {
-					var from int
-					for from = 0; from < 3 && from < eol; from++ {
-						if !u.IsSpace(q.runes[from]) {
+					myFrom := from
+					for myFrom = 0; myFrom < 3 && myFrom < eol; myFrom++ {
+						if !u.IsSpace(q.runes[myFrom]) {
 							break
 						}
 					}
-					if from < eol-1 {
+					if myFrom < eol-1 {
 						// we are positioned on a non-space character
-						ch0 := q.runes[from]
-						ch1 := q.runes[from+1]
+						ch0 := q.runes[myFrom]
+						ch1 := q.runes[myFrom+1]
 						if (ch0 == '*' || ch0 == '+' || ch0 == '-') && ch1 == ' ' {
-							b, err = q.parseUnordered(from + 2)
+							b, err = q.parseUnordered(myFrom + 2)
 						}
 					}
 				}

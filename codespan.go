@@ -61,7 +61,7 @@ func (q *Line) parseCodeSpan() (span SpanI, err error) {
 	found := false
 
 	// look for the end of the span
-	for offset++; offset < len(q.runes); offset++ {
+	for offset++; offset < uint(len(q.runes)); offset++ {
 		ch := q.runes[offset]
 		if ch == codeChar {
 			found = true
@@ -69,7 +69,7 @@ func (q *Line) parseCodeSpan() (span SpanI, err error) {
 		}
 	}
 	if found {
-		var start, end int
+		var start, end uint
 		start = q.offset + 1
 		end = offset
 		q.offset = offset + 1

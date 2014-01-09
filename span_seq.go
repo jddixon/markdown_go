@@ -23,7 +23,7 @@ type SpanSeq struct {
 // is converted to a Text object and appended to the spans output
 // slice, followed by the SpanI.
 
-func (q *Line) parseSpanSeq(doc *Document, from int, leftTrim bool) (
+func (q *Line) parseSpanSeq(doc *Document, from uint, leftTrim bool) (
 	seq *SpanSeq, err error) {
 
 	var (
@@ -32,7 +32,7 @@ func (q *Line) parseSpanSeq(doc *Document, from int, leftTrim bool) (
 	q.offset = from
 	seq = new(SpanSeq)
 	firstSpan := true
-	for q.offset < len(q.runes) {
+	for q.offset < uint(len(q.runes)) {
 		var span SpanI
 		ch := q.runes[q.offset]
 

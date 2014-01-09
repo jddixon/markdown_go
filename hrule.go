@@ -31,12 +31,12 @@ func (h *HRule) Get() []rune {
 //
 // If the parse succeeds we return a pointer to the HRule object.
 // Otherwise the offset is unchanged and b's value is nil.
-func (q *Line) parseHRule() (b BlockI, err error) {
+func (q *Line) parseHRule(from uint) (b BlockI, err error) {
 
 	var (
 		badCharSeen bool
-		eol         int  = len(q.runes)
-		offset      int  = q.offset
+		eol         uint = uint(len(q.runes))
+		offset      uint = from
 		char        rune = q.runes[offset]
 		charCount   int  = 1
 	)

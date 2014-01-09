@@ -36,12 +36,12 @@ func (h *Unordered) Get() (r []rune) {
 
 // Parse a line beginning with asterisk, plus, or minus (*, +, -) as an
 // LI entity.
-func (q *Line) parseUnordered(from int) (b BlockI, err error) {
+func (q *Line) parseUnordered(from uint) (b BlockI, err error) {
 
 	var (
-		bodyStart int
-		eol       int = len(q.runes)
-		offset    int = from
+		bodyStart uint
+		eol       uint = uint(len(q.runes))
+		offset    uint = from
 	)
 
 	// Enter with the offset set to the first character after

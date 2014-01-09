@@ -38,7 +38,7 @@ func (q *Line) parseEmphSpan() (span SpanI, err error) {
 
 	// determine whether the emphasis is doubled, then look for the end
 	// of the span
-	for offset++; offset < len(q.runes); offset++ {
+	for offset++; offset < uint(len(q.runes)); offset++ {
 		ch := q.runes[offset]
 		if firstChar {
 			firstChar = false
@@ -49,7 +49,7 @@ func (q *Line) parseEmphSpan() (span SpanI, err error) {
 		}
 		if ch == emphChar {
 			if emphDoubled {
-				if offset+1 < len(q.runes) &&
+				if offset+1 < uint(len(q.runes)) &&
 					q.runes[offset+1] == emphChar {
 					offset++
 					found = true
@@ -62,7 +62,7 @@ func (q *Line) parseEmphSpan() (span SpanI, err error) {
 		}
 	}
 	if found {
-		var start, end int
+		var start, end uint
 		if emphDoubled {
 			start = q.offset + 2
 			end = offset - 1

@@ -27,7 +27,7 @@ func (bq *Blockquote) Get() (runes []rune) {
 }
 
 // OBSOLETE =========================================================
-func (q *Line) parseBlockquote(doc *Document, from int) (
+func (q *Line) parseBlockquote(doc *Document, from uint) (
 	h HolderI, err error) {
 
 	// Enter having seen "> " and with offset set to the next character

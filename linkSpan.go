@@ -72,11 +72,11 @@ func (q *Line) parseLinkSpan() (span SpanI, err error) {
 
 	offset := q.offset + 1
 	var (
-		linkTextStart        int = offset
-		linkTextEnd          int
-		uriStart, uriEnd     int
-		titleStart, titleEnd int
-		end                  int // offset of closing paren, if found
+		linkTextStart        uint = offset
+		linkTextEnd          uint
+		uriStart, uriEnd     uint
+		titleStart, titleEnd uint
+		end                  uint // offset of closing paren, if found
 		linkText, uri, title []rune
 	)
 
@@ -86,19 +86,19 @@ func (q *Line) parseLinkSpan() (span SpanI, err error) {
 	// END
 
 	// look for the end of the linkText
-	for ; offset < len(q.runes); offset++ {
+	for ; offset < uint(len(q.runes)); offset++ {
 		ch := q.runes[offset]
 		if ch == ']' {
 			linkTextEnd = offset
 			// DEBUG
 			fmt.Printf("linkTextEnd = %d; end is %d\n",
-				offset, len(q.runes)) // DEBUG
+				offset, uint(len(q.runes))) // DEBUG
 			// END
 			offset++
 			break
 		}
 	}
-	if (offset < len(q.runes)-1) && linkTextEnd > 0 {
+	if (offset < uint(len(q.runes))-1) && linkTextEnd > 0 {
 		// optional space
 		if q.runes[offset] == ' ' {
 			fmt.Printf("skipping space at %d\n", offset)
@@ -111,7 +111,7 @@ func (q *Line) parseLinkSpan() (span SpanI, err error) {
 		}
 	}
 	if uriStart > 0 {
-		for offset = uriStart; offset < len(q.runes); offset++ {
+		for offset = uriStart; offset < uint(len(q.runes)); offset++ {
 			ch := q.runes[offset]
 			if ch == ')' {
 				end = offset

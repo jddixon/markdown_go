@@ -6,7 +6,7 @@ import ()
 
 type Line struct {
 	runes   []rune
-	offset  int    // offset of current rune within this line
+	offset  uint   // offset of current rune within this line
 	lineSep []rune // CR, LF, or both; or 0
 	Err     error
 }

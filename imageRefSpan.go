@@ -81,15 +81,15 @@ func (q *Line) parseImageRefSpan(doc *Document) (span SpanI, err error) {
 	} else {
 		offset := q.offset + 2 // Enter having seen ![
 		var (
-			altTextStart   int = offset
-			altTextEnd     int
-			idStart, idEnd int
-			end            int // offset of closing paren, if found
+			altTextStart   uint = offset
+			altTextEnd     uint
+			idStart, idEnd uint
+			end            uint // offset of closing paren, if found
 			altText, id    []rune
 		)
 
 		// look for the end of the altText -------------------------
-		for ; offset < len(q.runes); offset++ {
+		for ; offset < uint(len(q.runes)); offset++ {
 			ch := q.runes[offset]
 			if ch == ']' {
 				altTextEnd = offset
@@ -100,7 +100,7 @@ func (q *Line) parseImageRefSpan(doc *Document) (span SpanI, err error) {
 		}
 		if altTextEnd > 0 {
 			// optional space
-			if offset < len(q.runes)-1 && q.runes[offset+1] == ' ' {
+			if offset < uint(len(q.runes))-1 && q.runes[offset+1] == ' ' {
 				offset++
 			}
 			if q.runes[offset] == '[' {
@@ -111,7 +111,7 @@ func (q *Line) parseImageRefSpan(doc *Document) (span SpanI, err error) {
 		}
 		// find the end of the ID -----------------------------------
 		if idStart > 0 {
-			for offset = idStart; offset < len(q.runes); offset++ {
+			for offset = idStart; offset < uint(len(q.runes)); offset++ {
 				ch := q.runes[offset]
 				if ch == ']' {
 					end = offset

@@ -28,7 +28,7 @@ func (s *XLSuite) TestReadLine(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(line1, NotNil)
 	c.Assert(string(line1.runes), Equals, text1)
-	c.Assert(line1.offset, Equals, 0)
+	c.Assert(line1.offset, Equals, uint(0))
 	c.Assert(len(line1.lineSep), Equals, 1)
 	c.Assert(line1.lineSep[0], Equals, LF)
 
@@ -37,7 +37,7 @@ func (s *XLSuite) TestReadLine(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(line2, NotNil)
 	c.Assert(string(line2.runes), Equals, text2)
-	c.Assert(line2.offset, Equals, 0)
+	c.Assert(line2.offset, Equals, uint(0))
 	c.Assert(len(line2.lineSep), Equals, 1)
 	c.Assert(line2.lineSep[0], Equals, CR)
 
@@ -47,7 +47,7 @@ func (s *XLSuite) TestReadLine(c *C) {
 	c.Assert(err, Equals, io.EOF)
 	c.Assert(line3, NotNil)
 	c.Assert(string(line3.runes), Equals, text3)
-	c.Assert(line3.offset, Equals, 0)
+	c.Assert(line3.offset, Equals, uint(0))
 	c.Assert(len(line3.lineSep), Equals, 1)
 	c.Assert(line3.lineSep[0], Equals, rune(0))
 

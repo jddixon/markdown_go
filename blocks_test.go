@@ -95,7 +95,7 @@ func (s *XLSuite) doTestHRule(c *C, char rune, rng *xr.PRNG) {
 	c.Assert(err, Equals, nil)
 	c.Assert(line, NotNil)
 
-	b, err := line.parseHRule()
+	b, err := line.parseHRule(uint(0))
 	c.Assert(err, IsNil)
 	c.Assert(b, NotNil)
 	h := b.(*HRule)

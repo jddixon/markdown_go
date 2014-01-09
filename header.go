@@ -44,17 +44,17 @@ func (h *Header) Get() []rune {
 func (q *Line) parseHeader(from uint) (b BlockI, err error) {
 
 	var (
-		eol                  int = len(q.runes)
+		eol                  uint = uint(len(q.runes))
 		hashCount            int
-		offset               int
-		titleStart, titleEnd int
+		offset               uint
+		titleStart, titleEnd uint
 	)
 
 	// count leading hashes -----------------------------------------
 	hashCount = 1 // we enter having seen one '#'
 
 	// enter with the offset set to the first hash sign on the line
-	for offset = q.offset + 1; offset < eol; offset++ {
+	for offset = from; offset < eol; offset++ {
 		ch := q.runes[offset]
 		if ch != '#' {
 			break

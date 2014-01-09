@@ -83,16 +83,16 @@ func (line *Line) parseLinkDefinition(doc *Document) (
 
 	var (
 		ch                   rune
-		idStart, idEnd       int
-		offset               int
-		uriStart, uriEnd     int
-		titleStart, titleEnd int
+		idStart, idEnd       uint
+		offset               uint
+		uriStart, uriEnd     uint
+		titleStart, titleEnd uint
 	)
 	// Enter having seen a left square bracket ('[') at the beginning
 	// of a line, possibly preceded by up to three spaces.  The offset
 	// is on the bracket.
 
-	eol := len(line.runes)
+	eol := uint(len(line.runes))
 	offset = line.offset + 1 // just beyond the bracket
 
 	// collect the id -----------------------------------------------
@@ -210,16 +210,16 @@ func (line *Line) parseImageDefinition(doc *Document) (
 	// END
 	var (
 		ch                   rune
-		idStart, idEnd       int
-		offset               int
-		uriStart, uriEnd     int
-		titleStart, titleEnd int
+		idStart, idEnd       uint
+		offset               uint
+		uriStart, uriEnd     uint
+		titleStart, titleEnd uint
 	)
 	// Enter having seen an exclamation point followed by a left square
 	// bracket ('![') at the beginning of a line, possibly preceded by up
 	// to three spaces.  The offset is on the exclamation point.
 
-	eol := len(line.runes)
+	eol := uint(len(line.runes))
 	offset = line.offset + 2 // just beyond the bracket
 
 	// collect the id -----------------------------------------------

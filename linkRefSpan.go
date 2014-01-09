@@ -89,15 +89,15 @@ func (q *Line) parseLinkRefSpan(doc *Document) (span SpanI, err error) {
 	} else {
 		offset := q.offset + 1
 		var (
-			linkTextStart  int = offset
-			linkTextEnd    int
-			idStart, idEnd int
-			end            int // offset of closing paren, if found
+			linkTextStart  uint = offset
+			linkTextEnd    uint
+			idStart, idEnd uint
+			end            uint // offset of closing paren, if found
 			linkText, id   []rune
 		)
 
 		// look for the end of the linkText -------------------------
-		for ; offset < len(q.runes); offset++ {
+		for ; offset < uint(len(q.runes)); offset++ {
 			ch := q.runes[offset]
 			if ch == ']' {
 				linkTextEnd = offset
@@ -108,7 +108,7 @@ func (q *Line) parseLinkRefSpan(doc *Document) (span SpanI, err error) {
 		}
 		if linkTextEnd > 0 {
 			// optional space
-			if offset < len(q.runes)-1 && q.runes[offset] == ' ' {
+			if offset < uint(len(q.runes))-1 && q.runes[offset] == ' ' {
 				offset++
 			}
 			if q.runes[offset] == '[' {
@@ -119,7 +119,7 @@ func (q *Line) parseLinkRefSpan(doc *Document) (span SpanI, err error) {
 		}
 		// find the end of the ID -----------------------------------
 		if idStart > 0 {
-			for offset = idStart; offset < len(q.runes); offset++ {
+			for offset = idStart; offset < uint(len(q.runes)); offset++ {
 				ch := q.runes[offset]
 				if ch == ']' {
 					end = offset

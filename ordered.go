@@ -35,12 +35,12 @@ func (h *Ordered) Get() (r []rune) {
 }
 
 // Parse a line beginning with a digit followed by a dot followed by a space.
-func (q *Line) parseOrdered(from int) (b BlockI, err error) {
+func (q *Line) parseOrdered(from uint) (b BlockI, err error) {
 
 	var (
-		bodyStart int
-		eol       int = len(q.runes)
-		offset    int
+		bodyStart uint
+		eol       uint = uint(len(q.runes))
+		offset    uint
 	)
 
 	// Enter with the offset set to the first character after
