@@ -13,7 +13,7 @@ import (
 type Holder struct {
 	isBlockquote bool
 	depth        uint
-	children     []BlockI
+	blocks       []BlockI
 }
 
 func NewHolder(isBq bool, depth uint) (h *Holder, err error) {
@@ -28,25 +28,43 @@ func NewHolder(isBq bool, depth uint) (h *Holder, err error) {
 	return
 }
 
-func (h *Holder) AddChild(child BlockI) (err error) {
-	if child == nil {
+func (h *Holder) AddBlock(block BlockI) (err error) {
+	if block == nil {
 		err = NilChild
 	} else {
 		// XXX We don't prevent duplicates
-		h.children = append(h.children, child)
+		h.blocks = append(h.blocks, block)
 	}
 	return
 }
 
 func (h *Holder) Size() int {
-	return len(h.children)
+	return len(h.blocks)
 }
 
-func (h *Holder) GetChild(n int) (child BlockI, err error) {
+func (h *Holder) GetBlock(n int) (block BlockI, err error) {
 	if n < 0 || h.Size() <= n {
 		err = ChildNdxOutOfRange
 	} else {
-		child = h.children[n]
+		block = h.blocks[n]
+	}
+	return
+}
+
+// Return an offset 1 beyond the number of chevrons ('>') expected
+// for this depth.  At depth N, we skip N.
+func SkipChevrons(q *Line, depth uint) (from uint) {
+
+	var count uint
+	eol := uint(len(q.runes))
+	for offset := uint(0); offset < eol; offset++ {
+		if q.runes[offset] == '>' {
+			count++
+			if count >= depth {
+				from = offset + 1
+				break
+			}
+		}
 	}
 	return
 }
@@ -63,6 +81,13 @@ func (h *Holder) ParseHolder(p *Parser,
 		ch0              rune
 		lastBlockLineSep bool
 		stopped          bool
+
+		// used to control child holder (for Blockquote)
+		haveChild bool
+		child     *Blockquote
+		toChild   chan *Line
+		fromChild chan int
+		stopChild chan bool
 	)
 	resp <- OK // OK, setup complete
 
@@ -74,7 +99,8 @@ func (h *Holder) ParseHolder(p *Parser,
 	resp <- ACK // MOVE ME
 
 	// DEBUG
-	fmt.Printf("ParseHolder: first line is '%s'\n", string(q.runes))
+	fmt.Printf("ParseHolder depth %d: first line is '%s'\n",
+		h.depth, string(q.runes))
 	if err == nil {
 		fmt.Println("    nil error")
 	} else {
@@ -85,8 +111,50 @@ func (h *Holder) ParseHolder(p *Parser,
 	// pass through the document line by line
 	for err == nil || err == io.EOF {
 		var from uint
+		if haveChild {
+			toChild <- q
+			statusChild := <-fromChild
+			// child may have set q.err
+			err = q.Err
+			if err != nil || (statusChild|LAST_LINE_PROCESSED != 0) {
+				haveChild = false
+				if err == nil || err == io.EOF {
+					fmt.Println("*** APPENDING BLOCKQUOTE: A ***")
+					h.blocks = append(h.blocks, child)
+				}
+				// child = nil
+			}
+			goto GET_NEXT
+		}
 		if len(q.runes) > 0 {
+			if h.depth > 0 {
+				from = SkipChevrons(q, h.depth)
+			}
+			if q.runes[from] == '>' {
+				toChild = make(chan *Line)
+				fromChild = make(chan int)
+				stopChild = make(chan bool)
+				child, _ = NewBlockquote(h.depth + 1)
+				fmt.Printf("*** CREATED BLOCKQUOTE, DEPTH %d ***\n",
+					h.depth+1)
+				go child.ParseHolder(p, toChild, fromChild, stopChild)
+				haveChild = true
+				statusChild := <-fromChild // setup complete
 
+				toChild <- q
+				statusChild = <-fromChild
+				// child may have set q.err
+				err = q.Err
+				if err != nil || (statusChild|LAST_LINE_PROCESSED != 0) {
+					haveChild = false
+					if err == nil || err == io.EOF {
+						fmt.Println("*** APPENDING BLOCKQUOTE: B ***")
+						h.blocks = append(h.blocks, child)
+					}
+					child = nil
+				}
+				goto GET_NEXT
+			}
 			// HANDLE BLOCKS ----------------------------------------
 
 			if err == nil || err == io.EOF {
@@ -148,7 +216,9 @@ func (h *Holder) ParseHolder(p *Parser,
 						// we are positioned on a non-space character
 						ch0 := q.runes[myFrom]
 						ch1 := q.runes[myFrom+1]
-						if (ch0 == '*' || ch0 == '+' || ch0 == '-') && ch1 == ' ' {
+						if (ch0 == '*' || ch0 == '+' || ch0 == '-') &&
+							ch1 == ' ' {
+
 							b, err = q.parseUnordered(myFrom + 2)
 						}
 					}
@@ -160,7 +230,7 @@ func (h *Holder) ParseHolder(p *Parser,
 				// as a sequence of spans and make a Para out of it.
 				if err == nil || err == io.EOF {
 					if b != nil {
-						doc.AddChild(b)
+						h.AddBlock(b)
 						lastBlockLineSep = false
 					} else {
 						// default parser
@@ -168,15 +238,15 @@ func (h *Holder) ParseHolder(p *Parser,
 						fmt.Printf("== invoking parseSpanSeq(true) ==\n")
 						// END
 						var seq *SpanSeq
-						seq, err = q.parseSpanSeq(doc, 0, true)
+						seq, err = q.parseSpanSeq(doc, from, true)
 						if err == nil || err == io.EOF {
 							if curPara == nil {
 								curPara = new(Para)
 							}
 							fmt.Printf("* adding seq to curPara\n") // DEBUG
 							curPara.seqs = append(curPara.seqs, *seq)
-							fmt.Printf("  curPara has %d seqs\n",
-								len(curPara.seqs))
+							fmt.Printf("  curPara depth %d  has %d seqs\n",
+								h.depth, len(curPara.seqs))
 						}
 					}
 				}
@@ -187,20 +257,24 @@ func (h *Holder) ParseHolder(p *Parser,
 			ls, err := NewLineSep(q.lineSep)
 			if err == nil {
 				if curPara != nil {
-					doc.AddChild(curPara)
+					h.AddBlock(curPara)
 					curPara = nil
 					lastBlockLineSep = false
 				}
 				fmt.Printf("adding LineSep to holder\n") // DEBUG
 				if !lastBlockLineSep {
-					doc.AddChild(ls)
+					h.AddBlock(ls)
 					lastBlockLineSep = true
 				}
 			}
 		}
+
+		// prepare for next iteration ---------------------
+	GET_NEXT:
 		if err != nil || eofSeen {
 			// DEBUG
-			fmt.Println("parseHolder breaking, error or EOF seen")
+			fmt.Printf("parseHolder depth %d breaking, error or EOF seen\n",
+				h.depth)
 			if err != nil {
 				fmt.Printf("    ERROR: %s\n", err.Error())
 			}
@@ -210,6 +284,7 @@ func (h *Holder) ParseHolder(p *Parser,
 			// END
 			break
 		}
+
 		var ok bool
 		select {
 		case q, ok = <-in:
@@ -246,21 +321,26 @@ func (h *Holder) ParseHolder(p *Parser,
 		// DEBUG
 		fmt.Printf("Parse: next line is '%s'\n", string(q.runes))
 		// END
-	}
+	} // END FOR LOOP -----------------------------------------------
+
 	if err == nil || err == io.EOF {
+		if haveChild {
+			fmt.Println("*** APPENDING BLOCKQUOTE: C ***")
+			h.blocks = append(h.blocks, child)
+		}
 		if curPara != nil {
-			fmt.Println("have dangling curPara") // DEBUG
-			doc.AddChild(curPara)
+			fmt.Printf("depth %d: have dangling curPara\n", h.depth) // DEBUG
+			h.AddBlock(curPara)
 			curPara = nil
 		}
 		// DEBUG
-		fmt.Printf("parseHolder returning; document has %d children\n",
-			len(doc.children))
+		fmt.Printf("parseHolder depth %d returning; holder has %d blocks\n",
+			h.depth, len(h.blocks))
 		// END
 	}
 
 SAYOONARA:
-	resp <- DONE
+	resp <- DONE | LAST_LINE_PROCESSED
 
 JUST_DIE:
 	return

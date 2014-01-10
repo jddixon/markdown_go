@@ -13,34 +13,23 @@ type Blockquote struct {
 	Holder
 }
 
+func NewBlockquote(depth uint) (bq *Blockquote, err error) {
+	h, err := NewHolder(true, depth)
+	if err == nil {
+		bq = &Blockquote{Holder: *h}
+	}
+	return
+}
+
 func (bq *Blockquote) Get() (runes []rune) {
 	runes = append(runes, BLOCKQUOTE_OPEN...)
 	for i := 0; i < bq.Size(); i++ {
-		child, _ := bq.GetChild(i)
-		runes = append(runes, child.Get()...)
+		block, _ := bq.GetBlock(i)
+		runes = append(runes, block.Get()...)
 	}
 	// XXX A HACK
 	runes = append(runes, '\n')
 	// END HACK
 	runes = append(runes, BLOCKQUOTE_CLOSE...)
-	return
-}
-
-// OBSOLETE =========================================================
-func (q *Line) parseBlockquote(doc *Document, from uint) (
-	h HolderI, err error) {
-
-	// Enter having seen "> " and with offset set to the next character
-	var seq *SpanSeq
-	seq, err = q.parseSpanSeq(doc, from, true) // true means trim left
-	curPara := new(Para)
-	curPara.seqs = append(curPara.seqs, *seq)
-	if err == nil {
-		bq := new(Blockquote)
-		err = bq.AddChild(curPara)
-		if err == nil {
-			h = bq
-		}
-	}
 	return
 }

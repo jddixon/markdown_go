@@ -120,8 +120,7 @@ func (p *Parser) Parse() (doc *Document, err error) {
 	resp := make(chan int)
 	stop := make(chan bool)
 
-	root, _ := NewHolder(false, uint(0)) // not blockquote, depth 0
-	go root.ParseHolder(p, out, resp, stop)
+	go doc.ParseHolder(p, out, resp, stop)
 	status := <-resp
 
 	q := p.readLine()

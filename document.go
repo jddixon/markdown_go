@@ -44,12 +44,12 @@ func (q *Document) Get() (body []rune) {
 		inUnordered bool
 		inOrdered   bool
 	)
-	for i := 0; i < len(q.children)-1; i++ {
+	for i := 0; i < len(q.blocks)-1; i++ {
 		fmt.Printf("BLOCK %d\n", i)
 
 		var ()
 
-		block := q.children[i]
+		block := q.blocks[i]
 		content := block.Get()
 
 		switch block.(type) {
@@ -86,7 +86,7 @@ func (q *Document) Get() (body []rune) {
 	}
 
 	// output last block IF it is not a LineSep
-	lastBlock := q.children[len(q.children)-1]
+	lastBlock := q.blocks[len(q.blocks)-1]
 	switch lastBlock.(type) {
 	case *LineSep:
 		// do nothing
