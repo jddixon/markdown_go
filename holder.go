@@ -52,7 +52,8 @@ func (h *Holder) GetBlock(n int) (block BlockI, err error) {
 }
 
 // Return an offset 1 beyond the number of chevrons ('>') expected
-// for this depth.  At depth N, we skip N.
+// for this depth.  At depth N, we skip N.  If there is a space
+// beyond the chevron, skip that too.
 func SkipChevrons(q *Line, depth uint) (from uint) {
 
 	var count uint
@@ -62,6 +63,9 @@ func SkipChevrons(q *Line, depth uint) (from uint) {
 			count++
 			if count >= depth {
 				from = offset + 1
+				if from+1 < eol && u.IsSpace(q.runes[from]) {
+					from++
+				}
 				break
 			}
 		}
@@ -111,26 +115,41 @@ func (h *Holder) ParseHolder(p *Parser,
 	// pass through the document line by line
 	for err == nil || err == io.EOF {
 		var from uint
+		lineLen := uint(len(q.runes))
 		if haveChild {
+			// just copy the line through to the child
+			// DEBUG
+			fmt.Printf("COPYING TO CHILD: %s\n", string(q.runes))
+			// END
 			toChild <- q
 			statusChild := <-fromChild
 			// child may have set q.err
 			err = q.Err
-			if err != nil || (statusChild|LAST_LINE_PROCESSED != 0) {
+			if err != nil || (statusChild&LAST_LINE_PROCESSED != 0) {
 				haveChild = false
 				if err == nil || err == io.EOF {
-					fmt.Println("*** APPENDING BLOCKQUOTE: A ***")
+					// DEBUG
+					fmt.Printf("*** APPENDING BLOCKQUOTE: AFTER '%s' ***\n",
+						string(q.runes))
+					fmt.Printf("    err is %v\n", err)
+					fmt.Printf("    statusChild is 0x%x\n", statusChild)
+					// END
 					h.blocks = append(h.blocks, child)
 				}
 				// child = nil
 			}
 			goto GET_NEXT
 		}
-		if len(q.runes) > 0 {
+		if lineLen > 0 {
 			if h.depth > 0 {
 				from = SkipChevrons(q, h.depth)
+				// DEBUG
+				fmt.Printf("depth %d, length %d, SkipChevrons sets from to %d\n",
+					h.depth, lineLen, from)
+				// END
 			}
-			if q.runes[from] == '>' {
+			// the first case arises when > is last character on line
+			if from >= lineLen || q.runes[from] == '>' {
 				toChild = make(chan *Line)
 				fromChild = make(chan int)
 				stopChild = make(chan bool)
@@ -141,11 +160,14 @@ func (h *Holder) ParseHolder(p *Parser,
 				haveChild = true
 				statusChild := <-fromChild // setup complete
 
+				// DEBUG
+				fmt.Printf("COPYING TO NEW CHILD: %s\n", string(q.runes))
+				// END
 				toChild <- q
 				statusChild = <-fromChild
 				// child may have set q.err
 				err = q.Err
-				if err != nil || (statusChild|LAST_LINE_PROCESSED != 0) {
+				if err != nil || (statusChild&LAST_LINE_PROCESSED != 0) {
 					haveChild = false
 					if err == nil || err == io.EOF {
 						fmt.Println("*** APPENDING BLOCKQUOTE: B ***")

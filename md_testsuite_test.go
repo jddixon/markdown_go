@@ -36,14 +36,14 @@ var (
 		"asterisk",
 		"asterisk-near-text",
 		"backslash-escape",
-		//"blockquote-added-markup",
-		//"blockquote-line-2-paragraphs",
+		//"blockquote-added-markup",		// \n in wrong place
+		"blockquote-line-2-paragraphs",
 		"blockquote-line",
-		//"blockquote-multiline-1-space-begin",
-		//"blockquote-multiline-1-space-end",
-		//"blockquote-multiline-2-paragraphs",
-		//"blockquote-multiline",
-		//"blockquote-nested",
+		"blockquote-multiline-1-space-begin",
+		//"blockquote-multiline-1-space-end",	// \u00a0 added
+		//"blockquote-multiline-2-paragraphs",	// text lost
+		"blockquote-multiline",
+		//"blockquote-nested",					// text lost
 		//"blockquote-nested-multiplereturn-level1",
 		//"blockquote-nested-multiplereturn",
 		//"blockquote-nested-return-level1",

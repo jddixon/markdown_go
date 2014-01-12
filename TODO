@@ -1,5 +1,9 @@
 xgo/md/TODO
 
+2014-01-09
+    * fix: header expects # at from, but test has "> #"
+    * fix: most blockquote tests fail
+
 2014-01-01
     * link-idref-angle-bracket represents argument for channel 
         to tell parseHolder() that we are done
