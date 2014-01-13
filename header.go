@@ -32,7 +32,7 @@ func NewHeader(n int, title []rune) (h BlockI, err error) {
 }
 
 func (h *Header) Get() []rune {
-	text := fmt.Sprintf("<h%d>%s</h%d>", h.n, string(h.runes), h.n)
+	text := fmt.Sprintf("<h%d>%s</h%d>\n", h.n, string(h.runes), h.n)
 	return []rune(text)
 }
 

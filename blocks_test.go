@@ -64,7 +64,7 @@ func (s *XLSuite) TestHeader(c *C) {
 
 		// test serialization -----------------------------
 		ser := string(b.Get())
-		expected := fmt.Sprintf("<h%d>%s</h%d>", i+1, titles[i], i+1)
+		expected := fmt.Sprintf("<h%d>%s</h%d>\n", i+1, titles[i], i+1)
 		c.Assert(ser, Equals, expected)
 	}
 }

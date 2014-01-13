@@ -34,31 +34,8 @@ func (p *Para) Get() (runes []rune) {
 	}
 	runes = append(runes, PARA_CLOSE...)
 	runes = append(runes, p.seqs[len(p.seqs)-1].lineSep...)
+	// DEBUG
+	// fmt.Printf("SPAN: '%s'\n", string(runes))
+	// END
 	return
 }
-
-// // Parse a line known to begin a new Para.
-// func (q *Line) parsePara() (b BlockI, err error) {
-// 	var pa *Para
-// 	spans, err := q.parseSpanSeq()
-// 	if err == nil {
-// 		// DEBUG
-// 		fmt.Printf("parsePara() finds %d spans\n", len(spans))
-// 		// END
-// 		pa = new(Para)
-// 		for i := 0; i < len(spans); i++ {
-// 			err = pa.Add(spans[i])
-// 			if err != nil {
-// 				break
-// 			}
-// 		}
-// 		if err == nil {
-// 			// DEBUG
-// 			fmt.Printf("  parsePara() returning Para with %d spans\n",
-// 				len(pa.spans))
-// 			// END
-// 			b = pa
-// 		}
-// 	}
-// 	return
-// }

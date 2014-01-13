@@ -1,5 +1,8 @@
 xgo/md/TODO
 
+2014-01-13
+    * get rid of goto in holder.go
+
 2014-01-09
     * fix: header expects # at from, but test has "> #"
     * fix: most blockquote tests fail
@@ -13,7 +16,6 @@ xgo/md/TODO
         - step 1: []blocks are BlockI, not MarkdownI                    * DONE
     * top level parseHolder
     * possibly lower level parseSpanHolder
-    * don't forget clj :-(
 
 2013-12-29
     * add holder.go, where Holder is something that can have children

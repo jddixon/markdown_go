@@ -63,7 +63,7 @@ func SkipChevrons(q *Line, depth uint) (from uint) {
 			count++
 			if count >= depth {
 				from = offset + 1
-				if from+1 < eol && u.IsSpace(q.runes[from]) {
+				if from < eol && u.IsSpace(q.runes[from]) {
 					from++
 				}
 				break
@@ -115,6 +115,7 @@ func (h *Holder) ParseHolder(p *Parser,
 	// pass through the document line by line
 	for err == nil || err == io.EOF {
 		var from uint
+		blankLine := false
 		lineLen := uint(len(q.runes))
 		if haveChild {
 			// just copy the line through to the child
@@ -147,9 +148,13 @@ func (h *Holder) ParseHolder(p *Parser,
 				fmt.Printf("depth %d, length %d, SkipChevrons sets from to %d\n",
 					h.depth, lineLen, from)
 				// END
+				if from >= lineLen {
+					blankLine = true
+				}
 			}
 			// the first case arises when > is last character on line
-			if from >= lineLen || q.runes[from] == '>' {
+			// XXX QUESTIONABLE LOGIC
+			if !blankLine && q.runes[from] == '>' {
 				toChild = make(chan *Line)
 				fromChild = make(chan int)
 				stopChild = make(chan bool)
@@ -179,7 +184,7 @@ func (h *Holder) ParseHolder(p *Parser,
 			}
 			// HANDLE BLOCKS ----------------------------------------
 
-			if err == nil || err == io.EOF {
+			if !blankLine && (err == nil || err == io.EOF) {
 				var b BlockI
 				ch0 = q.runes[from]
 				eol := uint(len(q.runes))
@@ -275,6 +280,9 @@ func (h *Holder) ParseHolder(p *Parser,
 			}
 
 		} else {
+			blankLine = true
+		}
+		if blankLine {
 			// we got a blank line
 			ls, err := NewLineSep(q.lineSep)
 			if err == nil {

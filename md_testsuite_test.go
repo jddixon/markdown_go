@@ -36,12 +36,12 @@ var (
 		"asterisk",
 		"asterisk-near-text",
 		"backslash-escape",
-		//"blockquote-added-markup",		// \n in wrong place
+		"blockquote-added-markup",
 		"blockquote-line-2-paragraphs",
 		"blockquote-line",
 		"blockquote-multiline-1-space-begin",
-		//"blockquote-multiline-1-space-end",	// \u00a0 added
-		//"blockquote-multiline-2-paragraphs",	// text lost
+		//"blockquote-multiline-1-space-end",	// \u00a0 replaces space
+		"blockquote-multiline-2-paragraphs",
 		"blockquote-multiline",
 		//"blockquote-nested",					// text lost
 		//"blockquote-nested-multiplereturn-level1",
@@ -59,8 +59,7 @@ var (
 		"header-level1-hash-sign-closed",
 		"header-level1-hash-sign",
 		"header-level1-hash-sign-trailing-1-space",
-		// "header-level1-hash-sign-trailing-2-spaces",
-
+		//"header-level1-hash-sign-trailing-2-spaces", // shd force blank line
 		"header-level2-hash-sign-closed",
 		"header-level2-hash-sign",
 		"header-level3-hash-sign-closed",
@@ -106,7 +105,7 @@ var (
 		"ordered-list-items-random-number",
 		"paragraph-hard-return",
 		"paragraph-line",
-		"paragraphs-2-leading-spaces", // drop leading spaces in para
+		"paragraphs-2-leading-spaces",
 		"paragraphs-3-leading-spaces",
 		"paragraphs-leading-space",
 		"paragraphs-trailing-spaces",
@@ -116,13 +115,13 @@ var (
 		"strong-star",
 		"strong-underscore",
 		"unordered-list-items-dashsign",
-		//"unordered-list-items-leading-1space",
+		//"unordered-list-items-leading-1space",	// ?? bad test ??
 		"unordered-list-items-leading-2spaces",
 		"unordered-list-items-leading-3spaces",
 		"unordered-list-items",
 		"unordered-list-items-plussign",
 		//"unordered-list-paragraphs",
-		//"unordered-list-unindented-content",	// gets ZERO-LENGTH LINE
+		"unordered-list-unindented-content",
 		//"unordered-list-with-indented-content",
 	}
 )
