@@ -343,8 +343,8 @@ func (h *Holder) ParseHolder(p *Parser,
 			}
 			// END
 
-			// XXX NO ALLOWANCE FOR LAST_LINE_PROCESSED
-			resp <- DONE
+			// XXX LAST_LINE_PROCESSED SHOULD BE CONDITIONAL
+			resp <- DONE | LAST_LINE_PROCESSED
 			break
 		}
 

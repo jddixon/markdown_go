@@ -9,7 +9,8 @@ import (
 var _ = fmt.Print
 
 type Document struct {
-	dict map[string]*Definition
+	imgDict  map[string]*Definition
+	linkDict map[string]*Definition
 	Holder
 }
 
@@ -17,14 +18,15 @@ func NewDocument() (q *Document, err error) {
 
 	h, _ := NewHolder(false, uint(0)) // not Blockquote, depth 0
 	q = &Document{
-		dict:   make(map[string]*Definition),
-		Holder: *h,
+		imgDict:  make(map[string]*Definition),
+		linkDict: make(map[string]*Definition),
+		Holder:   *h,
 	}
 	return
 }
 
 // A pointer to the definition is returned to signal success.
-func (q *Document) AddDefinition(id string, uri, title []rune) (
+func (q *Document) AddImgDefinition(id string, uri, title []rune) (
 	def *Definition, err error) {
 
 	if id == "" {
@@ -34,7 +36,23 @@ func (q *Document) AddDefinition(id string, uri, title []rune) (
 	} else {
 		// XXX Note that this allows duplicate definitions
 		def = &Definition{uri: uri, title: title}
-		q.dict[id] = def
+		q.imgDict[id] = def
+	}
+	return
+}
+
+// A pointer to the definition is returned to signal success.
+func (q *Document) AddLinkDefinition(id string, uri, title []rune) (
+	def *Definition, err error) {
+
+	if id == "" {
+		err = NilDocument
+	} else if len(uri) == 0 {
+		err = EmptyURI
+	} else {
+		// XXX Note that this allows duplicate definitions
+		def = &Definition{uri: uri, title: title}
+		q.linkDict[id] = def
 	}
 	return
 }

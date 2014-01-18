@@ -1,5 +1,8 @@
 xgo/md/TODO
 
+2014-01-18
+    * linkReference.go appears to be dead code
+
 2014-01-14
     * xgoMarkdown should be able to parse source trees like
         /usr/local/src/html5-boilerplace/doc/*.md
@@ -8,24 +11,24 @@ xgo/md/TODO
         can be rendered as HTML
 
 2014-01-13
-    * get rid of goto in holder.go
+    * get rid of goto in holder.go                                      * DONE
 
 2014-01-09
-    * fix: header expects # at from, but test has "> #"
+    * fix: header expects # at from, but test has "> #"                 * DONE
     * fix: most blockquote tests fail
 
 2014-01-01
-    * link-idref-angle-bracket represents argument for channel 
+    * link-idref-angle-bracket requires (?) argument for channel 
         to tell parseHolder() that we are done
 
 2013-12-31
     * Document needs to become a HolderI                                * DONE
         - step 1: []blocks are BlockI, not MarkdownI                    * DONE
-    * top level parseHolder
-    * possibly lower level parseSpanHolder
+    * top level parseHolder                                             * DONE
+    * possibly lower level parseSpanHolder                              * SKIP
 
 2013-12-29
-    * add holder.go, where Holder is something that can have children
+    * add holder.go, where Holder is something that can have children   * DONE
     * then parser should have context stack
     * the various Get() routines should return HTML5 OM, not text
     * need a String() for everything
@@ -43,9 +46,9 @@ xgo/md/TODO
     * md*test line 127 appears correct, error is later                  * DONE
 
 2013-12-26
-    * in order to serialize Document to string, must be able to
-        serialize its dictionary; which means that the dict must
-        distinguish link and image definitions
+    * in order to serialize Document to string, must be able to		    * DONE
+        serialize its dictionary; which means that the dict must		* DONE
+        distinguish link and image definitions		                    * DONE
     * why can't I declare Document.blocks as []BlockI ?
     * test linkRefSpan with dictionary
 
@@ -54,8 +57,8 @@ xgo/md/TODO
         those in parseImageDef
 
 2013-12-16
-    * Entities should be handled in html_writer.  We run through the
-        runes, ignoring &...; sequences but replacing ambiguous 
-        characters with entities where required.
+    * Entities should be handled in html_writer.  We run through the	* DONE
+        runes, ignoring &...; sequences but replacing ambiguous 		* DONE
+        characters with entities where required.		                * DONE
     * a line consisting of nothing but hash signs should simply be 
         output as text; in other words, it gets appended to nonSeps

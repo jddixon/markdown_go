@@ -42,7 +42,7 @@ func NewImageRefSpan(doc *Document, altText []rune, id string) (
 
 func (ls *ImageRefSpan) Get() (out []rune) {
 
-	def := ls.doc.dict[ls.id]
+	def := ls.doc.imgDict[ls.id]
 	uri := def.uri
 	title := def.title
 

@@ -175,7 +175,7 @@ func (line *Line) parseLinkDefinition(doc *Document) (
 		if titleEnd > 0 {
 			title = line.runes[titleStart:titleEnd]
 		}
-		def, err = doc.AddDefinition(id, uri, title)
+		def, err = doc.AddLinkDefinition(id, uri, title)
 		// DEBUG
 		if def == nil {
 			fmt.Printf("parseLinkDefn returning NIL, error %s\n",
@@ -313,7 +313,7 @@ func (line *Line) parseImageDefinition(doc *Document) (
 		if titleEnd > 0 {
 			title = line.runes[titleStart:titleEnd]
 		}
-		def, err = doc.AddDefinition(id, uri, title)
+		def, err = doc.AddImgDefinition(id, uri, title)
 		// DEBUG
 		if def == nil {
 			fmt.Printf("parseImageDefn returning NIL, error %s\n",

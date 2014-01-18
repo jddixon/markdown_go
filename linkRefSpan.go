@@ -43,7 +43,7 @@ func (ls *LinkRefSpan) Get() (out []rune) {
 	} else {
 		key = ls.id
 	}
-	def := ls.doc.dict[key]
+	def := ls.doc.linkDict[key]
 	uri := def.uri
 	title := def.title
 

@@ -23,25 +23,25 @@ const (
 
 var (
 	TEST_NAMES = []string{
-		// "2-paragraphs-hard-return",
-		//"2-paragraphs-hard-return-spaces",
+		"2-paragraphs-hard-return",
+		"2-paragraphs-hard-return-spaces",
 		"2-paragraphs-line",
-		//"2-paragraphs-line-returns",
-		//"2-paragraphs-line-spaces",
-		//"2-paragraphs-line-tab",
+		"2-paragraphs-line-returns",
+		"2-paragraphs-line-spaces",
+		"2-paragraphs-line-tab",
 		"ampersand-text-flow",
 		"ampersand-uri",
 		"asterisk",
 		"asterisk-near-text",
 		"backslash-escape",
-		// "blockquote-added-markup",
-		//"blockquote-line-2-paragraphs",
-		//"blockquote-line",
-		//"blockquote-multiline-1-space-begin",
+		"blockquote-added-markup",
+		"blockquote-line-2-paragraphs",
+		"blockquote-line",
+		"blockquote-multiline-1-space-begin",
 		//"blockquote-multiline-1-space-end",	// \u00a0 replaces space
-		//"blockquote-multiline-2-paragraphs",
-		// "blockquote-multiline",
-		//"blockquote-nested",					// XXX WORKING HERE
+		"blockquote-multiline-2-paragraphs",
+		"blockquote-multiline",
+		//"blockquote-nested",					// XXX WORKING HERE; test lost
 		//"blockquote-nested-multiplereturn-level1",
 		//"blockquote-nested-multiplereturn",
 		//"blockquote-nested-return-level1",

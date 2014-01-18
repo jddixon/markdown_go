@@ -1,6 +1,6 @@
 package md
 
-// xgo/md/reference.go
+// xgo/md/linkReference.go
 
 import (
 //"fmt"
@@ -13,7 +13,7 @@ import (
 // pair of brackets is empty, then the id is "implicit", meaning that it
 // is the same as the link text.
 //
-type Reference struct {
+type LinkReference struct {
 	id       string
 	linkText []rune
 	doc      *Document
@@ -25,9 +25,9 @@ type Reference struct {
 // If the Defintion contains no title, the second attribute will be
 // omitted.
 //
-func (ref *Reference) Get() (runes []rune) {
+func (ref *LinkReference) Get() (runes []rune) {
 
-	def := ref.doc.dict[ref.id]
+	def := ref.doc.linkDict[ref.id]
 	uri := def.uri
 	title := def.title
 
