@@ -1,5 +1,12 @@
 xgo/md/TODO
 
+2014-01-14
+    * xgoMarkdown should be able to parse source trees like
+        /usr/local/src/html5-boilerplace/doc/*.md
+        which contain links to file names with a .md extension;
+        these should automatically be processed into trees which
+        can be rendered as HTML
+
 2014-01-13
     * get rid of goto in holder.go
 
@@ -28,7 +35,7 @@ xgo/md/TODO
         - needs from parameter                                          * DONE
 
     * handle the 11 blockquote tests
-    * add xgo/cmd/xgoMarkDown
+    * add xgo/cmd/xgoMarkdown
 
 2013-12-27
     * need to suppress any lineSep in the last block of Document.Get()  * DONE

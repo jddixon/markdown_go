@@ -23,31 +23,31 @@ const (
 
 var (
 	TEST_NAMES = []string{
-		"2-paragraphs-hard-return",
-		"2-paragraphs-hard-return-spaces",
+		// "2-paragraphs-hard-return",
+		//"2-paragraphs-hard-return-spaces",
 		"2-paragraphs-line",
-		"2-paragraphs-line-returns",
-		"2-paragraphs-line-spaces",
-		"2-paragraphs-line-tab",
+		//"2-paragraphs-line-returns",
+		//"2-paragraphs-line-spaces",
+		//"2-paragraphs-line-tab",
 		"ampersand-text-flow",
-
 		"ampersand-uri",
-
 		"asterisk",
 		"asterisk-near-text",
 		"backslash-escape",
-		"blockquote-added-markup",
-		"blockquote-line-2-paragraphs",
-		"blockquote-line",
-		"blockquote-multiline-1-space-begin",
+		// "blockquote-added-markup",
+		//"blockquote-line-2-paragraphs",
+		//"blockquote-line",
+		//"blockquote-multiline-1-space-begin",
 		//"blockquote-multiline-1-space-end",	// \u00a0 replaces space
-		"blockquote-multiline-2-paragraphs",
-		"blockquote-multiline",
-		//"blockquote-nested",					// text lost
+		//"blockquote-multiline-2-paragraphs",
+		// "blockquote-multiline",
+		//"blockquote-nested",					// XXX WORKING HERE
 		//"blockquote-nested-multiplereturn-level1",
 		//"blockquote-nested-multiplereturn",
 		//"blockquote-nested-return-level1",
-
+		//"code-1-tab",
+		//"code-4-spaces-escaping",
+		//"code-4-spaces",
 		"em-middle-word",
 		"em-star",
 		"em-underscore",
@@ -55,7 +55,7 @@ var (
 		"EOL-CR+LF",
 		"EOL-CR",
 		"EOL-LF",
-
+		// "header-level1-equal-underlined",
 		"header-level1-hash-sign-closed",
 		"header-level1-hash-sign",
 		"header-level1-hash-sign-trailing-1-space",
@@ -75,17 +75,15 @@ var (
 		"horizontal-rule-3-stars",
 		"horizontal-rule-3-underscores",
 		"horizontal-rule-7-dashes",
-
+		//"img-idref",
+		//"img-idref-title",
 		"img",
 		"img-title",
-
 		"inline-code-escaping-entities",
 		// "inline-code",				// tests doubled backtick
 		//"inline-code-with-visible-backtick",
-
 		// "line-break-2-spaces",		// spaces at end of line => <br />
 		// "line-break-5-spaces",		// spaces at end of line => <br />
-
 		// "link-automatic-email",
 		// "link-automatic",
 		"link-bracket-paranthesis",
@@ -99,7 +97,10 @@ var (
 		//"link-idref-title-next-line",
 		"link-idref-title-paranthesis",
 		"link-idref-title-single-quote",
-
+		//"list-blockquote",
+		//"list-code",
+		//"list-multiparagraphs",
+		//"list-multiparagraphs-tab",
 		"ordered-list-escaped",
 		"ordered-list-items",
 		"ordered-list-items-random-number",

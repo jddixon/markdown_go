@@ -80,6 +80,8 @@ func (h *Holder) ParseHolder(p *Parser,
 	var (
 		eofSeen          bool
 		err              error
+		fatalError       bool
+		iAmDone          bool
 		curPara          *Para
 		q                *Line
 		ch0              rune
@@ -94,13 +96,13 @@ func (h *Holder) ParseHolder(p *Parser,
 		stopChild chan bool
 	)
 	resp <- OK // OK, setup complete
+	// -- ok --------------------------------------------------------
 
 	q = <-in // WAS q = p.readLine()
 	err = q.Err
 	if err == io.EOF {
 		eofSeen = true
 	}
-	resp <- ACK // MOVE ME
 
 	// DEBUG
 	fmt.Printf("ParseHolder depth %d: first line is '%s'\n",
@@ -112,196 +114,224 @@ func (h *Holder) ParseHolder(p *Parser,
 	}
 	// END
 
+	sayGoodBye := true
+
 	// pass through the document line by line
-	for err == nil || err == io.EOF {
-		var from uint
-		blankLine := false
+	for (err == nil || err == io.EOF) && !iAmDone {
+		var (
+			blankLine     bool
+			lineProcessed bool
+			from          uint
+			statusChild   int
+		)
 		lineLen := uint(len(q.runes))
 		if haveChild {
-			// just copy the line through to the child
-			// DEBUG
-			fmt.Printf("COPYING TO CHILD: %s\n", string(q.runes))
-			// END
-			toChild <- q
-			statusChild := <-fromChild
-			// child may have set q.err
-			err = q.Err
-			if err != nil || (statusChild&LAST_LINE_PROCESSED != 0) {
+			if lineLen == 0 && err == io.EOF {
+				stopChild <- true
+				statusChild = <-fromChild
 				haveChild = false
-				if err == nil || err == io.EOF {
-					// DEBUG
-					fmt.Printf("*** APPENDING BLOCKQUOTE: AFTER '%s' ***\n",
-						string(q.runes))
-					fmt.Printf("    err is %v\n", err)
-					fmt.Printf("    statusChild is 0x%x\n", statusChild)
-					// END
-					h.blocks = append(h.blocks, child)
-				}
-				// child = nil
-			}
-			goto GET_NEXT
-		}
-		if lineLen > 0 {
-			if h.depth > 0 {
-				from = SkipChevrons(q, h.depth)
 				// DEBUG
-				fmt.Printf("depth %d, length %d, SkipChevrons sets from to %d\n",
-					h.depth, lineLen, from)
+				fmt.Printf("*** DEPTH %d APPENDING BLOCKQUOTE, BLANK LINE, EOF:  ***\n",
+					h.depth)
+				fmt.Printf("    statusChild is 0x%x\n", statusChild)
+				fmt.Printf("    APPENDED %s\n",
+					string(child.Get()))
 				// END
-				if from >= lineLen {
-					blankLine = true
-				}
-			}
-			// the first case arises when > is last character on line
-			// XXX QUESTIONABLE LOGIC
-			if !blankLine && q.runes[from] == '>' {
-				toChild = make(chan *Line)
-				fromChild = make(chan int)
-				stopChild = make(chan bool)
-				child, _ = NewBlockquote(h.depth + 1)
-				fmt.Printf("*** CREATED BLOCKQUOTE, DEPTH %d ***\n",
-					h.depth+1)
-				go child.ParseHolder(p, toChild, fromChild, stopChild)
-				haveChild = true
-				statusChild := <-fromChild // setup complete
+				h.blocks = append(h.blocks, child)
+				// child = nil
 
+			} else {
+				// just copy the line through to the child
 				// DEBUG
-				fmt.Printf("COPYING TO NEW CHILD: %s\n", string(q.runes))
+				fmt.Printf("COPYING TO CHILD: %s\n", string(q.runes))
 				// END
 				toChild <- q
 				statusChild = <-fromChild
+				lineProcessed = statusChild == ACK ||
+					(statusChild == (DONE | LAST_LINE_PROCESSED))
 				// child may have set q.err
 				err = q.Err
-				if err != nil || (statusChild&LAST_LINE_PROCESSED != 0) {
+				if err != nil || (statusChild&DONE != 0) {
 					haveChild = false
 					if err == nil || err == io.EOF {
-						fmt.Println("*** APPENDING BLOCKQUOTE: B ***")
-						h.blocks = append(h.blocks, child)
-					}
-					child = nil
-				}
-				goto GET_NEXT
-			}
-			// HANDLE BLOCKS ----------------------------------------
-
-			if !blankLine && (err == nil || err == io.EOF) {
-				var b BlockI
-				ch0 = q.runes[from]
-				eol := uint(len(q.runes))
-
-				// HEADERS --------------------------------
-				if ch0 == '#' {
-					b, err = q.parseHeader(from + 1)
-				}
-
-				// HORIZONTAL RULES ----------------------
-				if b == nil && (err == nil || err == io.EOF) &&
-					(ch0 == '-' || ch0 == '*' || ch0 == '_') {
-					b, err = q.parseHRule(from)
-				}
-
-				// XXX STUB : TRY OTHER PARSERS
-
-				// BLOCKQUOTE -----------------------------
-				//if b == nil && (err == nil || err == io.EOF) && ch0 == '>' {
-				//	b, err = q.parseBlockquote(doc, 1)
-				//}
-				// ORDERED LISTS --------------------------
-
-				// XXX We require a space after these starting characters
-				if b == nil && (err == nil || err == io.EOF) {
-					myFrom := from
-					for ; myFrom < from+3 && myFrom < eol; myFrom++ {
-						if !u.IsSpace(q.runes[myFrom]) {
-							break
-						}
-					}
-					if myFrom < eol-2 {
-
-						// we are positioned on a non-space character
-						ch0 := q.runes[myFrom]
-						ch1 := q.runes[myFrom+1]
-						ch2 := q.runes[myFrom+2]
-						if u.IsDigit(ch0) && ch1 == '.' && ch2 == ' ' {
-							b, err = q.parseOrdered(myFrom + 2)
-
-						}
-					}
-				}
-
-				// UNORDERED LISTS ------------------------
-
-				// XXX We require a space after these starting characters
-				if b == nil && (err == nil || err == io.EOF) {
-					myFrom := from
-					for myFrom = 0; myFrom < 3 && myFrom < eol; myFrom++ {
-						if !u.IsSpace(q.runes[myFrom]) {
-							break
-						}
-					}
-					if myFrom < eol-1 {
-						// we are positioned on a non-space character
-						ch0 := q.runes[myFrom]
-						ch1 := q.runes[myFrom+1]
-						if (ch0 == '*' || ch0 == '+' || ch0 == '-') &&
-							ch1 == ' ' {
-
-							b, err = q.parseUnordered(myFrom + 2)
-						}
-					}
-				}
-
-				// DEFAULT: PARA --------------------------
-				// If we have parsed the line, we hang the block off
-				// the document.  Otherwise, we treat whatever we have
-				// as a sequence of spans and make a Para out of it.
-				if err == nil || err == io.EOF {
-					if b != nil {
-						h.AddBlock(b)
-						lastBlockLineSep = false
-					} else {
-						// default parser
 						// DEBUG
-						fmt.Printf("== invoking parseSpanSeq(true) ==\n")
+						fmt.Printf("*** DEPTH %d APPENDING BLOCKQUOTE: AFTER '%s' ***\n",
+							h.depth, string(q.runes))
+						fmt.Printf("    err is %v\n", err)
+						fmt.Printf("    statusChild is 0x%x\n", statusChild)
+						fmt.Printf("    APPENDED %s\n",
+							string(child.Get()))
 						// END
-						var seq *SpanSeq
-						seq, err = q.parseSpanSeq(doc, from, true)
+						h.blocks = append(h.blocks, child)
+
+					}
+					// child = nil
+				} // FOO
+			}
+		}
+		if !lineProcessed {
+			if lineLen > 0 {
+				if h.depth > 0 {
+					from = SkipChevrons(q, h.depth)
+					// DEBUG
+					fmt.Printf("depth %d, length %d, SkipChevrons sets from to %d\n",
+						h.depth, lineLen, from)
+					// END
+					if from >= lineLen {
+						blankLine = true
+					}
+				}
+				// the first case arises when > is last character on line
+				// XXX QUESTIONABLE LOGIC
+				if !blankLine && q.runes[from] == '>' {
+					toChild = make(chan *Line)
+					fromChild = make(chan int)
+					stopChild = make(chan bool)
+					child, _ = NewBlockquote(h.depth + 1)
+					fmt.Printf("*** CREATED BLOCKQUOTE, DEPTH %d ***\n",
+						h.depth+1)
+					go child.ParseHolder(p, toChild, fromChild, stopChild)
+					haveChild = true
+					statusChild := <-fromChild // setup complete
+
+					// DEBUG
+					fmt.Printf("COPYING TO NEW CHILD: %s\n", string(q.runes))
+					// END
+					toChild <- q
+					statusChild = <-fromChild
+					lineProcessed = statusChild == ACK ||
+						(statusChild == (DONE | LAST_LINE_PROCESSED))
+
+					// child may have set q.err
+					err = q.Err
+					if err != nil || (statusChild&LAST_LINE_PROCESSED != 0) {
+						haveChild = false
 						if err == nil || err == io.EOF {
-							if curPara == nil {
-								curPara = new(Para)
+							fmt.Println("*** APPENDING BLOCKQUOTE: B ***")
+							h.blocks = append(h.blocks, child)
+						}
+						child = nil
+					}
+				}
+				if !lineProcessed {
+					// HANDLE BLOCKS ----------------------------------------
+					if !blankLine && (err == nil || err == io.EOF) {
+						var b BlockI
+						ch0 = q.runes[from]
+
+						// HEADERS --------------------------------
+						if ch0 == '#' {
+							b, err = q.parseHeader(from + 1)
+						}
+
+						// HORIZONTAL RULES ----------------------
+						if b == nil && (err == nil || err == io.EOF) &&
+							(ch0 == '-' || ch0 == '*' || ch0 == '_') {
+							b, err = q.parseHRule(from)
+						}
+
+						// XXX STUB : TRY OTHER PARSERS
+
+						// ORDERED LISTS --------------------------
+
+						// XXX We require a space after these starting characters
+						if b == nil && (err == nil || err == io.EOF) {
+							myFrom := from
+							for ; myFrom < from+3 && myFrom < lineLen; myFrom++ {
+								if !u.IsSpace(q.runes[myFrom]) {
+									break
+								}
 							}
-							fmt.Printf("* adding seq to curPara\n") // DEBUG
-							curPara.seqs = append(curPara.seqs, *seq)
-							fmt.Printf("  curPara depth %d  has %d seqs\n",
-								h.depth, len(curPara.seqs))
+							if myFrom < lineLen-2 {
+
+								// we are positioned on a non-space character
+								ch0 := q.runes[myFrom]
+								ch1 := q.runes[myFrom+1]
+								ch2 := q.runes[myFrom+2]
+								if u.IsDigit(ch0) && ch1 == '.' && ch2 == ' ' {
+									b, err = q.parseOrdered(myFrom + 2)
+
+								}
+							}
+						}
+
+						// UNORDERED LISTS ------------------------
+
+						// XXX We require a space after these starting characters
+						if b == nil && (err == nil || err == io.EOF) {
+							myFrom := from
+							for myFrom = 0; myFrom < 3 && myFrom < lineLen; myFrom++ {
+								if !u.IsSpace(q.runes[myFrom]) {
+									break
+								}
+							}
+							if myFrom < lineLen-1 {
+								// we are positioned on a non-space character
+								ch0 := q.runes[myFrom]
+								ch1 := q.runes[myFrom+1]
+								if (ch0 == '*' || ch0 == '+' || ch0 == '-') &&
+									ch1 == ' ' {
+
+									b, err = q.parseUnordered(myFrom + 2)
+								}
+							}
+						}
+
+						// CODE -----------------------------------
+
+						// XXX STUB
+
+						// DEFAULT: PARA --------------------------
+						// If we have parsed the line, we hang the block off
+						// the document.  Otherwise, we treat whatever we have
+						// as a sequence of spans and make a Para out of it.
+						if err == nil || err == io.EOF {
+							if b != nil {
+								h.AddBlock(b)
+								lastBlockLineSep = false
+							} else {
+								// default parser
+								// DEBUG
+								fmt.Printf("== invoking parseSpanSeq(true) ==\n")
+								// END
+								var seq *SpanSeq
+								seq, err = q.parseSpanSeq(doc, from, true)
+								if err == nil || err == io.EOF {
+									if curPara == nil {
+										curPara = new(Para)
+									}
+									fmt.Printf("* adding seq to curPara\n") // DEBUG
+									curPara.seqs = append(curPara.seqs, *seq)
+									fmt.Printf("  curPara depth %d  has %d seqs\n",
+										h.depth, len(curPara.seqs))
+								}
+							}
 						}
 					}
 				}
-			}
 
-		} else {
-			blankLine = true
-		}
-		if blankLine {
-			// we got a blank line
-			ls, err := NewLineSep(q.lineSep)
-			if err == nil {
-				if curPara != nil {
-					h.AddBlock(curPara)
-					curPara = nil
-					lastBlockLineSep = false
-				}
-				fmt.Printf("adding LineSep to holder\n") // DEBUG
-				if !lastBlockLineSep {
-					h.AddBlock(ls)
-					lastBlockLineSep = true
+			} else {
+				blankLine = true
+			}
+			if blankLine {
+				// we got a blank line
+				ls, err := NewLineSep(q.lineSep)
+				if err == nil {
+					if curPara != nil {
+						h.AddBlock(curPara)
+						curPara = nil
+						lastBlockLineSep = false
+					}
+					fmt.Printf("adding LineSep to holder\n") // DEBUG
+					if !lastBlockLineSep {
+						h.AddBlock(ls)
+						lastBlockLineSep = true
+					}
 				}
 			}
 		}
-
 		// prepare for next iteration ---------------------
-	GET_NEXT:
-		if err != nil || eofSeen {
+		if err != nil || eofSeen || iAmDone {
 			// DEBUG
 			fmt.Printf("parseHolder depth %d breaking, error or EOF seen\n",
 				h.depth)
@@ -312,23 +342,31 @@ func (h *Holder) ParseHolder(p *Parser,
 				fmt.Println("    EOF SEEN, so breaking")
 			}
 			// END
+
+			// XXX NO ALLOWANCE FOR LAST_LINE_PROCESSED
+			resp <- DONE
 			break
 		}
 
+		resp <- ACK
+		// -- in ----------------------------------------------------
 		var ok bool
 		select {
 		case q, ok = <-in:
 			if ok {
 				err = q.Err
 			} else {
-				goto JUST_DIE
+				fatalError = true
+				break
 			}
 		case stopped, ok = <-stop:
 			if !ok {
-				goto JUST_DIE
+				fatalError = true
+				break
 			} else {
-				_ = stopped // not yet used - and so far unnecessary
-				goto SAYOONARA
+				_ = stopped        // not yet used - and so far unnecessary
+				sayGoodBye = false // XXX WRONG
+				break
 			}
 		}
 		if err == io.EOF {
@@ -337,7 +375,7 @@ func (h *Holder) ParseHolder(p *Parser,
 			fmt.Println("*** EOF SEEN ***")
 			// END
 		}
-		resp <- ACK // MOVE ME
+		// -- ack ---------------------------------------------------
 		if (err != nil && err != io.EOF) || q == nil {
 			break
 		}
@@ -353,25 +391,31 @@ func (h *Holder) ParseHolder(p *Parser,
 		// END
 	} // END FOR LOOP -----------------------------------------------
 
-	if err == nil || err == io.EOF {
-		if haveChild {
-			fmt.Println("*** APPENDING BLOCKQUOTE: C ***")
-			h.blocks = append(h.blocks, child)
+	if !fatalError {
+		if err == nil || err == io.EOF {
+			if haveChild {
+				fmt.Println("*** APPENDING BLOCKQUOTE: C ***")
+				h.blocks = append(h.blocks, child)
+			}
+			if curPara != nil {
+				fmt.Printf("depth %d: have dangling curPara\n", h.depth) // DEBUG
+				h.AddBlock(curPara)
+				curPara = nil
+			}
+			// DEBUG
+			fmt.Printf("parseHolder depth %d returning; holder has %d blocks\n",
+				h.depth, len(h.blocks))
+			for i := 0; i < len(h.blocks); i++ {
+				fmt.Printf("BLOCK %d:%d: '%s'\n",
+					h.depth, i, string(h.blocks[i].Get()))
+			}
+			// END
 		}
-		if curPara != nil {
-			fmt.Printf("depth %d: have dangling curPara\n", h.depth) // DEBUG
-			h.AddBlock(curPara)
-			curPara = nil
+		if sayGoodBye {
+			// XXX WRONG!
+			resp <- DONE | LAST_LINE_PROCESSED
 		}
-		// DEBUG
-		fmt.Printf("parseHolder depth %d returning; holder has %d blocks\n",
-			h.depth, len(h.blocks))
-		// END
 	}
 
-SAYOONARA:
-	resp <- DONE | LAST_LINE_PROCESSED
-
-JUST_DIE:
 	return
 }
