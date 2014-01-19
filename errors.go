@@ -17,6 +17,7 @@ var (
 	NilChild                = e.New("nil child parameter")
 	NilDocument             = e.New("nil document parameter")
 	NilID                   = e.New("nil id parameter")
+	NilOptions              = e.New("nil options parameter")
 	NilParser               = e.New("nil parser parameter")
 	NilWriter               = e.New("nil writer parameter")
 	NotALineSeparator       = e.New("not a line separator")

@@ -21,19 +21,30 @@ const (
 type Parser struct {
 	lexer *gl.LexInput
 	doc   *Document
+
+	testing bool
+	verbose bool
 }
 
-func NewParser(reader io.Reader) (p *Parser, err error) {
+func NewParser(opt *Options) (p *Parser, err error) {
 
-	var doc *Document
-	lx, err := gl.NewNewLexInput(reader)
-	if err == nil {
-		doc, err = NewDocument()
-	}
-	if err == nil {
-		p = &Parser{
-			lexer: lx,
-			doc:   doc,
+	if opt == nil {
+		err = NilOptions
+	} else {
+		var doc *Document
+		reader := opt.Reader
+		lx, err := gl.NewNewLexInput(reader)
+		if err == nil {
+			doc, err = NewDocument()
+		}
+		if err == nil {
+			p = &Parser{
+				lexer: lx,
+				doc:   doc,
+
+				testing: opt.Testing,
+				verbose: opt.Verbose,
+			}
 		}
 	}
 	return
@@ -129,11 +140,13 @@ func (p *Parser) Parse() (doc *Document, err error) {
 		eofSeen = true
 	}
 	// DEBUG
-	fmt.Printf("Parser: LINE: '%s'\n", string(q.runes))
-	if err == nil {
-		fmt.Println("    NIL error")
-	} else {
-		fmt.Printf("    error = '%s'\n", err.Error())
+	if p.testing {
+		fmt.Printf("Parser: LINE: '%s'\n", string(q.runes))
+		if err == nil {
+			fmt.Println("    NIL error")
+		} else {
+			fmt.Printf("    error = '%s'\n", err.Error())
+		}
 	}
 	// END
 	for err == nil || err == io.EOF {

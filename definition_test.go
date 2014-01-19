@@ -19,7 +19,8 @@ func (s *XLSuite) TestReadLine(c *C) {
 	text := text1 + "\n" + text2 + "\r" + text3
 
 	var rd io.Reader = strings.NewReader(text)
-	p, err := NewParser(rd)
+	options := NewOptions(rd, "", "", false, false)
+	p, err := NewParser(options)
 	c.Assert(err, IsNil)
 	c.Assert(p, NotNil)
 
@@ -69,7 +70,8 @@ func (s *XLSuite) TestLinkDefinition(c *C) {
 	text := def1 + "\n" + def2
 
 	var rd io.Reader = strings.NewReader(text)
-	p, err := NewParser(rd)
+	options := NewOptions(rd, "", "", false, false)
+	p, err := NewParser(options)
 	c.Assert(err, IsNil)
 	c.Assert(p, NotNil)
 	doc := p.doc
@@ -113,7 +115,8 @@ func (s *XLSuite) TestImageDefinition(c *C) {
 	text := def1 + "\n" + def2
 
 	var rd io.Reader = strings.NewReader(text)
-	p, err := NewParser(rd)
+	options := NewOptions(rd, "", "", false, false)
+	p, err := NewParser(options)
 	c.Assert(err, IsNil)
 	c.Assert(p, NotNil)
 	doc := p.doc

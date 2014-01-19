@@ -41,7 +41,8 @@ func (s *XLSuite) TestHeader(c *C) {
 	input := strings.Join(lines, "\n")
 
 	var rd io.Reader = strings.NewReader(input)
-	p, err := NewParser(rd)
+	options := NewOptions(rd, "", "", false, false)
+	p, err := NewParser(options)
 	c.Assert(err, IsNil)
 	c.Assert(p, NotNil)
 
@@ -86,7 +87,8 @@ func (s *XLSuite) doTestHRule(c *C, char rune, rng *xr.PRNG) {
 	text = append(text, '\r')
 	input := string(text)
 	var rd io.Reader = strings.NewReader(input)
-	p, err := NewParser(rd)
+	options := NewOptions(rd, "", "", false, false)
+	p, err := NewParser(options)
 	c.Assert(err, IsNil)
 	c.Assert(p, NotNil)
 

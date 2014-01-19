@@ -105,12 +105,14 @@ func (h *Holder) ParseHolder(p *Parser,
 	}
 
 	// DEBUG
-	fmt.Printf("ParseHolder depth %d: first line is '%s'\n",
-		h.depth, string(q.runes))
-	if err == nil {
-		fmt.Println("    nil error")
-	} else {
-		fmt.Printf("    error = %s\n", err.Error())
+	if p.testing {
+		fmt.Printf("ParseHolder depth %d: first line is '%s'\n",
+			h.depth, string(q.runes))
+		if err == nil {
+			fmt.Println("    nil error")
+		} else {
+			fmt.Printf("    error = %s\n", err.Error())
+		}
 	}
 	// END
 
@@ -131,11 +133,13 @@ func (h *Holder) ParseHolder(p *Parser,
 				statusChild = <-fromChild
 				haveChild = false
 				// DEBUG
-				fmt.Printf("*** DEPTH %d APPENDING BLOCKQUOTE, BLANK LINE, EOF:  ***\n",
-					h.depth)
-				fmt.Printf("    statusChild is 0x%x\n", statusChild)
-				fmt.Printf("    APPENDED %s\n",
-					string(child.Get()))
+				if p.testing {
+					fmt.Printf("*** DEPTH %d APPENDING BLOCKQUOTE, BLANK LINE, EOF:  ***\n",
+						h.depth)
+					fmt.Printf("    statusChild is 0x%x\n", statusChild)
+					fmt.Printf("    APPENDED %s\n",
+						string(child.Get()))
+				}
 				// END
 				h.blocks = append(h.blocks, child)
 				// child = nil
