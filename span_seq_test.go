@@ -9,7 +9,8 @@ import (
 // Test various kinds of emphasis spans with intermixed text.
 func (s *XLSuite) TestParaEmphAndCode(c *C) {
 
-	doc, _ := NewDocument() // just a dummy
+	opt := NewOptions(nil, "", "", false, false)
+	doc, _ := NewDocument(opt) // just a dummy
 	NULL_EOL := []rune{0}
 
 	input := []rune("abc _def_ **ghi** __jkl mno__ qrs ")
@@ -19,7 +20,7 @@ func (s *XLSuite) TestParaEmphAndCode(c *C) {
 	c.Assert(q, NotNil)
 
 	eol := uint(len(input))
-	seq, err := q.parseSpanSeq(doc, 0, true)
+	seq, err := q.parseSpanSeq(opt, doc, 0, true)
 	c.Assert(err, IsNil)
 	c.Assert(seq, NotNil)
 	c.Assert(q.offset, Equals, eol)
@@ -57,7 +58,8 @@ func (s *XLSuite) TestParaEmphAndCode(c *C) {
 
 // test link span with and without title
 func (s *XLSuite) TestParaLinkSpan(c *C) {
-	doc, _ := NewDocument() // just a dummy
+	opt := NewOptions(nil, "", "", false, false)
+	doc, _ := NewDocument(opt) // just a dummy
 	EOL := []rune{CR}
 
 	input := []rune("abc [foo](http://example.com) ")
@@ -68,7 +70,7 @@ func (s *XLSuite) TestParaLinkSpan(c *C) {
 	c.Assert(q, NotNil)
 
 	eol := uint(len(input))
-	seq, err := q.parseSpanSeq(doc, 0, true)
+	seq, err := q.parseSpanSeq(opt, doc, 0, true)
 	c.Assert(err, IsNil)
 	c.Assert(seq, NotNil)
 	c.Assert(q.offset, Equals, eol)
@@ -93,7 +95,8 @@ func (s *XLSuite) TestParaLinkSpan(c *C) {
 
 // test image span with and without title
 func (s *XLSuite) TestParaImageSpan(c *C) {
-	doc, _ := NewDocument() // just a dummy
+	opt := NewOptions(nil, "", "", false, false)
+	doc, _ := NewDocument(opt) // just a dummy
 	EOL := []rune{CR}
 
 	// we expect to left-trim the abc
@@ -105,7 +108,7 @@ func (s *XLSuite) TestParaImageSpan(c *C) {
 	c.Assert(q, NotNil)
 
 	eol := uint(len(input))
-	seq, err := q.parseSpanSeq(doc, 0, true)
+	seq, err := q.parseSpanSeq(opt, doc, 0, true)
 	c.Assert(err, IsNil)
 	c.Assert(seq, NotNil)
 	c.Assert(q.offset, Equals, eol)

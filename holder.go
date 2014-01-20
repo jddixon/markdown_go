@@ -11,16 +11,21 @@ import (
 //
 // Remember that a top level holder has definitions and is called a Document.
 type Holder struct {
+	opt          *Options
 	isBlockquote bool
 	depth        uint
 	blocks       []BlockI
 }
 
-func NewHolder(isBq bool, depth uint) (h *Holder, err error) {
-	if depth > 0 && !isBq {
+func NewHolder(opt *Options, isBq bool, depth uint) (h *Holder, err error) {
+
+	if opt == nil {
+		err = NilOptions
+	} else if depth > 0 && !isBq {
 		err = OnlyBlockquoteSupported
 	} else {
 		h = &Holder{
+			opt:          opt,
 			isBlockquote: isBq,
 			depth:        depth,
 		}
@@ -87,6 +92,8 @@ func (h *Holder) ParseHolder(p *Parser,
 		ch0              rune
 		lastBlockLineSep bool
 		stopped          bool
+		testing          = p.opt.Testing
+		verbose          = p.opt.Verbose
 
 		// used to control child holder (for Blockquote)
 		haveChild bool
@@ -95,6 +102,9 @@ func (h *Holder) ParseHolder(p *Parser,
 		fromChild chan int
 		stopChild chan bool
 	)
+	// DEBUG
+	_, _ = testing, verbose
+	// END
 	resp <- OK // OK, setup complete
 	// -- ok --------------------------------------------------------
 
@@ -147,7 +157,9 @@ func (h *Holder) ParseHolder(p *Parser,
 			} else {
 				// just copy the line through to the child
 				// DEBUG
-				fmt.Printf("COPYING TO CHILD: %s\n", string(q.runes))
+				if testing {
+					fmt.Printf("COPYING TO CHILD: %s\n", string(q.runes))
+				}
 				// END
 				toChild <- q
 				statusChild = <-fromChild
@@ -159,12 +171,14 @@ func (h *Holder) ParseHolder(p *Parser,
 					haveChild = false
 					if err == nil || err == io.EOF {
 						// DEBUG
-						fmt.Printf("*** DEPTH %d APPENDING BLOCKQUOTE: AFTER '%s' ***\n",
-							h.depth, string(q.runes))
-						fmt.Printf("    err is %v\n", err)
-						fmt.Printf("    statusChild is 0x%x\n", statusChild)
-						fmt.Printf("    APPENDED %s\n",
-							string(child.Get()))
+						if testing {
+							fmt.Printf("*** DEPTH %d APPENDING BLOCKQUOTE: AFTER '%s' ***\n",
+								h.depth, string(q.runes))
+							fmt.Printf("    err is %v\n", err)
+							fmt.Printf("    statusChild is 0x%x\n", statusChild)
+							fmt.Printf("    APPENDED %s\n",
+								string(child.Get()))
+						}
 						// END
 						h.blocks = append(h.blocks, child)
 
@@ -178,8 +192,10 @@ func (h *Holder) ParseHolder(p *Parser,
 				if h.depth > 0 {
 					from = SkipChevrons(q, h.depth)
 					// DEBUG
-					fmt.Printf("depth %d, length %d, SkipChevrons sets from to %d\n",
-						h.depth, lineLen, from)
+					if testing {
+						fmt.Printf("depth %d, length %d, SkipChevrons sets from to %d\n",
+							h.depth, lineLen, from)
+					}
 					// END
 					if from >= lineLen {
 						blankLine = true
@@ -191,15 +207,20 @@ func (h *Holder) ParseHolder(p *Parser,
 					toChild = make(chan *Line)
 					fromChild = make(chan int)
 					stopChild = make(chan bool)
-					child, _ = NewBlockquote(h.depth + 1)
-					fmt.Printf("*** CREATED BLOCKQUOTE, DEPTH %d ***\n",
-						h.depth+1)
+					child, _ = NewBlockquote(h.opt, h.depth+1)
+					if testing {
+						fmt.Printf("*** CREATED BLOCKQUOTE, DEPTH %d ***\n",
+							h.depth+1)
+					}
 					go child.ParseHolder(p, toChild, fromChild, stopChild)
 					haveChild = true
 					statusChild := <-fromChild // setup complete
 
 					// DEBUG
-					fmt.Printf("COPYING TO NEW CHILD: %s\n", string(q.runes))
+					if testing {
+						fmt.Printf("COPYING TO NEW CHILD: %s\n",
+							string(q.runes))
+					}
 					// END
 					toChild <- q
 					statusChild = <-fromChild
@@ -211,7 +232,9 @@ func (h *Holder) ParseHolder(p *Parser,
 					if err != nil || (statusChild&LAST_LINE_PROCESSED != 0) {
 						haveChild = false
 						if err == nil || err == io.EOF {
-							fmt.Println("*** APPENDING BLOCKQUOTE: B ***")
+							if testing {
+								fmt.Println("*** APPENDING BLOCKQUOTE: B ***")
+							}
 							h.blocks = append(h.blocks, child)
 						}
 						child = nil
@@ -295,19 +318,21 @@ func (h *Holder) ParseHolder(p *Parser,
 								lastBlockLineSep = false
 							} else {
 								// default parser
-								// DEBUG
-								fmt.Printf("== invoking parseSpanSeq(true) ==\n")
-								// END
 								var seq *SpanSeq
-								seq, err = q.parseSpanSeq(doc, from, true)
+								seq, err = q.parseSpanSeq(p.opt,
+									doc, from, true)
 								if err == nil || err == io.EOF {
 									if curPara == nil {
 										curPara = new(Para)
 									}
-									fmt.Printf("* adding seq to curPara\n") // DEBUG
+									if testing {
+										fmt.Printf("* adding seq to curPara\n")
+									}
 									curPara.seqs = append(curPara.seqs, *seq)
-									fmt.Printf("  curPara depth %d  has %d seqs\n",
-										h.depth, len(curPara.seqs))
+									if testing {
+										fmt.Printf("  curPara depth %d  has %d seqs\n",
+											h.depth, len(curPara.seqs))
+									}
 								}
 							}
 						}
@@ -326,7 +351,6 @@ func (h *Holder) ParseHolder(p *Parser,
 						curPara = nil
 						lastBlockLineSep = false
 					}
-					fmt.Printf("adding LineSep to holder\n") // DEBUG
 					if !lastBlockLineSep {
 						h.AddBlock(ls)
 						lastBlockLineSep = true
@@ -337,13 +361,15 @@ func (h *Holder) ParseHolder(p *Parser,
 		// prepare for next iteration ---------------------
 		if err != nil || eofSeen || iAmDone {
 			// DEBUG
-			fmt.Printf("parseHolder depth %d breaking, error or EOF seen\n",
-				h.depth)
-			if err != nil {
-				fmt.Printf("    ERROR: %s\n", err.Error())
-			}
-			if eofSeen {
-				fmt.Println("    EOF SEEN, so breaking")
+			if testing {
+				fmt.Printf("parseHolder depth %d breaking, error or EOF seen\n",
+					h.depth)
+				if err != nil {
+					fmt.Printf("    ERROR: %s\n", err.Error())
+				}
+				if eofSeen {
+					fmt.Println("    EOF SEEN, so breaking")
+				}
 			}
 			// END
 
@@ -375,43 +401,51 @@ func (h *Holder) ParseHolder(p *Parser,
 		}
 		if err == io.EOF {
 			eofSeen = true
-			// DEBUG
-			fmt.Println("*** EOF SEEN ***")
-			// END
 		}
 		// -- ack ---------------------------------------------------
 		if (err != nil && err != io.EOF) || q == nil {
 			break
 		}
 		if len(q.runes) == 0 {
-			fmt.Printf("ZERO-LENGTH LINE")
+			if testing {
+				fmt.Printf("ZERO-LENGTH LINE")
+			}
 			if len(q.lineSep) == 0 && q.lineSep[0] == rune(0) {
 				break
 			}
-			fmt.Printf("  lineSep is 0x%x\n", q.lineSep[0])
 		}
 		// DEBUG
-		fmt.Printf("Parse: next line is '%s'\n", string(q.runes))
+		if testing {
+			fmt.Printf("Parse: next line is '%s'\n", string(q.runes))
+		}
 		// END
 	} // END FOR LOOP -----------------------------------------------
 
 	if !fatalError {
 		if err == nil || err == io.EOF {
 			if haveChild {
-				fmt.Println("*** APPENDING BLOCKQUOTE: C ***")
+				if testing {
+					fmt.Println("*** APPENDING BLOCKQUOTE: C ***")
+				}
 				h.blocks = append(h.blocks, child)
 			}
 			if curPara != nil {
-				fmt.Printf("depth %d: have dangling curPara\n", h.depth) // DEBUG
+				// DEBUG
+				if testing {
+					fmt.Printf("depth %d: have dangling curPara\n", h.depth)
+				}
+				// END
 				h.AddBlock(curPara)
 				curPara = nil
 			}
 			// DEBUG
-			fmt.Printf("parseHolder depth %d returning; holder has %d blocks\n",
-				h.depth, len(h.blocks))
-			for i := 0; i < len(h.blocks); i++ {
-				fmt.Printf("BLOCK %d:%d: '%s'\n",
-					h.depth, i, string(h.blocks[i].Get()))
+			if testing {
+				fmt.Printf("parseHolder depth %d returning; holder has %d blocks\n",
+					h.depth, len(h.blocks))
+				for i := 0; i < len(h.blocks); i++ {
+					fmt.Printf("BLOCK %d:%d: '%s'\n",
+						h.depth, i, string(h.blocks[i].Get()))
+				}
 			}
 			// END
 		}

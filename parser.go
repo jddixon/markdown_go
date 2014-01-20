@@ -22,6 +22,8 @@ type Parser struct {
 	lexer *gl.LexInput
 	doc   *Document
 
+	opt *Options
+	// XXX NOW REDUNDANT:
 	testing bool
 	verbose bool
 }
@@ -35,13 +37,15 @@ func NewParser(opt *Options) (p *Parser, err error) {
 		reader := opt.Reader
 		lx, err := gl.NewNewLexInput(reader)
 		if err == nil {
-			doc, err = NewDocument()
+			doc, err = NewDocument(opt)
 		}
 		if err == nil {
 			p = &Parser{
 				lexer: lx,
 				doc:   doc,
+				opt:   opt,
 
+				// XXX NOW REDUNDANT
 				testing: opt.Testing,
 				verbose: opt.Verbose,
 			}
@@ -159,10 +163,10 @@ func (p *Parser) Parse() (doc *Document, err error) {
 
 			// rigidly require that definitions start in the first column
 			if q.runes[0] == '[' { // possible link definition
-				linkDefn, err = q.parseLinkDefinition(doc)
+				linkDefn, err = q.parseLinkDefinition(p.opt, doc)
 			}
 			if err == nil && linkDefn == nil && q.runes[0] == '!' {
-				imageDefn, err = q.parseImageDefinition(doc)
+				imageDefn, err = q.parseImageDefinition(p.opt, doc)
 			}
 		}
 		if imageDefn == nil && linkDefn == nil {

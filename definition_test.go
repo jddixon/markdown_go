@@ -56,6 +56,8 @@ func (s *XLSuite) TestReadLine(c *C) {
 
 func (s *XLSuite) TestLinkDefinition(c *C) {
 
+	opt := new(Options) // all default values
+
 	// 1: link definition with optional title
 	id1 := "george"
 	uri1 := "http://example.com"
@@ -81,7 +83,7 @@ func (s *XLSuite) TestLinkDefinition(c *C) {
 	c.Assert(err, IsNil) // gets io.EOF
 	c.Assert(string(line1.runes), Equals, def1)
 
-	defn1, err := line1.parseLinkDefinition(doc)
+	defn1, err := line1.parseLinkDefinition(opt, doc)
 	c.Assert(err, IsNil)
 	c.Assert(defn1, NotNil)
 	c.Assert(defn1.GetURI(), Equals, uri1)
@@ -92,7 +94,7 @@ func (s *XLSuite) TestLinkDefinition(c *C) {
 	c.Assert(err, Equals, io.EOF)
 	c.Assert(string(line2.runes), Equals, def2)
 
-	defn2, err := line2.parseLinkDefinition(doc)
+	defn2, err := line2.parseLinkDefinition(opt, doc)
 	c.Assert(err, IsNil)
 	c.Assert(defn2, NotNil)
 	c.Assert(defn2.GetURI(), Equals, uri2)
@@ -100,6 +102,8 @@ func (s *XLSuite) TestLinkDefinition(c *C) {
 }
 
 func (s *XLSuite) TestImageDefinition(c *C) {
+
+	opt := new(Options) // all default values
 
 	// 1: image definition with optional title
 	id1 := "pic1"
@@ -126,7 +130,7 @@ func (s *XLSuite) TestImageDefinition(c *C) {
 	c.Assert(err, IsNil) // gets io.EOF
 	c.Assert(string(line1.runes), Equals, def1)
 
-	defn1, err := line1.parseImageDefinition(doc)
+	defn1, err := line1.parseImageDefinition(opt, doc)
 	c.Assert(err, IsNil)
 	c.Assert(defn1, NotNil)
 	c.Assert(defn1.GetURI(), Equals, uri1)
@@ -137,7 +141,7 @@ func (s *XLSuite) TestImageDefinition(c *C) {
 	c.Assert(err, Equals, io.EOF)
 	c.Assert(string(line2.runes), Equals, def2)
 
-	defn2, err := line2.parseImageDefinition(doc)
+	defn2, err := line2.parseImageDefinition(opt, doc)
 	c.Assert(err, IsNil)
 	c.Assert(defn2, NotNil)
 	c.Assert(defn2.GetURI(), Equals, uri2)

@@ -64,11 +64,7 @@ func (p *LinkSpan) Get() (out []rune) {
 // ends with a URL or path (in the file system) enclosed by parentheses.
 // We make no attempt to verify that the URI is well-formed.
 //
-func (q *Line) parseLinkSpan() (span SpanI, err error) {
-
-	// DEBUG
-	fmt.Printf("Entering parseLinkSpan, offset is %d\n", q.offset)
-	// END
+func (q *Line) parseLinkSpan(opt *Options) (span SpanI, err error) {
 
 	offset := q.offset + 1
 	var (
@@ -78,78 +74,91 @@ func (q *Line) parseLinkSpan() (span SpanI, err error) {
 		titleStart, titleEnd uint
 		end                  uint // offset of closing paren, if found
 		linkText, uri, title []rune
+		verbose, testing     bool
 	)
+	if opt == nil {
+		err = NilOptions
+	} else {
+		verbose = opt.Verbose
+		testing = opt.Testing
+		_ = verbose
 
-	// DEBUG
-	fmt.Printf("parseLinkSpan: offset %d, text %s\n",
-		offset, string(q.runes[offset:]))
-	// END
+		// DEBUG
+		if testing {
+			fmt.Printf("parseLinkSpan: offset %d, text %s\n",
+				offset, string(q.runes[offset:]))
+		}
+		// END
 
-	// look for the end of the linkText
-	for ; offset < uint(len(q.runes)); offset++ {
-		ch := q.runes[offset]
-		if ch == ']' {
-			linkTextEnd = offset
-			// DEBUG
-			fmt.Printf("linkTextEnd = %d; end is %d\n",
-				offset, uint(len(q.runes))) // DEBUG
-			// END
-			offset++
-			break
-		}
-	}
-	if (offset < uint(len(q.runes))-1) && linkTextEnd > 0 {
-		// optional space
-		if q.runes[offset] == ' ' {
-			fmt.Printf("skipping space at %d\n", offset)
-			offset++
-		}
-		if q.runes[offset] == '(' {
-			offset++
-			uriStart = offset
-			// fmt.Printf("uriStart = %d\n", offset) // DEBUG
-		}
-	}
-	if uriStart > 0 {
-		for offset = uriStart; offset < uint(len(q.runes)); offset++ {
+		// look for the end of the linkText
+		for ; offset < uint(len(q.runes)); offset++ {
 			ch := q.runes[offset]
-			if ch == ')' {
-				end = offset
-				fmt.Printf("FOUND RPAREN LinkSpan END at %d\n", end)
-				if uriEnd == 0 {
-					uriEnd = end
+			if ch == ']' {
+				linkTextEnd = offset
+				// DEBUG
+				if testing {
+					fmt.Printf("linkTextEnd = %d; end is %d\n",
+						offset, uint(len(q.runes))) // DEBUG
 				}
+				// END
+				offset++
 				break
 			}
-			if ch == '"' {
-				if titleStart == 0 {
-					uriEnd = offset
-					if q.runes[uriEnd-1] == ' ' {
-						uriEnd--
+		}
+		if (offset < uint(len(q.runes))-1) && linkTextEnd > 0 {
+			// optional space
+			if q.runes[offset] == ' ' {
+				offset++
+			}
+			if q.runes[offset] == '(' {
+				offset++
+				uriStart = offset
+			}
+		}
+		if uriStart > 0 {
+			for offset = uriStart; offset < uint(len(q.runes)); offset++ {
+				ch := q.runes[offset]
+				if ch == ')' {
+					end = offset
+					if uriEnd == 0 {
+						uriEnd = end
 					}
-					titleStart = offset + 1 // inclusive
-				} else {
-					titleEnd = offset // exclusive
+					break
+				}
+				if ch == '"' {
+					if titleStart == 0 {
+						uriEnd = offset
+						if q.runes[uriEnd-1] == ' ' {
+							uriEnd--
+						}
+						titleStart = offset + 1 // inclusive
+					} else {
+						titleEnd = offset // exclusive
+					}
 				}
 			}
 		}
-	}
-	if end > 0 {
-		if titleStart > 0 && titleEnd == 0 {
-			fmt.Printf("found start of title but not end\n") // DEBUG
-			// just give up
-			end = 0
+		if end > 0 {
+			if titleStart > 0 && titleEnd == 0 {
+				// DEBUG
+				if testing {
+					fmt.Printf("found start of title but not end\n")
+				}
+				// END
+				// just give up
+				end = 0
+			}
 		}
-	}
-	if end > 0 {
-		linkText = q.runes[linkTextStart:linkTextEnd]
-		uri = q.runes[uriStart:uriEnd]
-		if titleStart > 0 {
-			title = q.runes[titleStart:titleEnd]
-		}
+		if end > 0 {
+			linkText = q.runes[linkTextStart:linkTextEnd]
+			uri = q.runes[uriStart:uriEnd]
+			if titleStart > 0 {
+				title = q.runes[titleStart:titleEnd]
+			}
 
-		span = NewLinkSpan(linkText, uri, title)
-		q.offset = offset + 1
+			span = NewLinkSpan(linkText, uri, title)
+			q.offset = offset + 1
+		} // FOO
 	}
 	return
 }

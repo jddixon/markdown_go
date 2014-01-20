@@ -14,13 +14,15 @@ type Document struct {
 	Holder
 }
 
-func NewDocument() (q *Document, err error) {
+func NewDocument(opt *Options) (q *Document, err error) {
 
-	h, _ := NewHolder(false, uint(0)) // not Blockquote, depth 0
-	q = &Document{
-		imgDict:  make(map[string]*Definition),
-		linkDict: make(map[string]*Definition),
-		Holder:   *h,
+	h, err := NewHolder(opt, false, uint(0)) // not Blockquote, depth 0
+	if err == nil {
+		q = &Document{
+			imgDict:  make(map[string]*Definition),
+			linkDict: make(map[string]*Definition),
+			Holder:   *h,
+		}
 	}
 	return
 }
@@ -63,9 +65,6 @@ func (q *Document) Get() (body []rune) {
 		inOrdered   bool
 	)
 	for i := 0; i < len(q.blocks)-1; i++ {
-		fmt.Printf("BLOCK %d\n", i)
-
-		var ()
 
 		block := q.blocks[i]
 		content := block.Get()

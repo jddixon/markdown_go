@@ -23,44 +23,77 @@ type SpanSeq struct {
 // is converted to a Text object and appended to the spans output
 // slice, followed by the SpanI.
 
-func (q *Line) parseSpanSeq(doc *Document, from uint, leftTrim bool) (
-	seq *SpanSeq, err error) {
+func (q *Line) parseSpanSeq(opt *Options, doc *Document, from uint,
+	leftTrim bool) (seq *SpanSeq, err error) {
 
 	var (
-		curText []rune
+		curText          []rune
+		testing, verbose bool
 	)
-	q.offset = from
-	seq = new(SpanSeq)
-	firstSpan := true
-	for q.offset < uint(len(q.runes)) {
-		var span SpanI
-		ch := q.runes[q.offset]
+	if opt == nil {
+		err = NilOptions
+	} else {
+		testing = opt.Testing
+		verbose = opt.Verbose
+		_ = verbose // DEBUG
+		q.offset = from
+		seq = new(SpanSeq)
+		firstSpan := true
+		for q.offset < uint(len(q.runes)) {
+			var span SpanI
+			ch := q.runes[q.offset]
 
-		// run through all candidate parsers ------------------------
-		if ch == '_' || ch == '*' {
-			span, _ = q.parseEmphSpan()
-		} else if ch == '`' {
-			span, _ = q.parseCodeSpan()
-		} else if ch == '[' {
-			span, _ = q.parseLinkSpan()
-			if span == nil {
-				span, _ = q.parseLinkRefSpan(doc)
+			// run through all candidate parsers ------------------------
+			if ch == '_' || ch == '*' {
+				span, _ = q.parseEmphSpan()
+			} else if ch == '`' {
+				span, _ = q.parseCodeSpan()
+			} else if ch == '[' {
+				span, _ = q.parseLinkSpan(opt)
+				if span == nil {
+					span, _ = q.parseLinkRefSpan(doc)
+				}
+			} else if ch == '!' {
+				span, _ = q.parseImageSpan(opt)
+				if span == nil {
+					span, _ = q.parseImageRefSpan(doc)
+				}
 			}
-		} else if ch == '!' {
-			span, _ = q.parseImageSpan()
+
+			// handle any parse results ---------------------------------
 			if span == nil {
-				span, _ = q.parseImageRefSpan(doc)
+				curText = append(curText, ch)
+				q.offset++
+			} else {
+				if len(curText) > 0 {
+					if firstSpan && leftTrim {
+						if testing {
+							fmt.Println("LEFT-TRIMMING")
+						}
+						// get rid of any leading spaces
+						for len(curText) > 0 {
+							if u.IsSpace(curText[0]) {
+								curText = curText[1:]
+							} else {
+								break
+							}
+						}
+					}
+					if len(curText) > 0 { // GEEP
+						seq.spans = append(seq.spans, NewText(curText))
+						curText = curText[:0]
+					}
+				}
+				seq.spans = append(seq.spans, span)
+				firstSpan = false
 			}
 		}
-
-		// handle any parse results ---------------------------------
-		if span == nil {
-			curText = append(curText, ch)
-			q.offset++
-		} else {
+		if len(curText) > 0 {
 			if len(curText) > 0 {
 				if firstSpan && leftTrim {
-					fmt.Println("LEFT-TRIMMING")
+					if testing {
+						fmt.Println("LEFT-TRIMMING")
+					}
 					// get rid of any leading spaces
 					for len(curText) > 0 {
 						if u.IsSpace(curText[0]) {
@@ -72,37 +105,16 @@ func (q *Line) parseSpanSeq(doc *Document, from uint, leftTrim bool) (
 				}
 				if len(curText) > 0 { // GEEP
 					seq.spans = append(seq.spans, NewText(curText))
-					curText = curText[:0]
 				}
 			}
-			seq.spans = append(seq.spans, span)
-			firstSpan = false
 		}
-	}
-	if len(curText) > 0 {
-		if len(curText) > 0 {
-			if firstSpan && leftTrim {
-				fmt.Println("LEFT-TRIMMING")
-				// get rid of any leading spaces
-				for len(curText) > 0 {
-					if u.IsSpace(curText[0]) {
-						curText = curText[1:]
-					} else {
-						break
-					}
-				}
+		ls := q.lineSep
+		for i := 0; i < len(ls); i++ {
+			ch := ls[i]
+			if ch != rune(0) {
+				seq.lineSep = append(seq.lineSep, ch)
 			}
-			if len(curText) > 0 { // GEEP
-				seq.spans = append(seq.spans, NewText(curText))
-			}
-		}
-	}
-	ls := q.lineSep
-	for i := 0; i < len(ls); i++ {
-		ch := ls[i]
-		if ch != rune(0) {
-			seq.lineSep = append(seq.lineSep, ch)
-		}
+		} // FOO
 	}
 	return
 }

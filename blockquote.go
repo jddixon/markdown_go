@@ -13,8 +13,9 @@ type Blockquote struct {
 	Holder
 }
 
-func NewBlockquote(depth uint) (bq *Blockquote, err error) {
-	h, err := NewHolder(true, depth)
+func NewBlockquote(opt *Options, depth uint) (bq *Blockquote, err error) {
+
+	h, err := NewHolder(opt, true, depth)
 	if err == nil {
 		bq = &Blockquote{Holder: *h}
 	}

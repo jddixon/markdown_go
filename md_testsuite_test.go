@@ -141,6 +141,8 @@ func (s *XLSuite) doMDTest(c *C, name string) {
 	options := NewOptions(in, mdPath, outPath, false, false)
 	p, err := NewParser(options)
 	c.Assert(err, IsNil)
+	c.Assert(p, NotNil)
+	c.Assert(p.opt, NotNil)
 
 	doc, err := p.Parse()
 	c.Assert(err, Equals, io.EOF)

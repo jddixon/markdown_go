@@ -67,7 +67,7 @@ func (p *ImageSpan) Get() (out []rune) {
 // ends with a PATH or path (in the file system) enclosed by parentheses.
 // We make no attempt to verify that the PATH is well-formed.
 //
-func (q *Line) parseImageSpan() (span SpanI, err error) {
+func (q *Line) parseImageSpan(opt *Options) (span SpanI, err error) {
 
 	offset := q.offset + 2 // enter having seen ![
 	var (
@@ -77,67 +77,83 @@ func (q *Line) parseImageSpan() (span SpanI, err error) {
 		titleStart, titleEnd  uint
 		end                   uint // offset of closing paren, if found
 		linkText, path, title []rune
+		verbose, testing      bool
 	)
+	if opt == nil {
+		err = NilOptions
+	} else {
+		verbose = opt.Verbose
+		testing = opt.Testing
+		_ = verbose
 
-	// look for the end of the linkText
-	for ; offset < uint(len(q.runes)); offset++ {
-		ch := q.runes[offset]
-		if ch == ']' {
-			linkTextEnd = offset
-			fmt.Printf("linkTextEnd = %d\n", offset) // DEBUG
-			offset++
-			break
-		}
-	}
-	if linkTextEnd > 0 {
-		// optional space
-		if offset < uint(len(q.runes))-1 && q.runes[offset+1] == ' ' {
-			offset++
-		}
-		if q.runes[offset] == '(' {
-			offset++
-			pathStart = offset
-			fmt.Printf("pathStart = %d\n", offset) // DEBUG
-		}
-	}
-	if pathStart > 0 {
-		for offset = pathStart; offset < uint(len(q.runes)); offset++ {
+		// look for the end of the linkText
+		for ; offset < uint(len(q.runes)); offset++ {
 			ch := q.runes[offset]
-			if ch == ')' {
-				end = offset
-				if pathEnd == 0 {
-					pathEnd = end
+			if ch == ']' {
+				linkTextEnd = offset
+				// DEBUG
+				if testing {
+					fmt.Printf("linkTextEnd = %d\n", offset)
 				}
+				// END
+				offset++
 				break
 			}
-			if ch == '"' {
-				if titleStart == 0 {
-					pathEnd = offset
-					if q.runes[pathEnd-1] == ' ' {
-						pathEnd--
+		}
+		if linkTextEnd > 0 {
+			// optional space
+			if offset < uint(len(q.runes))-1 && q.runes[offset+1] == ' ' {
+				offset++
+			}
+			if q.runes[offset] == '(' {
+				offset++
+				pathStart = offset
+				// DEBUG
+				if testing {
+					fmt.Printf("pathStart = %d\n", offset)
+				}
+				// END
+			}
+		}
+		if pathStart > 0 {
+			for offset = pathStart; offset < uint(len(q.runes)); offset++ {
+				ch := q.runes[offset]
+				if ch == ')' {
+					end = offset
+					if pathEnd == 0 {
+						pathEnd = end
 					}
-					titleStart = offset + 1 // inclusive
-				} else {
-					titleEnd = offset // exclusive
+					break
+				}
+				if ch == '"' {
+					if titleStart == 0 {
+						pathEnd = offset
+						if q.runes[pathEnd-1] == ' ' {
+							pathEnd--
+						}
+						titleStart = offset + 1 // inclusive
+					} else {
+						titleEnd = offset // exclusive
+					}
 				}
 			}
 		}
-	}
-	if end > 0 {
-		if titleStart > 0 && titleEnd == 0 {
-			// just give up
-			end = 0
+		if end > 0 {
+			if titleStart > 0 && titleEnd == 0 {
+				// just give up
+				end = 0
+			}
 		}
-	}
-	if end > 0 {
-		linkText = q.runes[linkTextStart:linkTextEnd]
-		path = q.runes[pathStart:pathEnd]
-		if titleStart > 0 {
-			title = q.runes[titleStart:titleEnd]
-		}
+		if end > 0 {
+			linkText = q.runes[linkTextStart:linkTextEnd]
+			path = q.runes[pathStart:pathEnd]
+			if titleStart > 0 {
+				title = q.runes[titleStart:titleEnd]
+			}
 
-		span = NewImageSpan(linkText, path, title)
-		q.offset = offset + 1
+			span = NewImageSpan(linkText, path, title)
+			q.offset = offset + 1
+		} // FOO
 	}
 	return
 }
