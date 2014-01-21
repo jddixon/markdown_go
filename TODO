@@ -1,5 +1,8 @@
 xgo/md/TODO
 
+2014-01-20
+    * review provisional code in para.go
+
 2014-01-18
     * linkReference.go appears to be dead code
 

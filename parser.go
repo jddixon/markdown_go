@@ -21,11 +21,7 @@ const (
 type Parser struct {
 	lexer *gl.LexInput
 	doc   *Document
-
-	opt *Options
-	// XXX NOW REDUNDANT:
-	testing bool
-	verbose bool
+	opt   *Options
 }
 
 func NewParser(opt *Options) (p *Parser, err error) {
@@ -44,10 +40,6 @@ func NewParser(opt *Options) (p *Parser, err error) {
 				lexer: lx,
 				doc:   doc,
 				opt:   opt,
-
-				// XXX NOW REDUNDANT
-				testing: opt.Testing,
-				verbose: opt.Verbose,
 			}
 		}
 	}
@@ -144,11 +136,9 @@ func (p *Parser) Parse() (doc *Document, err error) {
 		eofSeen = true
 	}
 	// DEBUG
-	if p.testing {
+	if p.opt.Testing {
 		fmt.Printf("Parser: LINE: '%s'\n", string(q.runes))
-		if err == nil {
-			fmt.Println("    NIL error")
-		} else {
+		if err != nil {
 			fmt.Printf("    error = '%s'\n", err.Error())
 		}
 	}

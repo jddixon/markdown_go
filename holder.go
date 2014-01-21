@@ -102,9 +102,8 @@ func (h *Holder) ParseHolder(p *Parser,
 		fromChild chan int
 		stopChild chan bool
 	)
-	// DEBUG
-	_, _ = testing, verbose
-	// END
+	_ = verbose // still not used
+
 	resp <- OK // OK, setup complete
 	// -- ok --------------------------------------------------------
 
@@ -115,7 +114,7 @@ func (h *Holder) ParseHolder(p *Parser,
 	}
 
 	// DEBUG
-	if p.testing {
+	if p.opt.Testing {
 		fmt.Printf("ParseHolder depth %d: first line is '%s'\n",
 			h.depth, string(q.runes))
 		if err == nil {
@@ -129,21 +128,26 @@ func (h *Holder) ParseHolder(p *Parser,
 	sayGoodBye := true
 
 	// pass through the document line by line
-	for (err == nil || err == io.EOF) && !iAmDone {
+	for (err == nil || err == io.EOF) && !iAmDone && !stopped {
 		var (
+			b             BlockI
 			blankLine     bool
 			lineProcessed bool
 			from          uint
 			statusChild   int
 		)
 		lineLen := uint(len(q.runes))
+		if lineLen == 0 {
+			blankLine = true
+		}
 		if haveChild {
 			if lineLen == 0 && err == io.EOF {
 				stopChild <- true
 				statusChild = <-fromChild
 				haveChild = false
+
 				// DEBUG
-				if p.testing {
+				if p.opt.Testing {
 					fmt.Printf("*** DEPTH %d APPENDING BLOCKQUOTE, BLANK LINE, EOF:  ***\n",
 						h.depth)
 					fmt.Printf("    statusChild is 0x%x\n", statusChild)
@@ -151,7 +155,10 @@ func (h *Holder) ParseHolder(p *Parser,
 						string(child.Get()))
 				}
 				// END
-				h.blocks = append(h.blocks, child)
+
+				// h.blocks = append(h.blocks, child)
+				b = child
+				lineProcessed = true
 				// child = nil
 
 			} else {
@@ -180,8 +187,9 @@ func (h *Holder) ParseHolder(p *Parser,
 								string(child.Get()))
 						}
 						// END
-						h.blocks = append(h.blocks, child)
-
+						// h.blocks = append(h.blocks, child)
+						b = child
+						lineProcessed = true
 					}
 					// child = nil
 				} // FOO
@@ -243,7 +251,6 @@ func (h *Holder) ParseHolder(p *Parser,
 				if !lineProcessed {
 					// HANDLE BLOCKS ----------------------------------------
 					if !blankLine && (err == nil || err == io.EOF) {
-						var b BlockI
 						ch0 = q.runes[from]
 
 						// HEADERS --------------------------------
@@ -308,56 +315,57 @@ func (h *Holder) ParseHolder(p *Parser,
 
 						// XXX STUB
 
-						// DEFAULT: PARA --------------------------
-						// If we have parsed the line, we hang the block off
-						// the document.  Otherwise, we treat whatever we have
-						// as a sequence of spans and make a Para out of it.
-						if err == nil || err == io.EOF {
-							if b != nil {
-								h.AddBlock(b)
-								lastBlockLineSep = false
-							} else {
-								// default parser
-								var seq *SpanSeq
-								seq, err = q.parseSpanSeq(p.opt,
-									doc, from, true)
-								if err == nil || err == io.EOF {
-									if curPara == nil {
-										curPara = new(Para)
-									}
-									if testing {
-										fmt.Printf("* adding seq to curPara\n")
-									}
-									curPara.seqs = append(curPara.seqs, *seq)
-									if testing {
-										fmt.Printf("  curPara depth %d  has %d seqs\n",
-											h.depth, len(curPara.seqs))
-									}
-								}
-							}
-						}
 					}
 				}
 
 			} else {
 				blankLine = true
 			}
-			if blankLine {
-				// we got a blank line
-				ls, err := NewLineSep(q.lineSep)
-				if err == nil {
-					if curPara != nil {
-						h.AddBlock(curPara)
-						curPara = nil
-						lastBlockLineSep = false
+		}
+		// DEFAULT: PARA --------------------------
+		// If we have parsed the line, we hang the block off
+		// the document.  Otherwise, we treat whatever we have
+		// as a sequence of spans and make a Para out of it.
+		if err == nil || err == io.EOF {
+			if b != nil {
+				h.AddBlock(b)
+				lastBlockLineSep = false
+			} else if !blankLine && !lineProcessed { // XXX CHANGE 2014-01-20
+				// default parser
+				var seq *SpanSeq
+				seq, err = q.parseSpanSeq(p.opt,
+					doc, from, true)
+				if err == nil || err == io.EOF {
+					if curPara == nil {
+						curPara = new(Para)
 					}
-					if !lastBlockLineSep {
-						h.AddBlock(ls)
-						lastBlockLineSep = true
+					if testing {
+						fmt.Printf("* adding seq to curPara\n")
+					}
+					curPara.seqs = append(curPara.seqs, *seq)
+					if testing {
+						fmt.Printf("  curPara depth %d  has %d seqs\n",
+							h.depth, len(curPara.seqs))
 					}
 				}
 			}
-		}
+		} // end DEFAULT: PARA
+		if blankLine && !lineProcessed { // CHANGE 2014-01-20
+			// we got a blank line
+			ls, err := NewLineSep(q.lineSep)
+			if err == nil {
+				if curPara != nil {
+					h.AddBlock(curPara)
+					curPara = nil
+					lastBlockLineSep = false
+				}
+				if !lastBlockLineSep {
+					h.AddBlock(ls)
+					lastBlockLineSep = true
+				}
+			}
+		} // FOO
+
 		// prepare for next iteration ---------------------
 		if err != nil || eofSeen || iAmDone {
 			// DEBUG
@@ -386,16 +394,26 @@ func (h *Holder) ParseHolder(p *Parser,
 			if ok {
 				err = q.Err
 			} else {
+				// DEBUG
+				fmt.Println("select, in: !ok so fatalError")
+				// END
 				fatalError = true
 				break
 			}
 		case stopped, ok = <-stop:
+			// DEBUG
+			if testing {
+				fmt.Printf("GOT STOPPED\n")
+			}
+			// END
 			if !ok {
+				// DEBUG
+				fmt.Println("select, stop: !ok so fatalError")
+				// END
 				fatalError = true
 				break
 			} else {
-				_ = stopped        // not yet used - and so far unnecessary
-				sayGoodBye = false // XXX WRONG
+				sayGoodBye = true
 				break
 			}
 		}
@@ -408,7 +426,7 @@ func (h *Holder) ParseHolder(p *Parser,
 		}
 		if len(q.runes) == 0 {
 			if testing {
-				fmt.Printf("ZERO-LENGTH LINE")
+				fmt.Println("ZERO-LENGTH LINE")
 			}
 			if len(q.lineSep) == 0 && q.lineSep[0] == rune(0) {
 				break
@@ -432,7 +450,8 @@ func (h *Holder) ParseHolder(p *Parser,
 			if curPara != nil {
 				// DEBUG
 				if testing {
-					fmt.Printf("depth %d: have dangling curPara\n", h.depth)
+					fmt.Printf("depth %d: have dangling curPara '%s'\n",
+						h.depth, string(curPara.Get()))
 				}
 				// END
 				h.AddBlock(curPara)

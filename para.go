@@ -32,10 +32,17 @@ func (p *Para) Get() (runes []rune) {
 			runes = append(runes, p.seqs[i].lineSep...)
 		}
 	}
+	// XXX PROVISIONAL - could be loop
+	ndxLast := len(runes) - 1
+	if ndxLast >= 0 && (runes[ndxLast] == CR || runes[ndxLast] == LF) {
+		runes = runes[:ndxLast]
+	}
+	// END PROVO
+
 	runes = append(runes, PARA_CLOSE...)
 	runes = append(runes, p.seqs[len(p.seqs)-1].lineSep...)
 	// DEBUG
-	// fmt.Printf("SPAN: '%s'\n", string(runes))
+	fmt.Printf("SPAN: '%s'\n", string(runes))
 	// END
 	return
 }

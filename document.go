@@ -60,73 +60,81 @@ func (q *Document) AddLinkDefinition(id string, uri, title []rune) (
 }
 
 func (q *Document) Get() (body []rune) {
-	var (
-		inUnordered bool
-		inOrdered   bool
-	)
-	for i := 0; i < len(q.blocks)-1; i++ {
+	if len(q.blocks) > 0 {
+		var (
+			inUnordered bool
+			inOrdered   bool
+			testing     = q.opt.Testing
+		)
+		// DEBUG
+		if testing {
+			fmt.Printf("Document.Get(): have %d blocks\n", len(q.blocks))
+		}
+		// END
+		for i := 0; i < len(q.blocks)-1; i++ {
 
-		block := q.blocks[i]
-		content := block.Get()
+			block := q.blocks[i]
+			content := block.Get()
 
-		switch block.(type) {
-		case *Ordered:
-			if inUnordered {
-				inUnordered = false
-				body = append(body, UL_CLOSE...)
+			switch block.(type) {
+			case *Ordered:
+				if inUnordered {
+					inUnordered = false
+					body = append(body, UL_CLOSE...)
+				}
+				if !inOrdered {
+					inOrdered = true
+					body = append(body, OL_OPEN...)
+				}
+			case *Unordered:
+				if inOrdered {
+					inOrdered = false
+					body = append(body, OL_CLOSE...)
+				}
+				if !inUnordered {
+					inUnordered = true
+					body = append(body, UL_OPEN...)
+				}
+			default:
+				if inUnordered {
+					body = append(body, UL_CLOSE...)
+					inUnordered = false
+				}
+				if inOrdered {
+					body = append(body, OL_CLOSE...)
+					inOrdered = false
+				}
 			}
-			if !inOrdered {
-				inOrdered = true
-				body = append(body, OL_OPEN...)
-			}
-		case *Unordered:
-			if inOrdered {
-				inOrdered = false
-				body = append(body, OL_CLOSE...)
-			}
-			if !inUnordered {
-				inUnordered = true
-				body = append(body, UL_OPEN...)
+			body = append(body, content...)
+
+		}
+
+		// output last block IF it is not a LineSep
+		lastBlock := q.blocks[len(q.blocks)-1]
+		switch lastBlock.(type) {
+		case *LineSep:
+			// do nothing
+			if testing {
+				fmt.Printf("skipping final LineSep\n") // DEBUG
 			}
 		default:
-			if inUnordered {
-				body = append(body, UL_CLOSE...)
-				inUnordered = false
+			// DEBUG
+			if testing {
+				fmt.Printf("outputting '%s'\n", string(lastBlock.Get()))
 			}
-			if inOrdered {
-				body = append(body, OL_CLOSE...)
-				inOrdered = false
-			}
+			// END
+			body = append(body, lastBlock.Get()...)
 		}
-		body = append(body, content...)
-
+		if inOrdered {
+			body = append(body, OL_CLOSE...)
+		}
+		if inUnordered {
+			body = append(body, UL_CLOSE...)
+		}
+		// drop any terminating CR/LF
+		for body[len(body)-1] == '\n' || body[len(body)-1] == '\r' {
+			body = body[:len(body)-1]
+		}
 	}
-
-	// output last block IF it is not a LineSep
-	lastBlock := q.blocks[len(q.blocks)-1]
-	switch lastBlock.(type) {
-	case *LineSep:
-		// do nothing
-		fmt.Printf("skipping final LineSep\n") // DEBUG
-	default:
-		// DEBUG
-		fmt.Printf("outputting '%s'\n", string(lastBlock.Get()))
-		// END
-		body = append(body, lastBlock.Get()...)
-	}
-	if inOrdered {
-		body = append(body, OL_CLOSE...)
-	}
-	if inUnordered {
-		body = append(body, UL_CLOSE...)
-	}
-	// drop any terminating CR/LF
-	for body[len(body)-1] == '\n' || body[len(body)-1] == '\r' {
-		body = body[:len(body)-1]
-	}
-
-	// DEBUG
-	fmt.Printf("Doc.Get returning '%s'\n", string(body))
-	// END
 	return
 }
