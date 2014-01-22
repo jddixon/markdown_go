@@ -23,13 +23,14 @@ func NewBlockquote(opt *Options, depth uint) (bq *Blockquote, err error) {
 }
 
 func (bq *Blockquote) Get() (runes []rune) {
+	runes = append(runes, LF)
 	runes = append(runes, BLOCKQUOTE_OPEN...)
 	for i := 0; i < bq.Size(); i++ {
 		block, _ := bq.GetBlock(i)
 		runes = append(runes, block.Get()...)
 	}
 	// XXX A HACK
-	runes = append(runes, '\n')
+	//runes = append(runes, '\n')
 	// END HACK
 	runes = append(runes, BLOCKQUOTE_CLOSE...)
 	return

@@ -136,5 +136,9 @@ func (q *Document) Get() (body []rune) {
 			body = body[:len(body)-1]
 		}
 	}
+	// XXX Blockquote is preceded by LF
+	if len(body) > 0 && body[0] == LF {
+		body = body[1:]
+	}
 	return
 }

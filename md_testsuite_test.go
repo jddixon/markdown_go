@@ -41,7 +41,7 @@ var (
 		//"blockquote-multiline-1-space-end",	// \u00a0 replaces space
 		"blockquote-multiline-2-paragraphs",
 		"blockquote-multiline",
-		//"blockquote-nested",					// XXX WORKING HERE; text lost
+		"blockquote-nested", // XXX WORKING HERE; text lost
 		//"blockquote-nested-multiplereturn-level1",
 		//"blockquote-nested-multiplereturn",
 		//"blockquote-nested-return-level1",	// infinite recursion ;-)

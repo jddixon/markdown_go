@@ -1,5 +1,13 @@
 xgo/md/TODO
 
+2014-01-21
+    * SkipChevrons() must detect that we have to few chevrons
+        and tell the caller, so that it can handle the end of
+        nested blockquotes correctly
+    * Possibly related: need to fix blockquote-nested test,
+        where expected differs from actual by a couple of 
+        newlines.
+
 2014-01-20
     * review provisional code in para.go
 
