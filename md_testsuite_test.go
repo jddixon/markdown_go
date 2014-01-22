@@ -44,7 +44,7 @@ var (
 		//"blockquote-nested",					// XXX WORKING HERE; text lost
 		//"blockquote-nested-multiplereturn-level1",
 		//"blockquote-nested-multiplereturn",
-		//"blockquote-nested-return-level1",
+		//"blockquote-nested-return-level1",	// infinite recursion ;-)
 		//"code-1-tab",
 		//"code-4-spaces-escaping",
 		//"code-4-spaces",

@@ -61,9 +61,9 @@ func (h *Holder) GetBlock(n int) (block BlockI, err error) {
 // beyond the chevron, skip that too.
 func SkipChevrons(q *Line, depth uint) (from uint) {
 
-	var count uint
+	var count, offset uint
 	eol := uint(len(q.runes))
-	for offset := uint(0); offset < eol; offset++ {
+	for offset = uint(0); offset < eol; offset++ {
 		if q.runes[offset] == '>' {
 			count++
 			if count >= depth {
@@ -83,6 +83,7 @@ func (h *Holder) ParseHolder(p *Parser,
 
 	doc := p.GetDocument()
 	var (
+		lostChild        BlockI
 		eofSeen          bool
 		err              error
 		fatalError       bool
@@ -117,9 +118,7 @@ func (h *Holder) ParseHolder(p *Parser,
 	if p.opt.Testing {
 		fmt.Printf("ParseHolder depth %d: first line is '%s'\n",
 			h.depth, string(q.runes))
-		if err == nil {
-			fmt.Println("    nil error")
-		} else {
+		if err != nil {
 			fmt.Printf("    error = %s\n", err.Error())
 		}
 	}
@@ -136,6 +135,7 @@ func (h *Holder) ParseHolder(p *Parser,
 			from          uint
 			statusChild   int
 		)
+		b = nil
 		lineLen := uint(len(q.runes))
 		if lineLen == 0 {
 			blankLine = true
@@ -157,8 +157,8 @@ func (h *Holder) ParseHolder(p *Parser,
 				// END
 
 				// h.blocks = append(h.blocks, child)
-				b = child
-				lineProcessed = true
+				lostChild = child
+				lineProcessed = true // we are at EOF
 				// child = nil
 
 			} else {
@@ -188,8 +188,7 @@ func (h *Holder) ParseHolder(p *Parser,
 						}
 						// END
 						// h.blocks = append(h.blocks, child)
-						b = child
-						lineProcessed = true
+						lostChild = child
 					}
 					// child = nil
 				} // FOO
@@ -398,32 +397,50 @@ func (h *Holder) ParseHolder(p *Parser,
 				fmt.Println("select, in: !ok so fatalError")
 				// END
 				fatalError = true
-				break
 			}
 		case stopped, ok = <-stop:
 			// DEBUG
 			if testing {
-				fmt.Printf("GOT STOPPED\n")
+				fmt.Printf("HOLDER %d HAS BEEN STOPPED\n", h.depth)
 			}
 			// END
 			if !ok {
 				// DEBUG
-				fmt.Println("select, stop: !ok so fatalError")
+				if testing {
+					fmt.Println("select, stop: !ok so fatalError")
+				}
 				// END
 				fatalError = true
-				break
 			} else {
 				sayGoodBye = true
-				break
 			}
+			if !fatalError && haveChild {
+				stopChild <- true
+				statusChild = <-fromChild
+
+				// DEBUG
+				if p.opt.Testing {
+					fmt.Printf("*** DEPTH %d STOPPED: QUEUING CHILD ***\n",
+						h.depth)
+					fmt.Printf("    statusChild is 0x%x\n", statusChild)
+					fmt.Printf("    BLOCKQUOTE: %s\n",
+						string(child.Get()))
+				}
+				// END
+
+				lostChild = child // that is, append it
+				haveChild = false
+			}
+			break
 		}
 		if err == io.EOF {
 			eofSeen = true
 		}
-		// -- ack ---------------------------------------------------
-		if (err != nil && err != io.EOF) || q == nil {
+		// BREAK-FORCING CONDITIONS -----------------------
+		if (err != nil && err != io.EOF) || fatalError || q == nil {
 			break
 		}
+		// ------------------------------------------------
 		if len(q.runes) == 0 {
 			if testing {
 				fmt.Println("ZERO-LENGTH LINE")
@@ -441,9 +458,10 @@ func (h *Holder) ParseHolder(p *Parser,
 
 	if !fatalError {
 		if err == nil || err == io.EOF {
+			// XXX should never happen
 			if haveChild {
 				if testing {
-					fmt.Println("*** APPENDING BLOCKQUOTE: C ***")
+					fmt.Println("*** APPENDING BLOCKQUOTE OUTSIDE LOOP ***")
 				}
 				h.blocks = append(h.blocks, child)
 			}
@@ -457,20 +475,30 @@ func (h *Holder) ParseHolder(p *Parser,
 				h.AddBlock(curPara)
 				curPara = nil
 			}
+			if lostChild != nil {
+				h.AddBlock(lostChild)
+				lastBlockLineSep = false
+			}
 			// DEBUG
 			if testing {
 				fmt.Printf("parseHolder depth %d returning; holder has %d blocks\n",
 					h.depth, len(h.blocks))
 				for i := 0; i < len(h.blocks); i++ {
-					fmt.Printf("BLOCK %d:%d: '%s'\n",
+					fmt.Printf("    BLOCK %d:%d:\n'%s'\n",
 						h.depth, i, string(h.blocks[i].Get()))
 				}
 			}
 			// END
 		}
 		if sayGoodBye {
-			// XXX WRONG!
+			if testing {
+				fmt.Printf("saying goodbye, depth %d ... \n", h.depth)
+			}
+			// XXX THE LAST_LINE_PROCESSED SHOULD BE CONDITIONED
 			resp <- DONE | LAST_LINE_PROCESSED
+			if testing {
+				fmt.Printf("    goodbye said, depth %d\n", h.depth)
+			}
 		}
 	}
 
