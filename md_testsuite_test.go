@@ -41,10 +41,10 @@ var (
 		//"blockquote-multiline-1-space-end",	// \u00a0 replaces space
 		"blockquote-multiline-2-paragraphs",
 		"blockquote-multiline",
-		"blockquote-nested", // XXX WORKING HERE; text lost
-		//"blockquote-nested-multiplereturn-level1",
-		//"blockquote-nested-multiplereturn",
-		//"blockquote-nested-return-level1",	// infinite recursion ;-)
+		"blockquote-nested",
+		//"blockquote-nested-multiplereturn-level1",  // infinite recursion
+		//"blockquote-nested-multiplereturn",	// nested blank line 
+		//"blockquote-nested-return-level1",	// infinite recursion 
 		//"code-1-tab",
 		//"code-4-spaces-escaping",
 		//"code-4-spaces",

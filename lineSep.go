@@ -59,8 +59,8 @@ func (ls *LineSep) Add(ch rune) (err error) {
 // XXX This may not accord with Markdown practice.
 func (ls *LineSep) Get() []rune {
 	// DEBUG
-	fmt.Printf("LineSep.Get() returning %d runes; first is 0x%02x\n",
-		len(ls.runes), ls.runes[0])
+	//fmt.Printf("LineSep.Get() returning %d runes; first is 0x%02x\n",
+	//	len(ls.runes), ls.runes[0])
 	// END
 	return ls.runes
 }
