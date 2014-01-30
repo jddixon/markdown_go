@@ -14,6 +14,7 @@ type Holder struct {
 	opt          *Options
 	isBlockquote bool
 	depth        uint
+	curPara      *Para
 	blocks       []BlockI
 }
 
@@ -58,10 +59,11 @@ func (h *Holder) GetBlock(n int) (block BlockI, err error) {
 
 // Return an offset 1 beyond the number of chevrons ('>') expected
 // for this depth.  At depth N, we skip N.  If there is a space
-// beyond the chevron, skip that too.
-func SkipChevrons(q *Line, depth uint) (from uint) {
+// beyond the chevron, skip that too.  The actual number of
+// chevrons found is returned.
+func SkipChevrons(q *Line, depth uint) (count, from uint) {
 
-	var count, offset uint
+	var offset uint
 	eol := uint(len(q.runes))
 	for offset = uint(0); offset < eol; offset++ {
 		if q.runes[offset] == '>' {
@@ -78,6 +80,23 @@ func SkipChevrons(q *Line, depth uint) (from uint) {
 	return
 }
 
+func (h *Holder) dumpAnyPara(addNewLine, testing bool) {
+	if h.curPara != nil {
+		// DEBUG
+		if testing {
+			fmt.Printf("depth %d: have dangling h.curPara '%s'\n",
+				h.depth, string(h.curPara.Get()))
+		}
+		// END
+		h.AddBlock(h.curPara)
+		if addNewLine {
+			newLine := []rune{'\n'}
+			lineSep, _ := NewLineSep(newLine)
+			h.AddBlock(lineSep)
+		}
+		h.curPara = nil
+	}
+}
 func (h *Holder) ParseHolder(p *Parser,
 	in chan *Line, resp chan int, stop chan bool) {
 
@@ -88,7 +107,7 @@ func (h *Holder) ParseHolder(p *Parser,
 		err              error
 		fatalError       bool
 		iAmDone          bool
-		curPara          *Para
+		lineProcessed    bool
 		q                *Line
 		ch0              rune
 		lastBlockLineSep bool
@@ -116,7 +135,7 @@ func (h *Holder) ParseHolder(p *Parser,
 
 	// DEBUG
 	if p.opt.Testing {
-		fmt.Printf("ParseHolder depth %d: first line is '%s'\n",
+		fmt.Printf("entering ParseHolder depth %d: first line is '%s'\n",
 			h.depth, string(q.runes))
 		if err != nil {
 			fmt.Printf("    error = %s\n", err.Error())
@@ -124,17 +143,17 @@ func (h *Holder) ParseHolder(p *Parser,
 	}
 	// END
 
-	sayGoodBye := true
+	sayGoodbye := true
 
 	// pass through the document line by line
 	for (err == nil || err == io.EOF) && !iAmDone && !stopped {
 		var (
-			b             BlockI
-			blankLine     bool
-			lineProcessed bool
-			from          uint
-			statusChild   int
+			b           BlockI
+			blankLine   bool
+			from        uint
+			statusChild int
 		)
+		lineProcessed = false
 		b = nil
 		lineLen := uint(len(q.runes))
 		if lineLen == 0 {
@@ -170,24 +189,23 @@ func (h *Holder) ParseHolder(p *Parser,
 				// END
 				toChild <- q
 				statusChild = <-fromChild
-				lineProcessed = statusChild == ACK ||
+				lineProcessed = (statusChild == ACK) ||
 					(statusChild == (DONE | LAST_LINE_PROCESSED))
+				// DEBUG
+				if testing {
+					fmt.Printf("child status = 0x%x : ", statusChild)
+					if lineProcessed {
+						fmt.Println("child has processed line")
+					} else {
+						fmt.Println("child has NOT processed line")
+					}
+				}
+				// END
 				// child may have set q.err
 				err = q.Err
 				if err != nil || (statusChild&DONE != 0) {
 					haveChild = false
 					if err == nil || err == io.EOF {
-						// DEBUG
-						if testing {
-							fmt.Printf("*** DEPTH %d APPENDING BLOCKQUOTE: AFTER '%s' ***\n",
-								h.depth, string(q.runes))
-							fmt.Printf("    err is %v\n", err)
-							fmt.Printf("    statusChild is 0x%x\n", statusChild)
-							fmt.Printf("    APPENDED %s\n",
-								string(child.Get()))
-						}
-						// END
-						// h.blocks = append(h.blocks, child)
 						lostChild = child
 					}
 					// child = nil
@@ -197,13 +215,16 @@ func (h *Holder) ParseHolder(p *Parser,
 		if !lineProcessed {
 			if lineLen > 0 {
 				if h.depth > 0 {
-					from = SkipChevrons(q, h.depth)
-					// DEBUG
+					var count uint
+					count, from = SkipChevrons(q, h.depth)
 					if testing {
-						fmt.Printf("depth %d, length %d, SkipChevrons sets from to %d\n",
-							h.depth, lineLen, from)
+						fmt.Printf("depth %d, length %d, SkipChevrons finds %d, sets from to %d\n",
+							h.depth, count, lineLen, from)
 					}
-					// END
+					if count < h.depth {
+						lineProcessed = false
+						break
+					}
 					if from >= lineLen {
 						blankLine = true
 					}
@@ -219,6 +240,7 @@ func (h *Holder) ParseHolder(p *Parser,
 						fmt.Printf("*** CREATED BLOCKQUOTE, DEPTH %d ***\n",
 							h.depth+1)
 					}
+					h.dumpAnyPara(true, testing)
 					go child.ParseHolder(p, toChild, fromChild, stopChild)
 					haveChild = true
 					statusChild := <-fromChild // setup complete
@@ -231,9 +253,19 @@ func (h *Holder) ParseHolder(p *Parser,
 					// END
 					toChild <- q
 					statusChild = <-fromChild
-					lineProcessed = statusChild == ACK ||
+					lineProcessed = (statusChild == ACK) ||
 						(statusChild == (DONE | LAST_LINE_PROCESSED))
 
+					// DEBUG
+					if testing {
+						fmt.Printf("new child status = 0x%x : ", statusChild)
+						if lineProcessed {
+							fmt.Println("child has processed line")
+						} else {
+							fmt.Println("child has NOT processed line")
+						}
+					}
+					// END
 					// child may have set q.err
 					err = q.Err
 					if err != nil || (statusChild&LAST_LINE_PROCESSED != 0) {
@@ -335,27 +367,28 @@ func (h *Holder) ParseHolder(p *Parser,
 				seq, err = q.parseSpanSeq(p.opt,
 					doc, from, true)
 				if err == nil || err == io.EOF {
-					if curPara == nil {
-						curPara = new(Para)
+					if h.curPara == nil {
+						h.curPara = new(Para)
 					}
 					if testing {
-						fmt.Printf("* adding seq to curPara\n")
+						fmt.Printf("* adding seq to h.curPara\n")
 					}
-					curPara.seqs = append(curPara.seqs, *seq)
+					h.curPara.seqs = append(h.curPara.seqs, *seq)
 					if testing {
-						fmt.Printf("  curPara depth %d  has %d seqs\n",
-							h.depth, len(curPara.seqs))
+						fmt.Printf("  h.curPara depth %d  has %d seqs\n",
+							h.depth, len(h.curPara.seqs))
 					}
 				}
+				lineProcessed = true
 			}
 		} // end DEFAULT: PARA
 		if blankLine && !lineProcessed { // CHANGE 2014-01-20
 			// we got a blank line
 			ls, err := NewLineSep(q.lineSep)
 			if err == nil {
-				if curPara != nil {
-					h.AddBlock(curPara)
-					curPara = nil
+				if h.curPara != nil {
+					h.AddBlock(h.curPara)
+					h.curPara = nil
 					lastBlockLineSep = false
 				}
 				if !lastBlockLineSep {
@@ -380,13 +413,18 @@ func (h *Holder) ParseHolder(p *Parser,
 			}
 			// END
 
-			// XXX LAST_LINE_PROCESSED SHOULD BE CONDITIONAL
-			resp <- DONE | LAST_LINE_PROCESSED
+			// THIS IS DANGEROUS
+			//myStatus := DONE
+			//if lineProcessed:
+			//	myStatus |= LASTLINE_PROCESSED
+			//resp <- myStatus
+
+			sayGoodbye = true
 			break
 		}
 
-		resp <- ACK
 		// -- in ----------------------------------------------------
+		resp <- ACK
 		var ok bool
 		select {
 		case q, ok = <-in:
@@ -412,7 +450,6 @@ func (h *Holder) ParseHolder(p *Parser,
 				// END
 				fatalError = true
 			} else {
-				sayGoodBye = true
 			}
 			if !fatalError && haveChild {
 				stopChild <- true
@@ -437,6 +474,10 @@ func (h *Holder) ParseHolder(p *Parser,
 			eofSeen = true
 		}
 		// BREAK-FORCING CONDITIONS -----------------------
+		if stopped {
+			sayGoodbye = true
+			break
+		}
 		if (err != nil && err != io.EOF) || fatalError || q == nil {
 			break
 		}
@@ -451,7 +492,8 @@ func (h *Holder) ParseHolder(p *Parser,
 		}
 		// DEBUG
 		if testing {
-			fmt.Printf("Parse: next line is '%s'\n", string(q.runes))
+			fmt.Printf("ParseHolder %d, bottom for loop: next line is '%s'\n",
+				h.depth, string(q.runes))
 		}
 		// END
 	} // END FOR LOOP -----------------------------------------------
@@ -465,20 +507,21 @@ func (h *Holder) ParseHolder(p *Parser,
 				}
 				h.blocks = append(h.blocks, child)
 			}
-			if curPara != nil {
+			if lostChild != nil {
 				// DEBUG
 				if testing {
-					fmt.Printf("depth %d: have dangling curPara '%s'\n",
-						h.depth, string(curPara.Get()))
+					fmt.Printf(
+						"*** DEPTH %d APPENDING LOSTCHILD BLOCKQUOTE ***\n",
+						h.depth)
+					fmt.Printf("    err is %v\n", err)
+					fmt.Printf("    APPENDED %s\n",
+						string(lostChild.Get()))
 				}
-				// END
-				h.AddBlock(curPara)
-				curPara = nil
-			}
-			if lostChild != nil {
+				// END	// GEEP
 				h.AddBlock(lostChild)
 				lastBlockLineSep = false
 			}
+			h.dumpAnyPara(false, testing)
 			// DEBUG
 			if testing {
 				fmt.Printf("parseHolder depth %d returning; holder has %d blocks\n",
@@ -490,12 +533,15 @@ func (h *Holder) ParseHolder(p *Parser,
 			}
 			// END
 		}
-		if sayGoodBye {
+		if sayGoodbye {
 			if testing {
 				fmt.Printf("saying goodbye, depth %d ... \n", h.depth)
 			}
-			// XXX THE LAST_LINE_PROCESSED SHOULD BE CONDITIONED
-			resp <- DONE | LAST_LINE_PROCESSED
+			myStatus := DONE
+			if lineProcessed {
+				myStatus = myStatus | LAST_LINE_PROCESSED
+			}
+			resp <- myStatus
 			if testing {
 				fmt.Printf("    goodbye said, depth %d\n", h.depth)
 			}

@@ -23,7 +23,7 @@ func NewBlockquote(opt *Options, depth uint) (bq *Blockquote, err error) {
 }
 
 func (bq *Blockquote) Get() (runes []rune) {
-	runes = append(runes, LF)
+	// runes = append(runes, LF)
 	runes = append(runes, BLOCKQUOTE_OPEN...)
 	for i := 0; i < bq.Size(); i++ {
 		block, _ := bq.GetBlock(i)

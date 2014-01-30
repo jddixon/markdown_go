@@ -42,9 +42,9 @@ var (
 		"blockquote-multiline-2-paragraphs",
 		"blockquote-multiline",
 		"blockquote-nested",
-		//"blockquote-nested-multiplereturn-level1",  // infinite recursion
-		//"blockquote-nested-multiplereturn",	// nested blank line 
-		//"blockquote-nested-return-level1",	// infinite recursion 
+		//"blockquote-nested-multiplereturn-level1",  // extra newline
+		"blockquote-nested-multiplereturn", // nested blank line
+		//"blockquote-nested-return-level1",	// ERROR IN TEST ?
 		//"code-1-tab",
 		//"code-4-spaces-escaping",
 		//"code-4-spaces",

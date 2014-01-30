@@ -181,7 +181,9 @@ func (p *Parser) Parse() (doc *Document, err error) {
 	if lastWasDef {
 		stop <- true
 	}
-	status = <-resp
+	// 2014-01-29
+	//status = <-resp
+
 	_ = status // UNUSED
 	if err == nil && eofSeen {
 		err = io.EOF
