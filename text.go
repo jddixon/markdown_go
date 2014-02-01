@@ -9,7 +9,14 @@ type Text struct {
 
 func NewText(runes []rune) (t *Text) {
 	txt := make([]rune, len(runes))
-	copy(txt, runes)
+	// copy(txt, runes)
+	for i := 0; i < len(runes); i++ {
+		r := runes[i]
+		if r == rune(0x00a0) {
+			r = rune(0x20)
+		}
+		txt[i] = r
+	}
 	return &Text{runes: txt}
 }
 

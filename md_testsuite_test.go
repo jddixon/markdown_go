@@ -38,13 +38,13 @@ var (
 		"blockquote-line-2-paragraphs",
 		"blockquote-line",
 		"blockquote-multiline-1-space-begin",
-		//"blockquote-multiline-1-space-end",	// \u00a0 replaces space
+		"blockquote-multiline-1-space-end", // \u00a0 must become space
 		"blockquote-multiline-2-paragraphs",
 		"blockquote-multiline",
 		"blockquote-nested",
-		//"blockquote-nested-multiplereturn-level1",  // extra newline
+		//"blockquote-nested-multiplereturn-level1",  // needs extra newline
 		"blockquote-nested-multiplereturn", // nested blank line
-		//"blockquote-nested-return-level1",	// ERROR IN TEST ?
+		//"blockquote-nested-return-level1",	// treatment of blank line
 		//"code-1-tab",
 		//"code-4-spaces-escaping",
 		//"code-4-spaces",
@@ -59,7 +59,7 @@ var (
 		"header-level1-hash-sign-closed",
 		"header-level1-hash-sign",
 		"header-level1-hash-sign-trailing-1-space",
-		//"header-level1-hash-sign-trailing-2-spaces", // shd force blank line
+		//"header-level1-hash-sign-trailing-2-spaces", // shd become <br />
 		"header-level2-hash-sign-closed",
 		"header-level2-hash-sign",
 		"header-level3-hash-sign-closed",
@@ -82,7 +82,7 @@ var (
 		"inline-code-escaping-entities",
 		// "inline-code",				// tests doubled backtick
 		//"inline-code-with-visible-backtick",
-		// "line-break-2-spaces",		// spaces at end of line => <br />
+		"line-break-2-spaces", // spaces at end of line => <br />
 		// "line-break-5-spaces",		// spaces at end of line => <br />
 		// "link-automatic-email",
 		// "link-automatic",
