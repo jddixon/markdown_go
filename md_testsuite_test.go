@@ -59,7 +59,7 @@ var (
 		"header-level1-hash-sign-closed",
 		"header-level1-hash-sign",
 		"header-level1-hash-sign-trailing-1-space",
-		//"header-level1-hash-sign-trailing-2-spaces", // shd become <br />
+		"header-level1-hash-sign-trailing-2-spaces", // force extra newline
 		"header-level2-hash-sign-closed",
 		"header-level2-hash-sign",
 		"header-level3-hash-sign-closed",
@@ -83,7 +83,7 @@ var (
 		// "inline-code",				// tests doubled backtick
 		//"inline-code-with-visible-backtick",
 		"line-break-2-spaces", // spaces at end of line => <br />
-		// "line-break-5-spaces",		// spaces at end of line => <br />
+		"line-break-5-spaces", // spaces at end of line => <br />
 		// "link-automatic-email",
 		// "link-automatic",
 		"link-bracket-paranthesis",

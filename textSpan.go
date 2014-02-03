@@ -1,13 +1,13 @@
 package md
 
-// xgo/md/text.go
+// xgo/md/textSpan.go
 
 // A run of simple text.
-type Text struct {
+type TextSpan struct {
 	runes []rune
 }
 
-func NewText(runes []rune) (t *Text) {
+func NewTextSpan(runes []rune) (t *TextSpan) {
 	txt := make([]rune, len(runes))
 	// copy(txt, runes)
 	for i := 0; i < len(runes); i++ {
@@ -17,9 +17,9 @@ func NewText(runes []rune) (t *Text) {
 		}
 		txt[i] = r
 	}
-	return &Text{runes: txt}
+	return &TextSpan{runes: txt}
 }
 
-func (t *Text) Get() []rune {
+func (t *TextSpan) Get() []rune {
 	return t.runes
 }

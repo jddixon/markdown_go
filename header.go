@@ -41,7 +41,7 @@ func (h *Header) Get() []rune {
 // is no other error, return nil for both Header and error.  If the parse
 // succeeds, return a non-nil Header.
 //
-func (q *Line) parseHeader(from uint) (b BlockI, err error) {
+func (q *Line) parseHeader(from uint) (b BlockI, forceNL bool, err error) {
 
 	var (
 		eol                  uint = uint(len(q.runes))
@@ -91,13 +91,18 @@ func (q *Line) parseHeader(from uint) (b BlockI, err error) {
 	}
 
 	// if we have a title -------------------------------------------
+	spaceCount := 0
 	if titleStart > 0 && titleEnd > 0 {
 
 		// drop any trailing spaces -----------------------
 		for q.runes[titleEnd-1] == ' ' {
 			titleEnd--
+			spaceCount++ // count of spaces seen at end of line
 		}
 		if titleEnd > titleStart {
+			if spaceCount >= 2 {
+				forceNL = true
+			}
 			// create the object --------------------------
 			b, _ = NewHeader(hashCount, q.runes[titleStart:titleEnd])
 		}

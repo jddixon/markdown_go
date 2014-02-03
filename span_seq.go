@@ -79,32 +79,52 @@ func (q *Line) parseSpanSeq(opt *Options, doc *Document, from uint,
 							}
 						}
 					}
-					if len(curText) > 0 { // GEEP
-						seq.spans = append(seq.spans, NewText(curText))
+					if len(curText) > 0 {
+						seq.spans = append(seq.spans, NewTextSpan(curText))
 						curText = curText[:0]
 					}
 				}
 				seq.spans = append(seq.spans, span)
 				firstSpan = false
 			}
-		}
+		} // end for loop
+
 		if len(curText) > 0 {
-			if len(curText) > 0 {
-				if firstSpan && leftTrim {
-					if testing {
-						fmt.Println("LEFT-TRIMMING")
+			if firstSpan && leftTrim {
+				if testing {
+					fmt.Println("LEFT-TRIMMING")
+				}
+				// get rid of any leading spaces
+				for len(curText) > 0 {
+					if u.IsSpace(curText[0]) {
+						curText = curText[1:]
+					} else {
+						break
 					}
-					// get rid of any leading spaces
+				}
+			}
+			txtLen := len(curText)
+			if txtLen == 1 || txtLen == 2 {
+				seq.spans = append(seq.spans, NewTextSpan(curText))
+			} else if txtLen > 2 {
+				// convert trailing 2 spaces to <br />
+				if curText[txtLen-2] == ' ' && curText[txtLen-1] == ' ' {
+					curText = curText[:txtLen-2]
+					// drop any other trailing spaces too
 					for len(curText) > 0 {
-						if u.IsSpace(curText[0]) {
-							curText = curText[1:]
+						ndxLast := len(curText) - 1
+						if u.IsSpace(curText[ndxLast]) {
+							curText = curText[:ndxLast]
 						} else {
 							break
 						}
 					}
-				}
-				if len(curText) > 0 { // GEEP
-					seq.spans = append(seq.spans, NewText(curText))
+					if len(curText) > 0 {
+						seq.spans = append(seq.spans, NewTextSpan(curText))
+					}
+					seq.spans = append(seq.spans, NewBreakSpan())
+				} else {
+					seq.spans = append(seq.spans, NewTextSpan(curText))
 				}
 			}
 		}

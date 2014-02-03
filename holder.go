@@ -80,6 +80,11 @@ func SkipChevrons(q *Line, depth uint) (count, from uint) {
 	return
 }
 
+func (h *Holder) makeSimpleLineSep() (nl *LineSep) {
+	newLine := []rune{'\n'}
+	nl, _ = NewLineSep(newLine)
+	return
+}
 func (h *Holder) dumpAnyPara(addNewLine, testing bool) {
 	if h.curPara != nil {
 		// DEBUG
@@ -90,8 +95,7 @@ func (h *Holder) dumpAnyPara(addNewLine, testing bool) {
 		// END
 		h.AddBlock(h.curPara)
 		if addNewLine {
-			newLine := []rune{'\n'}
-			lineSep, _ := NewLineSep(newLine)
+			lineSep := h.makeSimpleLineSep()
 			h.AddBlock(lineSep)
 		}
 		h.curPara = nil
@@ -150,6 +154,7 @@ func (h *Holder) ParseHolder(p *Parser,
 		var (
 			b           BlockI
 			blankLine   bool
+			forceNL     bool
 			from        uint
 			statusChild int
 		)
@@ -286,7 +291,7 @@ func (h *Holder) ParseHolder(p *Parser,
 
 						// HEADERS --------------------------------
 						if ch0 == '#' {
-							b, err = q.parseHeader(from + 1)
+							b, forceNL, err = q.parseHeader(from + 1)
 						}
 
 						// HORIZONTAL RULES ----------------------
@@ -360,7 +365,13 @@ func (h *Holder) ParseHolder(p *Parser,
 		if err == nil || err == io.EOF {
 			if b != nil {
 				h.AddBlock(b)
-				lastBlockLineSep = false
+				if forceNL {
+					b = h.makeSimpleLineSep()
+					h.AddBlock(b)
+					lastBlockLineSep = true
+				} else {
+					lastBlockLineSep = false
+				}
 			} else if !blankLine && !lineProcessed { // XXX CHANGE 2014-01-20
 				// default parser
 				var seq *SpanSeq
