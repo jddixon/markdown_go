@@ -106,6 +106,7 @@ func (h *Holder) ParseHolder(p *Parser,
 
 	doc := p.GetDocument()
 	var (
+		codeBlock        = new(CodeBlock)
 		lostChild        BlockI
 		eofSeen          bool
 		err              error
@@ -282,6 +283,59 @@ func (h *Holder) ParseHolder(p *Parser,
 							h.blocks = append(h.blocks, child)
 						}
 						child = nil
+					}
+				}
+				if !lineProcessed && (err == nil || err == io.EOF) {
+					// if we are in a code block and this isn't code, dump
+					// the code block
+					eol := uint(len(q.runes))
+					spanLen := eol - from
+					dumpCode := false
+					if codeBlock.Size() > 0 { // we are in a code block
+						if blankLine {
+							dumpCode = true
+						} else {
+							ch0 = q.runes[from]
+							if ch0 == '\t' {
+								span := NewCodeLine(q.runes[from+1 : eol])
+								codeBlock.Add(span)
+								lineProcessed = true
+							} else if spanLen < 4 {
+								dumpCode = true
+							} else if ch0 == ' ' && q.runes[from+1] == ' ' &&
+								q.runes[from+2] == ' ' &&
+								q.runes[from+3] == ' ' {
+
+								span := NewCodeLine(q.runes[from+4 : eol])
+								codeBlock.Add(span)
+								lineProcessed = true
+							} else {
+								dumpCode = true
+							}
+						}
+					} else { // we are not in a code block
+						if !blankLine {
+							ch0 = q.runes[from]
+							if ch0 == '\t' {
+								h.dumpAnyPara(true, testing)
+								span := NewCodeLine(q.runes[from+1 : eol])
+								codeBlock.Add(span)
+								lineProcessed = true
+							} else if spanLen >= 4 && ch0 == ' ' &&
+								q.runes[from+1] == ' ' &&
+								q.runes[from+2] == ' ' &&
+								q.runes[from+3] == ' ' {
+
+								h.dumpAnyPara(true, testing)
+								span := NewCodeLine(q.runes[from+4 : eol])
+								codeBlock.Add(span)
+								lineProcessed = true
+							}
+						}
+					}
+					if dumpCode {
+						h.AddBlock(codeBlock)
+						codeBlock = new(CodeBlock)
 					}
 				}
 				if !lineProcessed {
@@ -511,6 +565,10 @@ func (h *Holder) ParseHolder(p *Parser,
 
 	if !fatalError {
 		if err == nil || err == io.EOF {
+			if codeBlock.Size() > 0 {
+				h.AddBlock(codeBlock)
+				codeBlock = new(CodeBlock) // pedantry
+			}
 			// XXX should never happen
 			if haveChild {
 				if testing {

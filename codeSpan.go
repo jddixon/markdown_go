@@ -1,6 +1,6 @@
 package md
 
-// xgo/md/codespan.go
+// xgo/md/codeSpan.go
 
 // In Markdown input text a code span begins with one or two backticks
 // and ends with the same number of backticks.  The delimiting backticks

@@ -17,6 +17,8 @@ var (
 
 	BLOCKQUOTE_OPEN  = []rune("<blockquote>\n")
 	BLOCKQUOTE_CLOSE = []rune("</blockquote>\n")
+	CODE_OPEN        = []rune("<pre><code>")
+	CODE_CLOSE       = []rune("</code></pre>\n")
 	EM_OPEN          = []rune("<em>")
 	EM_CLOSE         = []rune("</em>")
 	H_RULE           = []rune("<hr />")
