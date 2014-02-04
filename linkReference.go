@@ -27,7 +27,7 @@ type LinkReference struct {
 //
 func (ref *LinkReference) Get() (runes []rune) {
 
-	def := ref.doc.linkDict[ref.id]
+	def := ref.doc.refDict[ref.id]
 	uri := def.uri
 	title := def.title
 

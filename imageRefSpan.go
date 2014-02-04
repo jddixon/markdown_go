@@ -6,10 +6,6 @@ import (
 	"fmt"
 )
 
-// XXX --------------------------------------------------------------
-// THIS IS NOT QUITE RIGHT -- JUST HACKED FROM linkRefSpan.go
-// XXX --------------------------------------------------------------
-
 var _ = fmt.Print
 
 // In Markdown serialization, a ImageRef looks like
@@ -38,25 +34,26 @@ func NewImageRefSpan(doc *Document, altText []rune, id string) (
 	return
 }
 
-// XXX WE NEED A DICTIONARY TO MAKE THIS WORK
-
 func (ls *ImageRefSpan) Get() (out []rune) {
 
-	def := ls.doc.imgDict[ls.id]
+	def := ls.doc.refDict[ls.id]
 	uri := def.uri
 	title := def.title
 
-	out = append(out, []rune("<a href=\"")...)
+	out = append(out, []rune("<img src=\"")...)
 	out = append(out, uri...)
-	if title != nil {
-		out = append(out, []rune("\" title=\"")...)
-		out = append(out, title...)
-	}
-	out = append(out, []rune("\">")...)
+	out = append(out, '"')
 	if ls.altText != nil {
+		out = append(out, []rune(" alt=\"")...)
 		out = append(out, ls.altText...)
+		out = append(out, '"')
 	}
-	out = append(out, []rune("</a>")...)
+	if title != nil {
+		out = append(out, []rune(" title=\"")...)
+		out = append(out, title...)
+		out = append(out, '"')
+	}
+	out = append(out, []rune(" />")...)
 	return
 }
 

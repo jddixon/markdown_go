@@ -43,7 +43,7 @@ func (ls *LinkRefSpan) Get() (out []rune) {
 	} else {
 		key = ls.id
 	}
-	def := ls.doc.linkDict[key]
+	def := ls.doc.refDict[key]
 	uri := def.uri
 	title := def.title
 
@@ -77,10 +77,6 @@ func (ls *LinkRefSpan) Get() (out []rune) {
 //
 func (q *Line) parseLinkRefSpan(doc *Document) (span SpanI, err error) {
 
-	// DEBUG
-	fmt.Printf("parseLinkRefSpan, offset = %d, line '%s'\n",
-		q.offset+1, string(q.runes[q.offset:]))
-	// END
 	if doc == nil {
 		// DEBUG
 		fmt.Printf("parseLinkRefSpan: nil document!\n")
@@ -136,10 +132,6 @@ func (q *Line) parseLinkRefSpan(doc *Document) (span SpanI, err error) {
 			id = q.runes[idStart:idEnd]
 			lrSpan, err = NewLinkRefSpan(doc, linkText, string(id))
 			span = lrSpan
-			// DEBUG
-			fmt.Printf("parseLinkRefSpan succeeded, setting offset to %d\n",
-				offset+1)
-			// END
 			q.offset = offset + 1
 		}
 	}

@@ -9,8 +9,7 @@ import (
 var _ = fmt.Print
 
 type Document struct {
-	imgDict  map[string]*Definition
-	linkDict map[string]*Definition
+	refDict map[string]*Definition
 	Holder
 }
 
@@ -19,16 +18,15 @@ func NewDocument(opt *Options) (q *Document, err error) {
 	h, err := NewHolder(opt, false, uint(0)) // not Blockquote, depth 0
 	if err == nil {
 		q = &Document{
-			imgDict:  make(map[string]*Definition),
-			linkDict: make(map[string]*Definition),
-			Holder:   *h,
+			refDict: make(map[string]*Definition),
+			Holder:  *h,
 		}
 	}
 	return
 }
 
 // A pointer to the definition is returned to signal success.
-func (q *Document) AddImgDefinition(id string, uri, title []rune) (
+func (q *Document) AddDefinition(id string, uri, title []rune, isImg bool) (
 	def *Definition, err error) {
 
 	if id == "" {
@@ -37,24 +35,8 @@ func (q *Document) AddImgDefinition(id string, uri, title []rune) (
 		err = EmptyURI
 	} else {
 		// XXX Note that this allows duplicate definitions
-		def = &Definition{uri: uri, title: title}
-		q.imgDict[id] = def
-	}
-	return
-}
-
-// A pointer to the definition is returned to signal success.
-func (q *Document) AddLinkDefinition(id string, uri, title []rune) (
-	def *Definition, err error) {
-
-	if id == "" {
-		err = NilDocument
-	} else if len(uri) == 0 {
-		err = EmptyURI
-	} else {
-		// XXX Note that this allows duplicate definitions
-		def = &Definition{uri: uri, title: title}
-		q.linkDict[id] = def
+		def = &Definition{uri: uri, title: title, isImg: isImg}
+		q.refDict[id] = def
 	}
 	return
 }

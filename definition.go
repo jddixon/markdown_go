@@ -13,6 +13,7 @@ var _ = fmt.Print
 type Definition struct {
 	uri   []rune
 	title []rune
+	isImg bool
 }
 
 func (def *Definition) GetURI() string {
@@ -21,48 +22,6 @@ func (def *Definition) GetURI() string {
 
 func (def *Definition) GetTitle() string {
 	return string(def.title)
-}
-
-// XXX THIS IS CURRENTLY NOT USED
-
-// Given a candidate ID in text, strip off leading and trailing spaces
-// and then check that there are no spaces in the ID.  Return a valid
-// ID in string form or an error.
-func ValidID(text []rune) (validID string, err error) {
-	id := make([]rune, len(text))
-	copy(id, text)
-	// get rid of any leading spaces
-	for len(id) > 0 && u.IsSpace(id[0]) {
-		id = id[1:]
-	}
-	if len(id) == 0 {
-		err = NilID
-	} else {
-		// get rid of any trailing spaces
-		for err == nil {
-			if len(id) == 0 {
-				err = EmptyID
-			} else {
-				ndxLast := len(id) - 1
-				if u.IsSpace(id[ndxLast]) {
-					id = id[:ndxLast]
-				}
-			}
-		}
-	}
-	// this is a very loose definition of a valid ID!
-	// XXX AND IT'S WRONG: SPACES WITHIN THE ID ARE OK
-	if err == nil {
-		for i := 0; i < len(id); i++ {
-			if u.IsSpace(id[i]) {
-				err = InvalidCharInID
-			}
-		}
-	}
-	if err == nil {
-		validID = string(id)
-	}
-	return
 }
 
 // We are at the beginning of a line (possiblly with up to three leading
@@ -182,7 +141,7 @@ func (line *Line) parseLinkDefinition(opt *Options, doc *Document) (
 			if titleEnd > 0 {
 				title = line.runes[titleStart:titleEnd]
 			}
-			def, err = doc.AddLinkDefinition(id, uri, title)
+			def, err = doc.AddDefinition(id, uri, title, false) // isImg=false
 			// DEBUG
 			if testing {
 				if def == nil {
@@ -335,7 +294,7 @@ func (line *Line) parseImageDefinition(opt *Options, doc *Document) (
 			if titleEnd > 0 {
 				title = line.runes[titleStart:titleEnd]
 			}
-			def, err = doc.AddImgDefinition(id, uri, title)
+			def, err = doc.AddDefinition(id, uri, title, true) //isImg = true
 			// DEBUG
 			if testing {
 				if def == nil {
@@ -356,3 +315,45 @@ func (line *Line) parseImageDefinition(opt *Options, doc *Document) (
 	}
 	return
 }
+
+// XXX THIS IS CURRENTLY NOT USED
+
+// Given a candidate ID in text, strip off leading and trailing spaces
+// and then check that there are no spaces in the ID.  Return a valid
+// ID in string form or an error.
+func ValidID(text []rune) (validID string, err error) {
+	id := make([]rune, len(text))
+	copy(id, text)
+	// get rid of any leading spaces
+	for len(id) > 0 && u.IsSpace(id[0]) {
+		id = id[1:]
+	}
+	if len(id) == 0 {
+		err = NilID
+	} else {
+		// get rid of any trailing spaces
+		for err == nil {
+			if len(id) == 0 {
+				err = EmptyID
+			} else {
+				ndxLast := len(id) - 1
+				if u.IsSpace(id[ndxLast]) {
+					id = id[:ndxLast]
+				}
+			}
+		}
+	}
+	// this is a very loose definition of a valid ID!
+	// XXX AND IT'S WRONG: SPACES WITHIN THE ID ARE OK
+	if err == nil {
+		for i := 0; i < len(id); i++ {
+			if u.IsSpace(id[i]) {
+				err = InvalidCharInID
+			}
+		}
+	}
+	if err == nil {
+		validID = string(id)
+	}
+	return
+} // GEEP
