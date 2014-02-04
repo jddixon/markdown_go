@@ -90,7 +90,7 @@ func (h *Holder) dumpAnyPara(addNewLine, testing bool) {
 		// DEBUG
 		if testing {
 			fmt.Printf("depth %d: have dangling h.curPara '%s'\n",
-				h.depth, string(h.curPara.Get()))
+				h.depth, string(h.curPara.GetHtml()))
 		}
 		// END
 		h.AddBlock(h.curPara)
@@ -176,7 +176,7 @@ func (h *Holder) ParseHolder(p *Parser,
 						h.depth)
 					fmt.Printf("    statusChild is 0x%x\n", statusChild)
 					fmt.Printf("    APPENDED %s\n",
-						string(child.Get()))
+						string(child.GetHtml()))
 				}
 				// END
 
@@ -472,7 +472,7 @@ func (h *Holder) ParseHolder(p *Parser,
 						h.depth)
 					fmt.Printf("    statusChild is 0x%x\n", statusChild)
 					fmt.Printf("    BLOCKQUOTE: %s\n",
-						string(child.Get()))
+						string(child.GetHtml()))
 				}
 				// END
 
@@ -526,7 +526,7 @@ func (h *Holder) ParseHolder(p *Parser,
 						h.depth)
 					fmt.Printf("    err is %v\n", err)
 					fmt.Printf("    APPENDED %s\n",
-						string(lostChild.Get()))
+						string(lostChild.GetHtml()))
 				}
 				// END	// GEEP
 				h.AddBlock(lostChild)
@@ -539,7 +539,7 @@ func (h *Holder) ParseHolder(p *Parser,
 					h.depth, len(h.blocks))
 				for i := 0; i < len(h.blocks); i++ {
 					fmt.Printf("    BLOCK %d:%d:\n'%s'\n",
-						h.depth, i, string(h.blocks[i].Get()))
+						h.depth, i, string(h.blocks[i].GetHtml()))
 				}
 			}
 			// END

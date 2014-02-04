@@ -21,12 +21,12 @@ func (p *Para) Add(seq SpanSeq) (err error) {
 	return
 }
 
-func (p *Para) Get() (runes []rune) {
+func (p *Para) GetHtml() (runes []rune) {
 	runes = append(runes, PARA_OPEN...)
 	for i := 0; i < len(p.seqs); i++ {
 		spans := p.seqs[i].spans
 		for j := 0; j < len(spans); j++ {
-			runes = append(runes, spans[j].Get()...)
+			runes = append(runes, spans[j].GetHtml()...)
 		}
 		if i < len(p.seqs)-1 {
 			runes = append(runes, p.seqs[i].lineSep...)

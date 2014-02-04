@@ -9,7 +9,7 @@ type EmphSpan struct {
 	runes       []rune
 }
 
-func (e *EmphSpan) Get() (out []rune) {
+func (e *EmphSpan) GetHtml() (out []rune) {
 	if e.emphDoubled {
 		out = append(out, STRONG_OPEN...)
 		out = append(out, e.runes...)

@@ -29,7 +29,7 @@ func NewCodeSpan(runes []rune) (t *CodeSpan) {
 // Any backticks in CodeSpan.Runes are literal backticks.
 // In the current implementation, < and > are automatically 'escaped',
 // in the sense that they are converted to character entities here.
-func (p *CodeSpan) Get() (out []rune) {
+func (p *CodeSpan) GetHtml() (out []rune) {
 
 	out = append(out, []rune("<code>")...)
 	for i := 0; i < len(p.runes); i++ {

@@ -45,7 +45,7 @@ var (
 		//"blockquote-nested-multiplereturn-level1",  // needs extra newline
 		"blockquote-nested-multiplereturn", // nested blank line
 		//"blockquote-nested-return-level1",	// treatment of blank line
-		//"code-1-tab",
+		//"code-1-tab",					// XXX WORKING HERE
 		//"code-4-spaces-escaping",
 		//"code-4-spaces",
 		"em-middle-word",
@@ -148,7 +148,7 @@ func (s *XLSuite) doMDTest(c *C, name string) {
 	c.Assert(err, Equals, io.EOF)
 	c.Assert(doc, NotNil)
 
-	html := doc.Get()
+	html := doc.GetHtml()
 	fmt.Printf("HTML: '%s'\n", string(html))
 
 	// convert []MarkdownI to bytes REDUNDANT CODE ?

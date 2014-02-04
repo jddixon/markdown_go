@@ -19,7 +19,7 @@ func NewHRule() (h BlockI, err error) {
 	return
 }
 
-func (h *HRule) Get() []rune {
+func (h *HRule) GetHtml() []rune {
 	return H_RULE
 }
 

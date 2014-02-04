@@ -15,6 +15,6 @@ func NewBreakSpan() (t *BreakSpan) {
 	return &BreakSpan{&out}
 }
 
-func (br *BreakSpan) Get() (out []rune) {
+func (br *BreakSpan) GetHtml() (out []rune) {
 	return *br.runes
 }

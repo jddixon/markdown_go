@@ -34,7 +34,7 @@ func NewImageRefSpan(doc *Document, altText []rune, id string) (
 	return
 }
 
-func (ls *ImageRefSpan) Get() (out []rune) {
+func (ls *ImageRefSpan) GetHtml() (out []rune) {
 
 	def := ls.doc.refDict[ls.id]
 	uri := def.uri

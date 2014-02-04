@@ -27,7 +27,7 @@ func NewUnordered(body []rune) (h BlockI, err error) {
 	return
 }
 
-func (h *Unordered) Get() (r []rune) {
+func (h *Unordered) GetHtml() (r []rune) {
 	r = append(r, LI_OPEN...)
 	r = append(r, h.runes...)
 	r = append(r, LI_CLOSE...)

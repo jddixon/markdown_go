@@ -34,7 +34,7 @@ func NewLinkSpan(linkText, uri, title []rune) (t *LinkSpan) {
 	return
 }
 
-func (p *LinkSpan) Get() (out []rune) {
+func (p *LinkSpan) GetHtml() (out []rune) {
 
 	out = append(out, []rune("<a href=\"")...)
 	out = append(out, p.uri...)

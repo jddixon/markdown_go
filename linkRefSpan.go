@@ -34,7 +34,7 @@ func NewLinkRefSpan(doc *Document, linkText []rune, id string) (
 	return
 }
 
-func (ls *LinkRefSpan) Get() (out []rune) {
+func (ls *LinkRefSpan) GetHtml() (out []rune) {
 
 	// handle implicit idRef, where id is an empty string
 	var key string

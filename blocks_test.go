@@ -65,7 +65,7 @@ func (s *XLSuite) TestHeader(c *C) {
 		c.Assert(string(h.runes), Equals, string(titles[i]))
 
 		// test serialization -----------------------------
-		ser := string(b.Get())
+		ser := string(b.GetHtml())
 		expected := fmt.Sprintf("<h%d>%s</h%d>\n", i+1, titles[i], i+1)
 		c.Assert(ser, Equals, expected)
 	}
@@ -104,7 +104,7 @@ func (s *XLSuite) doTestHRule(c *C, char rune, rng *xr.PRNG) {
 	h := b.(*HRule)
 
 	// test serialization -----------------------------
-	ser := string(h.Get())
+	ser := string(h.GetHtml())
 	c.Assert(ser, Equals, "<hr />")
 }
 func (s *XLSuite) TestHRule(c *C) {

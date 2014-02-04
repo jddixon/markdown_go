@@ -27,7 +27,7 @@ func NewOrdered(body []rune) (h BlockI, err error) {
 	return
 }
 
-func (h *Ordered) Get() (r []rune) {
+func (h *Ordered) GetHtml() (r []rune) {
 	r = append(r, LI_OPEN...)
 	r = append(r, h.runes...)
 	r = append(r, LI_CLOSE...)

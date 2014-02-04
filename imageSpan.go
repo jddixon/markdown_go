@@ -34,7 +34,7 @@ func NewImageSpan(linkText, path, title []rune) (t *ImageSpan) {
 	return
 }
 
-func (p *ImageSpan) Get() (out []rune) {
+func (p *ImageSpan) GetHtml() (out []rune) {
 
 	out = append(out, []rune("<img src=\"")...)
 	out = append(out, p.path...)

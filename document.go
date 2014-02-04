@@ -41,7 +41,7 @@ func (q *Document) AddDefinition(id string, uri, title []rune, isImg bool) (
 	return
 }
 
-func (q *Document) Get() (body []rune) {
+func (q *Document) GetHtml() (body []rune) {
 	if len(q.blocks) > 0 {
 		var (
 			inUnordered bool
@@ -50,13 +50,13 @@ func (q *Document) Get() (body []rune) {
 		)
 		// DEBUG
 		if testing {
-			fmt.Printf("Document.Get(): have %d blocks\n", len(q.blocks))
+			fmt.Printf("Document.GetHtml(): have %d blocks\n", len(q.blocks))
 		}
 		// END
 		for i := 0; i < len(q.blocks)-1; i++ {
 
 			block := q.blocks[i]
-			content := block.Get()
+			content := block.GetHtml()
 
 			switch block.(type) {
 			case *Ordered:
@@ -102,10 +102,10 @@ func (q *Document) Get() (body []rune) {
 		default:
 			// DEBUG
 			if testing {
-				fmt.Printf("outputting '%s'\n", string(lastBlock.Get()))
+				fmt.Printf("outputting '%s'\n", string(lastBlock.GetHtml()))
 			}
 			// END
-			body = append(body, lastBlock.Get()...)
+			body = append(body, lastBlock.GetHtml()...)
 		}
 		if inOrdered {
 			body = append(body, OL_CLOSE...)

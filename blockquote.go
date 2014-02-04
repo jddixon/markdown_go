@@ -22,12 +22,12 @@ func NewBlockquote(opt *Options, depth uint) (bq *Blockquote, err error) {
 	return
 }
 
-func (bq *Blockquote) Get() (runes []rune) {
+func (bq *Blockquote) GetHtml() (runes []rune) {
 	// runes = append(runes, LF)
 	runes = append(runes, BLOCKQUOTE_OPEN...)
 	for i := 0; i < bq.Size(); i++ {
 		block, _ := bq.GetBlock(i)
-		runes = append(runes, block.Get()...)
+		runes = append(runes, block.GetHtml()...)
 	}
 	// XXX A HACK
 	//runes = append(runes, '\n')

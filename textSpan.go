@@ -20,6 +20,6 @@ func NewTextSpan(runes []rune) (t *TextSpan) {
 	return &TextSpan{runes: txt}
 }
 
-func (t *TextSpan) Get() []rune {
+func (t *TextSpan) GetHtml() []rune {
 	return t.runes
 }
