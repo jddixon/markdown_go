@@ -5,6 +5,11 @@ xgo/md/TODO
         produce the canonical form of the element                       * DONE
     * FIX: para.go claims that each Para has a LineSeq associated with
         it, but there is no such element in the struct
+    * add "fencing", 3 or 4 backticks + optional language to start
+        codeblock and 3 or 4 backticks to end
+        - CodeBlock.String() should produce this
+        - See Metastackflow 125148
+        - also https://help.github.com/articles/github-flavored-markdown
 
 2014-01-27
     * notice that github does not pick up these commits until
