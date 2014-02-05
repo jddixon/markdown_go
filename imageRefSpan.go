@@ -34,6 +34,10 @@ func NewImageRefSpan(doc *Document, altText []rune, id string) (
 	return
 }
 
+func (ls *ImageRefSpan) String() string {
+	return fmt.Sprintf("[%s][%s]", ls.altText, ls.id)
+}
+
 func (ls *ImageRefSpan) GetHtml() (out []rune) {
 
 	def := ls.doc.refDict[ls.id]

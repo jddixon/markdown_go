@@ -9,6 +9,21 @@ type EmphSpan struct {
 	runes       []rune
 }
 
+func (e *EmphSpan) String() (s string) {
+
+	var ss []rune
+	ss = append(ss, '_')
+	if e.emphDoubled {
+		ss = append(ss, '_')
+	}
+	ss = append(ss, e.runes...)
+	ss = append(ss, '_')
+	if e.emphDoubled {
+		ss = append(ss, '_')
+	}
+	return string(ss)
+}
+
 func (e *EmphSpan) GetHtml() (out []rune) {
 	if e.emphDoubled {
 		out = append(out, STRONG_OPEN...)

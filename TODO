@@ -1,20 +1,17 @@
 xgo/md/TODO
 
+2014-02-05
+    * add String() to MarkdownI, with the intention that this should    * DONE
+        produce the canonical form of the element                       * DONE
+    * FIX: para.go claims that each Para has a LineSeq associated with
+        it, but there is no such element in the struct
+
 2014-01-27
-    * FIX: xgoMarkdown determines 'base' incorrectly; it just           * DONE
-        removes the extension on the input file (about line 100)        * DONE
     * notice that github does not pick up these commits until
         branch merge
 
-2014-01-21
-    * SkipChevrons() must detect that we have too few chevrons          * DONE
-        and tell the caller, so that it can handle the end of           * DONE
-        nested blockquotes correctly                                    * DONE
-    * Possibly related: need to fix blockquote-nested test,             * DONE
-        where expected differs from actual by a couple of newlines.     * DONE
-
 2014-01-20
-    * review provisional code in para.go
+    * review provisional code in para.go                                * DONE
 
 2014-01-18
     * linkReference.go appears to be dead code
@@ -34,14 +31,12 @@ xgo/md/TODO
         to tell parseHolder() that we are done
 
 2013-12-29
-    * add holder.go, where Holder is something that can have children   * DONE
     * then parser should have context stack
     * the various Get() routines should return HTML5 OM, not text
     * need a String() for everything
 
 2013-12-28
     * handle the 11 blockquote tests
-    * add xgo/cmd/xgoMarkdown                                           * DONE
 
 2013-12-26
     * why can't I declare Document.blocks as []BlockI ?

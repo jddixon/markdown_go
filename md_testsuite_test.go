@@ -45,7 +45,7 @@ var (
 		//"blockquote-nested-multiplereturn-level1",  // needs extra newline
 		"blockquote-nested-multiplereturn", // nested blank line
 		//"blockquote-nested-return-level1",	// treatment of blank line
-		"code-1-tab", // XXX WORKING HERE
+		"code-1-tab",
 		"code-4-spaces-escaping",
 		"code-4-spaces",
 		"em-middle-word",
@@ -82,8 +82,8 @@ var (
 		"inline-code-escaping-entities",
 		// "inline-code",				// tests doubled backtick
 		//"inline-code-with-visible-backtick",
-		"line-break-2-spaces", // spaces at end of line => <br />
-		"line-break-5-spaces", // spaces at end of line => <br />
+		"line-break-2-spaces",
+		"line-break-5-spaces",
 		// "link-automatic-email",
 		// "link-automatic",
 		"link-bracket-paranthesis",

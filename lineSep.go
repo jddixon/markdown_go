@@ -39,6 +39,10 @@ func NewLineSep(chars []rune) (ls *LineSep, err error) {
 	return
 }
 
+func (ls *LineSep) String() string {
+	return string(ls.runes)
+}
+
 // Add a character if you know it's a line separator.
 func (ls *LineSep) add(ch rune) {
 	ls.runes = append(ls.runes, ch)

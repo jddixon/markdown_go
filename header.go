@@ -31,6 +31,17 @@ func NewHeader(n int, title []rune) (h BlockI, err error) {
 	return
 }
 
+func (h *Header) String() string {
+	var ss []rune
+	for i := 0; i < h.n; i++ {
+		ss = append(ss, '#')
+	}
+	ss = append(ss, ' ')
+	ss = append(ss, h.runes...)
+	ss = append(ss, '\n')
+	return string(ss)
+}
+
 func (h *Header) GetHtml() []rune {
 	text := fmt.Sprintf("<h%d>%s</h%d>\n", h.n, string(h.runes), h.n)
 	return []rune(text)

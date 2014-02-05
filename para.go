@@ -4,6 +4,7 @@ package md
 
 import (
 	"fmt"
+	"strings"
 )
 
 var _ = fmt.Print
@@ -14,6 +15,14 @@ var _ = fmt.Print
 // terminators (null, CR, or LF)
 type Para struct {
 	seqs []SpanSeq
+}
+
+func (p *Para) String() string {
+	var ss []string
+	for i := 0; i < len(p.seqs); i++ {
+		ss = append(ss, p.seqs[i].String())
+	}
+	return strings.Join(ss, "")
 }
 
 func (p *Para) Add(seq SpanSeq) (err error) {

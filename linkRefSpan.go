@@ -34,6 +34,10 @@ func NewLinkRefSpan(doc *Document, linkText []rune, id string) (
 	return
 }
 
+func (ls *LinkRefSpan) String() string {
+	return fmt.Sprintf("[%s][%s]", ls.linkText, ls.id)
+}
+
 func (ls *LinkRefSpan) GetHtml() (out []rune) {
 
 	// handle implicit idRef, where id is an empty string

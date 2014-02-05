@@ -12,6 +12,10 @@ func NewCodeLine(runes []rune) (t *CodeLine) {
 	return &CodeLine{runes: txt}
 }
 
+func (cl *CodeLine) String() string {
+	return string(cl.runes) + "\n"
+}
+
 // Any backticks in CodeLine.Runes are literal backticks.
 // In the current implementation, < and > are automatically 'escaped',
 // in the sense that they are converted to character entities here.

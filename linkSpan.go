@@ -34,6 +34,15 @@ func NewLinkSpan(linkText, uri, title []rune) (t *LinkSpan) {
 	return
 }
 
+func (p *LinkSpan) String() string {
+	if len(p.title) == 0 {
+		return fmt.Sprintf("[%s] (%s) ", p.linkText, p.uri)
+	} else {
+		return fmt.Sprintf("[%s] (%s \"%s\") ",
+			p.linkText, p.uri, p.title)
+	}
+}
+
 func (p *LinkSpan) GetHtml() (out []rune) {
 
 	out = append(out, []rune("<a href=\"")...)

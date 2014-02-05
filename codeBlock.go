@@ -4,6 +4,7 @@ package md
 
 import (
 	"fmt"
+	"strings"
 )
 
 var _ = fmt.Print
@@ -12,6 +13,17 @@ var _ = fmt.Print
 // here as CodeLines
 type CodeBlock struct {
 	lines []CodeLine // to force conversion to entities
+}
+
+// XXX BLOCK-FENCED VERSION WOULD BE SUPPORTED
+func (p *CodeBlock) String() string {
+	const FOUR_SPACES = "    "
+	var ss []string
+	for i := 0; i < len(p.lines); i++ {
+		s := FOUR_SPACES + p.lines[i].String() // NL-terminated
+		ss = append(ss, s)
+	}
+	return strings.Join(ss, "")
 }
 
 // XXX Might make more sense to copy.

@@ -4,6 +4,7 @@ package md
 
 import (
 	"fmt"
+	"strings"
 	u "unicode"
 )
 
@@ -12,6 +13,15 @@ var _ = fmt.Print
 type SpanSeq struct {
 	spans   []SpanI
 	lineSep []rune
+}
+
+func (sq *SpanSeq) String() string {
+	var ss []string
+	for i := 0; i < len(sq.spans); i++ {
+		ss = append(ss, sq.spans[i].String())
+	}
+	s := strings.Join(ss, " ")
+	return s + string(sq.lineSep)
 }
 
 // Advance down the line.  If a special character is encountered,

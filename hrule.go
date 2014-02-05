@@ -19,6 +19,10 @@ func NewHRule() (h BlockI, err error) {
 	return
 }
 
+func (h *HRule) String() string {
+	return "---\n"
+}
+
 func (h *HRule) GetHtml() []rune {
 	return H_RULE
 }

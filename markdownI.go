@@ -4,4 +4,5 @@ package md
 
 type MarkdownI interface {
 	GetHtml() []rune
+	String() string
 }

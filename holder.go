@@ -3,6 +3,7 @@ package md
 import (
 	"fmt"
 	"io"
+	"strings"
 	u "unicode"
 )
 
@@ -32,6 +33,14 @@ func NewHolder(opt *Options, isBq bool, depth uint) (h *Holder, err error) {
 		}
 	}
 	return
+}
+
+func (h *Holder) String() string {
+	var ss []string
+	for i := 0; i < len(h.blocks); i++ {
+		ss = append(ss, h.blocks[i].String())
+	}
+	return strings.Join(ss, "\n")
 }
 
 func (h *Holder) AddBlock(block BlockI) (err error) {

@@ -26,6 +26,10 @@ func NewCodeSpan(runes []rune) (t *CodeSpan) {
 	return &CodeSpan{runes: txt}
 }
 
+func (p *CodeSpan) String() string {
+	return "`" + string(p.runes) + "`"
+}
+
 // Any backticks in CodeSpan.Runes are literal backticks.
 // In the current implementation, < and > are automatically 'escaped',
 // in the sense that they are converted to character entities here.
