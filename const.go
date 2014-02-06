@@ -12,8 +12,9 @@ const (
 )
 
 var (
-	SEP_CHAR    = []rune{CR, LF}
 	FOUR_SPACES = []rune("    ")
+	MAIL_TO     = []rune("mailto:")
+	SEP_CHAR    = []rune{CR, LF}
 
 	BLOCKQUOTE_OPEN  = []rune("<blockquote>\n")
 	BLOCKQUOTE_CLOSE = []rune("</blockquote>\n")

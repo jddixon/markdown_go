@@ -2,6 +2,10 @@ package md
 
 // xgo/md/codeSpan.go
 
+import (
+	"fmt"
+)
+
 // In Markdown input text a code span begins with one or two backticks
 // and ends with the same number of backticks.  The delimiting backticks
 // may themselves be separated by spaces.  If there is more than one
@@ -60,22 +64,46 @@ func (p *CodeSpan) GetHtml() (out []rune) {
 //
 func (q *Line) parseCodeSpan() (span SpanI, err error) {
 
-	codeChar := q.runes[q.offset]
+	const BACKTICK = '`'
+
 	offset := q.offset
+	eol := uint(len(q.runes))
 	found := false
+	doubled := false
+
+	// we require that the cursor is on the first BACKTICK
+	offset++
+	if offset < eol && q.runes[offset] == BACKTICK {
+		doubled = true
+		offset++
+		fmt.Printf("DOUBLED; next char is '%c'", q.runes[offset]) // DEBUG
+	}
 
 	// look for the end of the span
-	for offset++; offset < uint(len(q.runes)); offset++ {
+	for offset < uint(len(q.runes)) {
 		ch := q.runes[offset]
-		if ch == codeChar {
-			found = true
-			break
-		}
+		if ch == BACKTICK {
+			if doubled {
+				if offset < eol-1 && q.runes[offset+1] == BACKTICK {
+					offset++
+					found = true
+					break
+				}
+			} else {
+				found = true
+				break
+			}
+		} // FOO
+		offset++
 	}
 	if found {
 		var start, end uint
 		start = q.offset + 1
 		end = offset
+		if doubled {
+			start++
+			end--
+		}
 		q.offset = offset + 1
 		span = &CodeSpan{
 			runes: q.runes[start:end],

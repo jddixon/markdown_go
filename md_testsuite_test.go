@@ -80,12 +80,12 @@ var (
 		"img",
 		"img-title",
 		"inline-code-escaping-entities",
-		// "inline-code",				// tests doubled backtick
-		//"inline-code-with-visible-backtick",
+		"inline-code", // tests doubled backtick
+		"inline-code-with-visible-backtick",
 		"line-break-2-spaces",
 		"line-break-5-spaces",
-		// "link-automatic-email",
-		// "link-automatic",
+		//"link-automatic-email",
+		"link-automatic",
 		"link-bracket-paranthesis",
 		"link-bracket-paranthesis-title",
 		"link-idref-angle-bracket",

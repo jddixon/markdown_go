@@ -1,5 +1,10 @@
 xgo/md/TODO
 
+2014-02-06
+    * automatic email addresses 
+        - mailto: is not obfuscated
+        - obfuscatated text is being further processed, so that
+            literal ampersands are replaced by @amp;
 2014-02-05
     * add String() to MarkdownI, with the intention that this should    * DONE
         produce the canonical form of the element                       * DONE

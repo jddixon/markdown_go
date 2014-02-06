@@ -4,6 +4,7 @@ package md
 
 import (
 	"fmt"
+	"strings"
 )
 
 var _ = fmt.Print
@@ -168,6 +169,57 @@ func (q *Line) parseLinkSpan(opt *Options) (span SpanI, err error) {
 			span = NewLinkSpan(linkText, uri, title)
 			q.offset = offset + 1
 		} // FOO
+	}
+	return
+}
+
+// An automatic link looks like <http://www.w3c.org>
+// XXX This simplistic approach will treat an email address as a
+// URL.  Need to look tat the content to decide how to handle.
+func (q *Line) parseAutomaticLink() (span SpanI, err error) {
+
+	offset := q.offset
+	eol := uint(len(q.runes))
+	found := false
+
+	// we require that the cursor is on the <
+	offset++
+
+	// look for the end of the span
+	for offset < eol {
+		ch := q.runes[offset]
+		if ch == '>' {
+			found = true
+			break
+		}
+		offset++
+	}
+	if found {
+		var start, end uint
+		start = q.offset + 1
+		end = offset
+		body := q.runes[start:end]
+		// XXX Rough decision as to whether it's a link or an email address.
+		strBody := string(body)
+		if strings.HasPrefix(strBody, "http") {
+			q.offset = offset + 1
+			span = NewLinkSpan(body, body, body[:0])
+		} else if strings.Contains(strBody, "@") {
+			body2 := MAIL_TO
+			for i := 0; i < len(body); i++ {
+				var repr string
+				if i%2 == 0 {
+					repr = fmt.Sprintf("&#x%x", body[i]) // so hex
+				} else {
+					repr = fmt.Sprintf("&#%x", body[i]) // decimal
+				}
+				addMe := []rune(repr)
+				body2 = append(body2, addMe...)
+			}
+			q.offset = offset + 1
+			span = NewLinkSpan(body2, body2, body2[:0])
+		}
+		// otherwise we just ignore the attempt
 	}
 	return
 }

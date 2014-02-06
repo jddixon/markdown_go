@@ -68,6 +68,8 @@ func (q *Line) parseSpanSeq(opt *Options, doc *Document, from uint,
 				if span == nil {
 					span, _ = q.parseImageRefSpan(doc)
 				}
+			} else if ch == '<' {
+				span, _ = q.parseAutomaticLink()
 			}
 
 			// handle any parse results ---------------------------------
