@@ -14,8 +14,8 @@ type LineSep struct {
 
 // Whether this character is in our list of line separator characters.
 func IsSepChar(ch rune) bool {
-	for i := 0; i < len(SEP_CHAR); i++ {
-		if ch == SEP_CHAR[i] {
+	for i := 0; i < len(SEP_RUNES); i++ {
+		if ch == SEP_RUNES[i] {
 			return true
 		}
 	}

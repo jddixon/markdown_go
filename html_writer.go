@@ -64,7 +64,7 @@ func (hw *HtmlWriter) Write(runes []rune) (
 				// handle entities
 				semiOffset := -1
 				for k := j + 1; k < n; k++ {
-					if k > j+MAX_ENTITY_CHAR {
+					if k > j+MAX_ENTITY_CHARS {
 						break
 					}
 					ch := runes[k]
@@ -74,7 +74,7 @@ func (hw *HtmlWriter) Write(runes []rune) (
 					}
 				}
 				// weird errors are possible here, should a semicolon
-				// appear within MAX_ENTITY_CHAR of the ampersand
+				// appear within MAX_ENTITY_CHARS of the ampersand
 				if semiOffset > 0 {
 					// found end of entity, so just output the ampersand
 					count, _ = p.WriteRune(r)

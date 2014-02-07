@@ -89,6 +89,7 @@ func (q *Line) parseLinkSpan(opt *Options) (span SpanI, err error) {
 	if opt == nil {
 		err = NilOptions
 	} else {
+		ampSeen := false
 		verbose = opt.Verbose
 		testing = opt.Testing
 		_ = verbose
@@ -134,6 +135,8 @@ func (q *Line) parseLinkSpan(opt *Options) (span SpanI, err error) {
 						uriEnd = end
 					}
 					break
+				} else if ch == '&' {
+					ampSeen = true
 				}
 				if ch == '"' {
 					if titleStart == 0 {
@@ -162,6 +165,17 @@ func (q *Line) parseLinkSpan(opt *Options) (span SpanI, err error) {
 		if end > 0 {
 			linkText = q.runes[linkTextStart:linkTextEnd]
 			uri = q.runes[uriStart:uriEnd]
+			if ampSeen {
+				var newUri []rune
+				for i := 0; i < len(uri); i++ {
+					if uri[i] == '&' {
+						newUri = append(newUri, AMP_ENTITY...)
+					} else {
+						newUri = append(newUri, uri[i])
+					}
+				}
+				uri = newUri
+			}
 			if titleStart > 0 {
 				title = q.runes[titleStart:titleEnd]
 			}
@@ -206,18 +220,20 @@ func (q *Line) parseAutomaticLink() (span SpanI, err error) {
 			span = NewLinkSpan(body, body, body[:0])
 		} else if strings.Contains(strBody, "@") {
 			body2 := MAIL_TO
-			for i := 0; i < len(body); i++ {
+			body2 = append(body2, body...)
+			var body3 []rune
+			for i := 0; i < len(body2); i++ {
 				var repr string
 				if i%2 == 0 {
-					repr = fmt.Sprintf("&#x%x", body[i]) // so hex
+					repr = fmt.Sprintf("&#x%x;", body2[i]) // output hex
 				} else {
-					repr = fmt.Sprintf("&#%x", body[i]) // decimal
+					repr = fmt.Sprintf("&#%x;", body2[i]) // or decimal
 				}
 				addMe := []rune(repr)
-				body2 = append(body2, addMe...)
+				body3 = append(body3, addMe...)
 			}
 			q.offset = offset + 1
-			span = NewLinkSpan(body2, body2, body2[:0])
+			span = NewLinkSpan(body3, body3, body3[:0])
 		}
 		// otherwise we just ignore the attempt
 	}

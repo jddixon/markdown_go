@@ -18,12 +18,6 @@ type CodeSpan struct {
 	runes []rune
 }
 
-var (
-	AMP_ENTITY = []rune("&amp;")
-	LT_ENTITY  = []rune("&lt;")
-	GT_ENTITY  = []rune("&gt;")
-)
-
 func NewCodeSpan(runes []rune) (t *CodeSpan) {
 	txt := make([]rune, len(runes))
 	copy(txt, runes)

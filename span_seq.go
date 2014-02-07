@@ -40,6 +40,7 @@ func (q *Line) parseSpanSeq(opt *Options, doc *Document, from uint,
 		curText          []rune
 		testing, verbose bool
 	)
+	eol := uint(len(q.runes))
 	if opt == nil {
 		err = NilOptions
 	} else {
@@ -49,7 +50,7 @@ func (q *Line) parseSpanSeq(opt *Options, doc *Document, from uint,
 		q.offset = from
 		seq = new(SpanSeq)
 		firstSpan := true
-		for q.offset < uint(len(q.runes)) {
+		for q.offset < eol {
 			var span SpanI
 			ch := q.runes[q.offset]
 
@@ -68,12 +69,20 @@ func (q *Line) parseSpanSeq(opt *Options, doc *Document, from uint,
 				if span == nil {
 					span, _ = q.parseImageRefSpan(doc)
 				}
+			} else if ch == '&' {
+				span, _ = q.parseEntitySpan()
 			} else if ch == '<' {
 				span, _ = q.parseAutomaticLink()
 			}
 
 			// handle any parse results ---------------------------------
 			if span == nil {
+				if ch == '\\' && q.offset < eol-1 &&
+					escaped(q.runes[q.offset+1]) {
+
+					q.offset++
+					ch = q.runes[q.offset]
+				}
 				curText = append(curText, ch)
 				q.offset++
 			} else {

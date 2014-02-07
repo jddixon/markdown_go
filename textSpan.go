@@ -8,14 +8,17 @@ type TextSpan struct {
 }
 
 func NewTextSpan(runes []rune) (t *TextSpan) {
-	txt := make([]rune, len(runes))
-	// copy(txt, runes)
+	var txt []rune
+
 	for i := 0; i < len(runes); i++ {
 		r := runes[i]
-		if r == rune(0x00a0) {
-			r = rune(0x20)
+		if r == '&' {
+			txt = append(txt, AMP_ENTITY...)
+		} else if r == HARD_SPACE {
+			txt = append(txt, rune(SPACE))
+		} else {
+			txt = append(txt, r)
 		}
-		txt[i] = r
 	}
 	return &TextSpan{runes: txt}
 }

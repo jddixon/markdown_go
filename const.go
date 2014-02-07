@@ -3,18 +3,26 @@ package md
 // xgo/md/const.go
 
 const (
-	BACKSLASH       = '\\'
-	CR              = '\r'
-	LF              = '\n'
-	MAX_ENTITY_CHAR = 6 // between & and ;
-	SPACE           = ' '
-	TAB             = '\t'
+	BACKSLASH        = '\\'
+	CR               = '\r'
+	LF               = '\n'
+	MAX_ENTITY_CHARS = 6 // between & and ;
+	SPACE            = ' '
+	TAB              = '\t'
 )
 
 var (
+	AMP_ENTITY  = []rune("&amp;")
+	COPY_ENTITY = []rune("&copy;")
+	GT_ENTITY   = []rune("&gt;")
+	LT_ENTITY   = []rune("&lt;")
+)
+
+var (
+	HARD_SPACE  = rune(0x00a0)
 	FOUR_SPACES = []rune("    ")
 	MAIL_TO     = []rune("mailto:")
-	SEP_CHAR    = []rune{CR, LF}
+	SEP_RUNES   = []rune{CR, LF}
 
 	BLOCKQUOTE_OPEN  = []rune("<blockquote>\n")
 	BLOCKQUOTE_CLOSE = []rune("</blockquote>\n")

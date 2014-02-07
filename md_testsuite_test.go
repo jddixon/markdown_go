@@ -3,7 +3,7 @@ package md
 // xgo/lex/md_testsuite_test.go
 
 import (
-	"bytes"
+	//"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -84,7 +84,7 @@ var (
 		"inline-code-with-visible-backtick",
 		"line-break-2-spaces",
 		"line-break-5-spaces",
-		//"link-automatic-email",
+		//"link-automatic-email",	// output OK, but they randomize differently
 		"link-automatic",
 		"link-bracket-paranthesis",
 		"link-bracket-paranthesis-title",
@@ -149,22 +149,26 @@ func (s *XLSuite) doMDTest(c *C, name string) {
 	c.Assert(doc, NotNil)
 
 	html := doc.GetHtml()
+	// DEBUG
 	fmt.Printf("HTML: '%s'\n", string(html))
+	// END
 
 	// convert []MarkdownI to bytes REDUNDANT CODE ?
-	var b bytes.Buffer
-	var wPtr io.Writer = &b
-	c.Assert(wPtr, NotNil)
-	wr, err := NewHtmlWriter(wPtr)
-	c.Assert(err, IsNil)
-	c.Assert(wr, NotNil)
-	count, err := wr.Write(html)
-	c.Assert(err, IsNil)
-	_ = count
-	actualOut := string(b.Bytes())
+	//var b bytes.Buffer
+	//var wPtr io.Writer = &b
+	//c.Assert(wPtr, NotNil)
+	//wr, err := NewHtmlWriter(wPtr)
+	//c.Assert(err, IsNil)
+	//c.Assert(wr, NotNil)
+	//count, err := wr.Write(html)
+	//c.Assert(err, IsNil)
+	//_ = count
+	//actualOut := string(b.Bytes())
+	actualOut := string(html)
 
 	bytesFromDisk, err := ioutil.ReadFile(outPath)
 	c.Assert(err, IsNil)
+
 	expectedOut := string(bytesFromDisk)
 
 	// c.Assert(len(actualOut), Equals, len(expectedOut))
