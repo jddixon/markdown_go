@@ -1,6 +1,6 @@
 package md
 
-// xgo/md/span_seq.go
+// xgo/md/spanSeq.go
 
 import (
 	"fmt"
@@ -125,12 +125,28 @@ func (q *Line) parseSpanSeq(opt *Options, doc *Document, from uint,
 				}
 			}
 			txtLen := len(curText)
-			if txtLen == 1 || txtLen == 2 {
+			if txtLen == 1 {
 				seq.spans = append(seq.spans, NewTextSpan(curText))
+			} else if txtLen == 2 {
+				if curText[txtLen-1] == '\t' {
+					// XXX DOESN'T CATCH space-tab
+					seq.spans = append(seq.spans, NewTextSpan(curText[:2]))
+
+				} else {
+					seq.spans = append(seq.spans, NewTextSpan(curText))
+					seq.spans = append(seq.spans, NewBreakSpan())
+				}
 			} else if txtLen > 2 {
-				// convert trailing 2 spaces to <br />
+				// convert trailing 2 spaces or tab to <br />
+				matched := false
 				if curText[txtLen-2] == ' ' && curText[txtLen-1] == ' ' {
 					curText = curText[:txtLen-2]
+					matched = true
+				} else if curText[txtLen-1] == '\t' {
+					curText = curText[:txtLen-1]
+					matched = true
+				}
+				if matched {
 					// drop any other trailing spaces too
 					for len(curText) > 0 {
 						ndxLast := len(curText) - 1
@@ -140,12 +156,12 @@ func (q *Line) parseSpanSeq(opt *Options, doc *Document, from uint,
 							break
 						}
 					}
-					if len(curText) > 0 {
-						seq.spans = append(seq.spans, NewTextSpan(curText))
-					}
-					seq.spans = append(seq.spans, NewBreakSpan())
-				} else {
+				}
+				if len(curText) > 0 {
 					seq.spans = append(seq.spans, NewTextSpan(curText))
+				}
+				if matched {
+					seq.spans = append(seq.spans, NewBreakSpan())
 				}
 			}
 		}

@@ -38,13 +38,13 @@ var (
 		"blockquote-line-2-paragraphs",
 		"blockquote-line",
 		"blockquote-multiline-1-space-begin",
-		"blockquote-multiline-1-space-end", // \u00a0 must become space
+		"blockquote-multiline-1-space-end", // \u00a0 hard spacae ==> space
 		"blockquote-multiline-2-paragraphs",
 		"blockquote-multiline",
 		"blockquote-nested",
-		//"blockquote-nested-multiplereturn-level1",  // needs extra newline
+		//"blockquote-nested-multiplereturn-level1",  // XXX needs extra newline
 		"blockquote-nested-multiplereturn", // nested blank line
-		//"blockquote-nested-return-level1",	// treatment of blank line
+		"blockquote-nested-return-level1",  // XXX treatment of blank line
 		"code-1-tab",
 		"code-4-spaces-escaping",
 		"code-4-spaces",
@@ -84,7 +84,6 @@ var (
 		"inline-code-with-visible-backtick",
 		"line-break-2-spaces",
 		"line-break-5-spaces",
-		//"link-automatic-email",	// output OK, but they randomize differently
 		"link-automatic",
 		"link-bracket-paranthesis",
 		"link-bracket-paranthesis-title",
@@ -99,7 +98,7 @@ var (
 		"link-idref-title-single-quote",
 		//"list-blockquote",
 		//"list-code",
-		//"list-multiparagraphs",
+		"list-multiparagraphs", // XXX WORKING HERE
 		//"list-multiparagraphs-tab",
 		"ordered-list-escaped",
 		"ordered-list-items",
@@ -111,12 +110,10 @@ var (
 		"paragraphs-leading-space",
 		"paragraphs-trailing-spaces",
 		"paragraph-trailing-leading-spaces",
-		// "paragraph-trailing-tab", // trailing tab becomes spaces?
 		"strong-middle-word",
 		"strong-star",
 		"strong-underscore",
 		"unordered-list-items-dashsign",
-		//"unordered-list-items-leading-1space",	// ?? bad test ??
 		"unordered-list-items-leading-2spaces",
 		"unordered-list-items-leading-3spaces",
 		"unordered-list-items",
@@ -124,6 +121,17 @@ var (
 		//"unordered-list-paragraphs",
 		"unordered-list-unindented-content",
 		//"unordered-list-with-indented-content",
+
+		// BAD OR ODD TESTS
+
+		// XXX output OK, but they randomize differently
+		//"link-automatic-email",
+
+		// XXX trailing tab becomes 4 spaces??
+		// "paragraph-trailing-tab",
+
+		// XXX  bad test - requires terminating newline
+		// "unordered-list-items-leading-1space",
 	}
 )
 

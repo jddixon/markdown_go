@@ -1,10 +1,13 @@
 xgo/md/TODO
 
+2014-02-07
+    * automatic email addresses: match randomization algorithm!
+
 2014-02-06
-    * automatic email addresses 
-        - mailto: is not obfuscated
-        - obfuscatated text is being further processed, so that
-            literal ampersands are replaced by @amp;
+    * automatic email addresses                              			* DONE
+        - mailto: is not obfuscated			                            * DONE
+        - obfuscatated text is being further processed, so that			* DONE
+            literal ampersands are replaced by @amp;			        * DONE
 2014-02-05
     * add String() to MarkdownI, with the intention that this should    * DONE
         produce the canonical form of the element                       * DONE
