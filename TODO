@@ -1,5 +1,8 @@
 xgo/md/TODO
 
+2014-02-10
+    * test FencedCodeBlock
+
 2014-02-07
     * automatic email addresses: match randomization algorithm!
 

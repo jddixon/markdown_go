@@ -15,7 +15,7 @@ type CodeBlock struct {
 	lines []CodeLine // to force conversion to entities
 }
 
-// XXX BLOCK-FENCED VERSION WOULD BE SUPPORTED
+// XXX FENCED CODE BLOCK VERSION SHOULD BE SUPPORTED
 func (p *CodeBlock) String() string {
 	const FOUR_SPACES = "    "
 	var ss []string

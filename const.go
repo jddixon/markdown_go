@@ -24,6 +24,9 @@ var (
 	MAIL_TO     = []rune("mailto:")
 	SEP_RUNES   = []rune{CR, LF}
 
+	// 4 is canonical, 3 is OK, backtick is OK
+	FENCE = []rune("~~~~~\n")
+
 	BLOCKQUOTE_OPEN  = []rune("<blockquote>\n")
 	BLOCKQUOTE_CLOSE = []rune("</blockquote>\n")
 	CODE_OPEN        = []rune("<pre><code>")

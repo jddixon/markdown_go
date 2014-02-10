@@ -110,12 +110,28 @@ func (h *Holder) dumpAnyPara(addNewLine, testing bool) {
 		h.curPara = nil
 	}
 }
+
+// Return true if a fence is found
+// XXX ALLOW 3+
+// XXX ALLOW TILDE OR BACKTICK
+func (q *Line) foundFence(from uint) (found bool) {
+
+	eol := uint(len(q.runes))
+	spanLen := eol - from
+
+	if spanLen >= 3 && q.runes[from+0] == '~' &&
+		q.runes[from+1] == '~' && q.runes[from+2] == '~' {
+		found = true
+	}
+	return
+}
 func (h *Holder) ParseHolder(p *Parser,
 	in chan *Line, resp chan int, stop chan bool) {
 
 	doc := p.GetDocument()
 	var (
 		codeBlock        = new(CodeBlock)
+		fencedCodeBlock  *FencedCodeBlock
 		lostChild        BlockI
 		eofSeen          bool
 		err              error
@@ -294,6 +310,7 @@ func (h *Holder) ParseHolder(p *Parser,
 						child = nil
 					}
 				}
+				// INDENTED CODE BLOCK ==============================
 				if !lineProcessed && (err == nil || err == io.EOF) {
 					// if we are in a code block and this isn't code, dump
 					// the code block
@@ -346,7 +363,38 @@ func (h *Holder) ParseHolder(p *Parser,
 						h.AddBlock(codeBlock)
 						codeBlock = new(CodeBlock)
 					}
-				}
+				} // GEEP
+
+				// FENCED CODE BLOCK ================================
+
+				if !lineProcessed && (err == nil || err == io.EOF) {
+					// if we are in a code block and this isn't code, dump
+					// the code block
+					eol := uint(len(q.runes))
+					dumpCode := false
+					if fencedCodeBlock != nil {
+						// we are in a fenced code block
+						lineProcessed = true
+						if q.foundFence(from) {
+							dumpCode = true
+						} else {
+							span := NewCodeLine(q.runes[from+1 : eol])
+							fencedCodeBlock.Add(span)
+						}
+
+					} else { // we are not yet in a code block
+						if !blankLine {
+							if q.foundFence(from) {
+								lineProcessed = true
+								fencedCodeBlock = new(FencedCodeBlock)
+							}
+						}
+					}
+					if dumpCode {
+						h.AddBlock(fencedCodeBlock)
+						fencedCodeBlock = nil
+					}
+				} // GEEP
 				if !lineProcessed {
 					// HANDLE BLOCKS ----------------------------------------
 					if !blankLine && (err == nil || err == io.EOF) {

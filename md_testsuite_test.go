@@ -44,7 +44,7 @@ var (
 		"blockquote-nested",
 		//"blockquote-nested-multiplereturn-level1",  // XXX needs extra newline
 		"blockquote-nested-multiplereturn", // nested blank line
-		"blockquote-nested-return-level1",  // XXX treatment of blank line
+		//"blockquote-nested-return-level1",  // XXX treatment of blank line
 		"code-1-tab",
 		"code-4-spaces-escaping",
 		"code-4-spaces",
@@ -98,7 +98,7 @@ var (
 		"link-idref-title-single-quote",
 		//"list-blockquote",
 		//"list-code",
-		"list-multiparagraphs", // XXX WORKING HERE
+		//"list-multiparagraphs", // XXX WORKING HERE
 		//"list-multiparagraphs-tab",
 		"ordered-list-escaped",
 		"ordered-list-items",
