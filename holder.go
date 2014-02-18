@@ -376,15 +376,21 @@ func (h *Holder) ParseHolder(p *Parser,
 						// we are in a fenced code block
 						lineProcessed = true
 						if q.foundFence(from) {
+							fmt.Println("END FENCED CODE") // DEBUG
 							dumpCode = true
 						} else {
-							span := NewCodeLine(q.runes[from+1 : eol])
+							// DEBUG
+							fmt.Printf("Holder adding to fence: '%s'\n",
+								string(q.runes[from:eol]))
+							// END
+							span := NewCodeLine(q.runes[from:eol])
 							fencedCodeBlock.Add(span)
 						}
 
 					} else { // we are not yet in a code block
 						if !blankLine {
 							if q.foundFence(from) {
+								fmt.Println("START FENCED CODE") // DEBUG
 								lineProcessed = true
 								fencedCodeBlock = new(FencedCodeBlock)
 							}
@@ -394,7 +400,7 @@ func (h *Holder) ParseHolder(p *Parser,
 						h.AddBlock(fencedCodeBlock)
 						fencedCodeBlock = nil
 					}
-				} // GEEP
+				}
 				if !lineProcessed {
 					// HANDLE BLOCKS ----------------------------------------
 					if !blankLine && (err == nil || err == io.EOF) {

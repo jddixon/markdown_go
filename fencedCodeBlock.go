@@ -30,6 +30,9 @@ func (p *FencedCodeBlock) String() string {
 
 // XXX Might make more sense to copy.
 func (p *FencedCodeBlock) Add(line *CodeLine) {
+	// DEBUG
+	fmt.Printf("  FencedCodeBlock.Add: '%s'\n", line.String())
+	// END
 	p.lines = append(p.lines, *line)
 	return
 }
