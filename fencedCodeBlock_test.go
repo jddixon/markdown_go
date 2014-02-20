@@ -57,10 +57,6 @@ func (s *XLSuite) doTestFencedBlock(c *C, char rune, rng *xr.PRNG) {
 	c.Assert(err, IsNil)
 	c.Assert(p, NotNil)
 
-	// DEBUG
-	fmt.Printf("SAMPLE INPUT:\n%s", input)
-	// END
-
 	doc, err := p.Parse()
 	c.Assert(err, Equals, io.EOF)
 	c.Assert(doc, NotNil)

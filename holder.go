@@ -376,13 +376,8 @@ func (h *Holder) ParseHolder(p *Parser,
 						// we are in a fenced code block
 						lineProcessed = true
 						if q.foundFence(from) {
-							fmt.Println("END FENCED CODE") // DEBUG
 							dumpCode = true
 						} else {
-							// DEBUG
-							fmt.Printf("Holder adding to fence: '%s'\n",
-								string(q.runes[from:eol]))
-							// END
 							span := NewCodeLine(q.runes[from:eol])
 							fencedCodeBlock.Add(span)
 						}
@@ -390,7 +385,6 @@ func (h *Holder) ParseHolder(p *Parser,
 					} else { // we are not yet in a code block
 						if !blankLine {
 							if q.foundFence(from) {
-								fmt.Println("START FENCED CODE") // DEBUG
 								lineProcessed = true
 								fencedCodeBlock = new(FencedCodeBlock)
 							}
@@ -479,7 +473,7 @@ func (h *Holder) ParseHolder(p *Parser,
 		// If we have parsed the line, we hang the block off
 		// the document.  Otherwise, we treat whatever we have
 		// as a sequence of spans and make a Para out of it.
-		if err == nil || err == io.EOF {
+		if fencedCodeBlock == nil && (err == nil || err == io.EOF) {
 			if b != nil {
 				h.AddBlock(b)
 				if forceNL {
@@ -510,7 +504,7 @@ func (h *Holder) ParseHolder(p *Parser,
 				lineProcessed = true
 			}
 		} // end DEFAULT: PARA
-		if blankLine && !lineProcessed { // CHANGE 2014-01-20
+		if fencedCodeBlock == nil && blankLine && !lineProcessed {
 			// we got a blank line
 			ls, err := NewLineSep(q.lineSep)
 			if err == nil {
