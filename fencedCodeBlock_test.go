@@ -81,3 +81,33 @@ func (s *XLSuite) TestFencedBlock(c *C) {
 	s.doTestFencedBlock(c, '~', rng)
 	s.doTestFencedBlock(c, '`', rng)
 }
+
+// XXX MODIFY TO ADD from PARAMETER
+func (s *XLSuite) makeFence(post rune, length uint, lang string) string {
+	var runes []rune
+	for i := uint(0); i < length; i++ {
+		runes = append(runes, post)
+	}
+	if len(lang) > 0 {
+		runes = append(runes, ' ')
+		runes = append(runes, []rune(lang)...)
+	}
+	return string(runes)
+}
+
+func (s *XLSuite) TestFenceFound(c *C) {
+	rng := xr.MakeSimpleRNG()
+
+	str := s.makeFence('~', uint(3+rng.Intn(3)), "")
+	q := NewLine([]rune(str), nil)
+	found, actualLang := q.foundFence(uint(0))
+	c.Assert(found, Equals, true)
+	c.Assert(actualLang, Equals, "")
+
+	expectedLang := rng.NextFileName(8)
+	str = s.makeFence('`', uint(3+rng.Intn(3)), expectedLang)
+	q = NewLine([]rune(str), nil)
+	found, actualLang = q.foundFence(uint(0))
+	c.Assert(found, Equals, true)
+	c.Assert(actualLang, Equals, expectedLang)
+}

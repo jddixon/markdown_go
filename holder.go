@@ -111,17 +111,50 @@ func (h *Holder) dumpAnyPara(addNewLine, testing bool) {
 	}
 }
 
-// Return true if a fence is found
-// XXX ALLOW 3+
-// XXX ALLOW TILDE OR BACKTICK
-func (q *Line) foundFence(from uint) (found bool) {
+// Return true if a fence is found.  If an optional language name is
+// specified, return that as well.  The language name may be any
+// alphanumeric string whose first character is not a digit.
+func (q *Line) foundFence(from uint) (found bool, lang string) {
+
+	var fenceChar rune
 
 	eol := uint(len(q.runes))
 	spanLen := eol - from
 
-	if spanLen >= 3 && q.runes[from+0] == '~' &&
-		q.runes[from+1] == '~' && q.runes[from+2] == '~' {
-		found = true
+	if spanLen >= 3 {
+		if q.runes[from+0] == '~' && q.runes[from+1] == '~' &&
+			q.runes[from+2] == '~' {
+			fenceChar = '~'
+			found = true
+		} else if q.runes[from+0] == '`' && q.runes[from+1] == '`' &&
+			q.runes[from+2] == '`' {
+			fenceChar = '`'
+			found = true
+		}
+		// XXX This isn't right: ~~~XYZ will match
+		if found {
+			var offset uint
+			// skip any more fenceposts
+			for offset = from + 3; offset < eol; offset++ {
+				char := q.runes[offset]
+				if char != fenceChar {
+					break
+				}
+			}
+			// skip any spaces
+			for offset < eol {
+				char := q.runes[offset]
+				if !u.IsSpace(char) {
+					break
+				}
+				offset++
+			}
+			// XXX simplistic
+			if offset < eol {
+				rest := string(q.runes[offset:])
+				lang = strings.TrimSpace(rest)
+			}
+		}
 	}
 	return
 }
@@ -363,7 +396,7 @@ func (h *Holder) ParseHolder(p *Parser,
 						h.AddBlock(codeBlock)
 						codeBlock = new(CodeBlock)
 					}
-				} // GEEP
+				}
 
 				// FENCED CODE BLOCK ================================
 
@@ -375,7 +408,8 @@ func (h *Holder) ParseHolder(p *Parser,
 					if fencedCodeBlock != nil {
 						// we are in a fenced code block
 						lineProcessed = true
-						if q.foundFence(from) {
+						endingFence, _ := q.foundFence(from)
+						if endingFence {
 							dumpCode = true
 						} else {
 							span := NewCodeLine(q.runes[from:eol])
@@ -384,7 +418,9 @@ func (h *Holder) ParseHolder(p *Parser,
 
 					} else { // we are not yet in a code block
 						if !blankLine {
-							if q.foundFence(from) {
+							startingFence, lang := q.foundFence(from)
+							_ = lang
+							if startingFence {
 								lineProcessed = true
 								fencedCodeBlock = new(FencedCodeBlock)
 							}
