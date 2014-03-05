@@ -44,7 +44,6 @@ var (
 		"blockquote-nested",
 		//"blockquote-nested-multiplereturn-level1",  // XXX needs extra newline
 		"blockquote-nested-multiplereturn", // nested blank line
-		//"blockquote-nested-return-level1",  // XXX treatment of blank line
 		"code-1-tab",
 		"code-4-spaces-escaping",
 		"code-4-spaces",
@@ -55,7 +54,7 @@ var (
 		"EOL-CR+LF",
 		"EOL-CR",
 		"EOL-LF",
-		// "header-level1-equal-underlined",
+		"header-level1-equal-underlined", // XXX needs some cleanup
 		"header-level1-hash-sign-closed",
 		"header-level1-hash-sign",
 		"header-level1-hash-sign-trailing-1-space",
@@ -123,6 +122,9 @@ var (
 		//"unordered-list-with-indented-content",
 
 		// BAD OR ODD TESTS
+
+		// Daring Fireball disagrees with this test:
+		//"blockquote-nested-return-level1",
 
 		// XXX output OK, but they randomize differently
 		//"link-automatic-email",

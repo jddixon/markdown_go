@@ -219,7 +219,8 @@ func (h *Holder) ParseHolder(p *Parser,
 		)
 		lineProcessed = false
 		b = nil
-		lineLen := uint(len(q.runes))
+		lineLen := uint(len(q.runes)) // XXX REDUNDANT
+		eol := uint(len(q.runes))
 		if lineLen == 0 {
 			blankLine = true
 		}
@@ -347,7 +348,6 @@ func (h *Holder) ParseHolder(p *Parser,
 				if !lineProcessed && (err == nil || err == io.EOF) {
 					// if we are in a code block and this isn't code, dump
 					// the code block
-					eol := uint(len(q.runes))
 					spanLen := eol - from
 					dumpCode := false
 					if codeBlock.Size() > 0 { // we are in a code block
@@ -403,7 +403,6 @@ func (h *Holder) ParseHolder(p *Parser,
 				if !lineProcessed && (err == nil || err == io.EOF) {
 					// if we are in a code block and this isn't code, dump
 					// the code block
-					eol := uint(len(q.runes))
 					dumpCode := false
 					if fencedCodeBlock != nil {
 						// we are in a fenced code block
@@ -433,15 +432,39 @@ func (h *Holder) ParseHolder(p *Parser,
 				}
 				if !lineProcessed {
 					// HANDLE BLOCKS ----------------------------------------
+					// Within this block, if b is not nil, we have found a
+					// block and shouldn't look for another.
+
 					if !blankLine && (err == nil || err == io.EOF) {
 						ch0 = q.runes[from]
 
-						// HEADERS --------------------------------
-						if ch0 == '#' {
+						// UNDERLINED HEADER ------------------------
+						if ch0 == '=' {
+							foundUnderline := true
+							for i := uint(0); i < eol; i++ {
+								if q.runes[i] != '=' {
+									foundUnderline = false
+									break
+								}
+							}
+							if foundUnderline {
+								if h.curPara != nil {
+									// XXX A KLUDGE.  We crudely assume that
+									// if any text at all has been collected
+									// we can just use it as the title.
+
+									title := strings.TrimSpace(h.curPara.String())
+									h.curPara = nil
+									b, err = NewHeader(1, []rune(title))
+								}
+							}
+						}
+						// HEADERS ----------------------------------
+						if b == nil && (err == nil || err == io.EOF) && ch0 == '#' {
 							b, forceNL, err = q.parseHeader(from + 1)
 						}
 
-						// HORIZONTAL RULES ----------------------
+						// HORIZONTAL RULES ------------------------
 						if b == nil && (err == nil || err == io.EOF) &&
 							(ch0 == '-' || ch0 == '*' || ch0 == '_') {
 							b, err = q.parseHRule(from)
