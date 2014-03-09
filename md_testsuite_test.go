@@ -42,7 +42,10 @@ var (
 		"blockquote-multiline-2-paragraphs",
 		"blockquote-multiline",
 		"blockquote-nested",
-		//"blockquote-nested-multiplereturn-level1",  // XXX needs extra newline
+		// XXX .out has extra newline after end of nested blockquote
+		// WORKING HERE
+		//"blockquote-nested-multiplereturn-level1",
+
 		"blockquote-nested-multiplereturn", // nested blank line
 		"code-1-tab",
 		"code-4-spaces-escaping",

@@ -1,5 +1,12 @@
 xgo/md/TODO
 
+2014-03-08
+    * accept HTML *span* elements
+        - verify Markdown IS interpreted in such elements
+
+    * accept HTML *block* elements 
+        - verify Markdown not interpreted in such blocks
+
 2014-03-04
     * look at extensions under https://github.com/karlcow/markdown-testsuite
     * consider //http://kramdown.gettalong.org/syntax.html

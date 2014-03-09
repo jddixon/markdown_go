@@ -249,16 +249,19 @@ func (h *Holder) ParseHolder(p *Parser,
 				// just copy the line through to the child
 				// DEBUG
 				if testing {
-					fmt.Printf("COPYING TO CHILD: %s\n", string(q.runes))
+					fmt.Printf("COPYING TO CHILD %d: %s\n",
+						h.depth+1, string(q.runes))
 				}
 				// END
 				toChild <- q
 				statusChild = <-fromChild
 				lineProcessed = (statusChild == ACK) ||
+					// XXX
 					(statusChild == (DONE | LAST_LINE_PROCESSED))
 				// DEBUG
 				if testing {
-					fmt.Printf("child status = 0x%x : ", statusChild)
+					fmt.Printf("child %d status = 0x%x : ",
+						h.depth, statusChild)
 					if lineProcessed {
 						fmt.Println("child has processed line")
 					} else {
@@ -277,6 +280,13 @@ func (h *Holder) ParseHolder(p *Parser,
 				} // FOO
 			}
 		}
+		/////////////////////////////////////////////////////////////
+		// XXX NOT CORRECTLY HANDLED AT THIS POINT:
+		// XXX (a) blank line
+		// XXX (b) lostChild != nil
+		// XXX (c) ! lineProcessed
+		/////////////////////////////////////////////////////////////
+
 		if !lineProcessed {
 			if lineLen > 0 {
 				if h.depth > 0 {
@@ -292,6 +302,9 @@ func (h *Holder) ParseHolder(p *Parser,
 					}
 					if from >= lineLen {
 						blankLine = true
+						// DEBUG
+						fmt.Printf("  BLANK LINE\n")
+						// END
 					}
 				}
 				// the first case arises when > is last character on line
@@ -312,8 +325,8 @@ func (h *Holder) ParseHolder(p *Parser,
 
 					// DEBUG
 					if testing {
-						fmt.Printf("COPYING TO NEW CHILD: %s\n",
-							string(q.runes))
+						fmt.Printf("COPYING TO NEW CHILD %d: %s\n",
+							h.depth+1, string(q.runes))
 					}
 					// END
 					toChild <- q
@@ -453,7 +466,11 @@ func (h *Holder) ParseHolder(p *Parser,
 									// if any text at all has been collected
 									// we can just use it as the title.
 
-									title := strings.TrimSpace(h.curPara.String())
+									//runish := h.curPara.GetHtml()
+									//title := strings.TrimSpace(string(runish))
+
+									crude := h.curPara.String()
+									title := strings.TrimSpace(crude)
 									h.curPara = nil
 									b, err = NewHeader(1, []rune(title))
 								}
@@ -692,6 +709,7 @@ func (h *Holder) ParseHolder(p *Parser,
 				}
 				h.blocks = append(h.blocks, child)
 			}
+			h.dumpAnyPara(false, testing)
 			if lostChild != nil {
 				// DEBUG
 				if testing {
@@ -706,7 +724,6 @@ func (h *Holder) ParseHolder(p *Parser,
 				h.AddBlock(lostChild)
 				lastBlockLineSep = false
 			}
-			h.dumpAnyPara(false, testing)
 			// DEBUG
 			if testing {
 				fmt.Printf("parseHolder depth %d returning; holder has %d blocks\n",
