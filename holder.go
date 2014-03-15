@@ -158,39 +158,38 @@ func (q *Line) foundFence(from uint) (found bool, lang string) {
 	}
 	return
 }
-func (h *Holder) ParseHolder(p *Parser,
-	in chan *Line, resp chan int, stop chan bool) {
+
+// XXX MAJOR CHANGE: parameter
+//    in chan *Line
+// replaced by
+//    q *Line
+// and q dropped from var block at top of ParseHolder
+
+func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 
 	doc := p.GetDocument()
 	var (
 		codeBlock        = new(CodeBlock)
 		fencedCodeBlock  *FencedCodeBlock
-		lostChild        BlockI
 		eofSeen          bool
 		err              error
 		fatalError       bool
 		iAmDone          bool
 		lineProcessed    bool
-		q                *Line
 		ch0              rune
 		lastBlockLineSep bool
-		stopped          bool
 		testing          = p.opt.Testing
 		verbose          = p.opt.Verbose
 
 		// used to control child holder (for Blockquote)
-		haveChild bool
 		child     *Blockquote
-		toChild   chan *Line
-		fromChild chan int
-		stopChild chan bool
+		lostChild BlockI
 	)
 	_ = verbose // still not used
 
-	resp <- OK // OK, setup complete
 	// -- ok --------------------------------------------------------
 
-	q = <-in // WAS q = p.readLine()
+	// WAS q = p.readLine()
 	err = q.Err
 	if err == io.EOF {
 		eofSeen = true
@@ -209,7 +208,7 @@ func (h *Holder) ParseHolder(p *Parser,
 	sayGoodbye := true
 
 	// pass through the document line by line
-	for (err == nil || err == io.EOF) && !iAmDone && !stopped {
+	for (err == nil || err == io.EOF) && !iAmDone {
 		var (
 			b           BlockI
 			blankLine   bool
@@ -220,66 +219,67 @@ func (h *Holder) ParseHolder(p *Parser,
 		lineProcessed = false
 		b = nil
 		lineLen := uint(len(q.runes)) // XXX REDUNDANT
-		eol := uint(len(q.runes))
+		eol := uint(len(q.runes))     // XXX identical to lineLen)
 		if lineLen == 0 {
 			blankLine = true
 		}
-		if haveChild {
-			if lineLen == 0 && err == io.EOF {
-				stopChild <- true
-				statusChild = <-fromChild
-				haveChild = false
+		//if haveChild {
+		//	if lineLen == 0 && err == io.EOF {
+		//		stopChild <- true
+		//		statusChild = <-fromChild
+		//		haveChild = false
 
-				// DEBUG
-				if p.opt.Testing {
-					fmt.Printf("*** DEPTH %d APPENDING BLOCKQUOTE, BLANK LINE, EOF:  ***\n",
-						h.depth)
-					fmt.Printf("    statusChild is 0x%x\n", statusChild)
-					fmt.Printf("    APPENDED %s\n",
-						string(child.GetHtml()))
-				}
-				// END
+		//		// DEBUG
+		//		if p.opt.Testing {
+		//			fmt.Printf("*** DEPTH %d APPENDING BLOCKQUOTE, BLANK LINE, EOF:  ***\n",
+		//				h.depth)
+		//			fmt.Printf("    statusChild is 0x%x\n", statusChild)
+		//			fmt.Printf("    APPENDED %s\n",
+		//				string(child.GetHtml()))
+		//		}
+		//		// END
 
-				// h.blocks = append(h.blocks, child)
-				lostChild = child
-				lineProcessed = true // we are at EOF
-				// child = nil
+		//		// h.blocks = append(h.blocks, child)
+		//		lostChild = child
+		//		lineProcessed = true // we are at EOF
+		//		// child = nil
 
-			} else {
-				// just copy the line through to the child
-				// DEBUG
-				if testing {
-					fmt.Printf("COPYING TO CHILD %d: %s\n",
-						h.depth+1, string(q.runes))
-				}
-				// END
-				toChild <- q
-				statusChild = <-fromChild
-				lineProcessed = (statusChild == ACK) ||
-					// XXX
-					(statusChild == (DONE | LAST_LINE_PROCESSED))
-				// DEBUG
-				if testing {
-					fmt.Printf("child %d status = 0x%x : ",
-						h.depth, statusChild)
-					if lineProcessed {
-						fmt.Println("child has processed line")
-					} else {
-						fmt.Println("child has NOT processed line")
-					}
-				}
-				// END
-				// child may have set q.err
-				err = q.Err
-				if err != nil || (statusChild&DONE != 0) {
-					haveChild = false
-					if err == nil || err == io.EOF {
-						lostChild = child
-					}
-					// child = nil
-				} // FOO
-			}
-		}
+		//	} else {
+		//		// just copy the line through to the child
+		//		// DEBUG
+		//		if testing {
+		//			fmt.Printf("COPYING TO CHILD %d: %s\n",
+		//				h.depth+1, string(q.runes))
+		//		}
+		//		// END
+		//		toChild <- q
+		//		statusChild = <-fromChild
+		//		lineProcessed = (statusChild == ACK) ||
+		//			// XXX
+		//			(statusChild == (DONE | LAST_LINE_PROCESSED))
+		//		// DEBUG
+		//		if testing {
+		//			fmt.Printf("child %d status = 0x%x : ",
+		//				h.depth, statusChild)
+		//			if lineProcessed {
+		//				fmt.Println("child has processed line")
+		//			} else {
+		//				fmt.Println("child has NOT processed line")
+		//			}
+		//		}
+		//		// END
+		//		// child may have set q.err
+		//		err = q.Err
+		//		if err != nil || (statusChild&DONE != 0) {
+		//			haveChild = false
+		//			if err == nil || err == io.EOF {
+		//				lostChild = child
+		//			}
+		//			// child = nil
+		//		} // FOO
+		//	}
+		//} // GEEP
+
 		/////////////////////////////////////////////////////////////
 		// XXX NOT CORRECTLY HANDLED AT THIS POINT:
 		// XXX (a) blank line
@@ -310,27 +310,17 @@ func (h *Holder) ParseHolder(p *Parser,
 				// the first case arises when > is last character on line
 				// XXX QUESTIONABLE LOGIC
 				if !blankLine && q.runes[from] == '>' {
-					toChild = make(chan *Line)
-					fromChild = make(chan int)
-					stopChild = make(chan bool)
+					// toChild = make(chan *Line)
+					// fromChild = make(chan int)
+					// stopChild = make(chan bool)
 					child, _ = NewBlockquote(h.opt, h.depth+1)
 					if testing {
 						fmt.Printf("*** CREATED BLOCKQUOTE, DEPTH %d ***\n",
 							h.depth+1)
 					}
 					h.dumpAnyPara(true, testing)
-					go child.ParseHolder(p, toChild, fromChild, stopChild)
-					haveChild = true
-					statusChild := <-fromChild // setup complete
+					q, statusChild = child.ParseHolder(p, q)
 
-					// DEBUG
-					if testing {
-						fmt.Printf("COPYING TO NEW CHILD %d: %s\n",
-							h.depth+1, string(q.runes))
-					}
-					// END
-					toChild <- q
-					statusChild = <-fromChild
 					lineProcessed = (statusChild == ACK) ||
 						(statusChild == (DONE | LAST_LINE_PROCESSED))
 
@@ -347,7 +337,6 @@ func (h *Holder) ParseHolder(p *Parser,
 					// child may have set q.err
 					err = q.Err
 					if err != nil || (statusChild&LAST_LINE_PROCESSED != 0) {
-						haveChild = false
 						if err == nil || err == io.EOF {
 							if testing {
 								fmt.Println("*** APPENDING BLOCKQUOTE: B ***")
@@ -611,71 +600,70 @@ func (h *Holder) ParseHolder(p *Parser,
 			}
 			// END
 
-			// THIS IS DANGEROUS
-			//myStatus := DONE
-			//if lineProcessed:
-			//	myStatus |= LASTLINE_PROCESSED
-			//resp <- myStatus
-
+			status = DONE
+			if lineProcessed {
+				status |= LAST_LINE_PROCESSED
+			}
 			sayGoodbye = true
 			break
 		}
 
 		// -- in ----------------------------------------------------
-		resp <- ACK
-		var ok bool
-		select {
-		case q, ok = <-in:
-			if ok {
-				err = q.Err
-			} else {
-				// DEBUG
-				fmt.Println("select, in: !ok so fatalError")
-				// END
-				fatalError = true
-			}
-		case stopped, ok = <-stop:
-			// DEBUG
-			if testing {
-				fmt.Printf("HOLDER %d HAS BEEN STOPPED\n", h.depth)
-			}
-			// END
-			if !ok {
-				// DEBUG
-				if testing {
-					fmt.Println("select, stop: !ok so fatalError")
-				}
-				// END
-				fatalError = true
-			} else {
-			}
-			if !fatalError && haveChild {
-				stopChild <- true
-				statusChild = <-fromChild
+		q = p.readLine()
 
-				// DEBUG
-				if p.opt.Testing {
-					fmt.Printf("*** DEPTH %d STOPPED: QUEUING CHILD ***\n",
-						h.depth)
-					fmt.Printf("    statusChild is 0x%x\n", statusChild)
-					fmt.Printf("    BLOCKQUOTE: %s\n",
-						string(child.GetHtml()))
-				}
-				// END
+		// select {
+		// case q, ok = <-in:
+		// 	if ok {
+		// 		err = q.Err
+		// 	} else {
+		// 		// DEBUG
+		// 		fmt.Println("select, in: !ok so fatalError")
+		// 		// END
+		// 		fatalError = true
+		// 	}
+		// case stopped, ok = <-stop:
+		// 	// DEBUG
+		// 	if testing {
+		// 		fmt.Printf("HOLDER %d HAS BEEN STOPPED\n", h.depth)
+		// 	}
+		// 	// END GEEP
+		// 	if !ok {
+		// 		// DEBUG
+		// 		if testing {
+		// 			fmt.Println("select, stop: !ok so fatalError")
+		// 		}
+		// 		// END
+		// 		fatalError = true
+		// 	} else {
+		// 	}
+		// 	if !fatalError && haveChild {
+		// 		stopChild <- true
+		// 		statusChild = <-fromChild
 
-				lostChild = child // that is, append it
-				haveChild = false
-			}
-			break
-		}
+		// 		// DEBUG
+		// 		if p.opt.Testing {
+		// 			fmt.Printf("*** DEPTH %d STOPPED: QUEUING CHILD ***\n",
+		// 				h.depth)
+		// 			fmt.Printf("    statusChild is 0x%x\n", statusChild)
+		// 			fmt.Printf("    BLOCKQUOTE: %s\n",
+		// 				string(child.GetHtml()))
+		// 		}
+		// 		// END
+
+		// 		lostChild = child // that is, append it
+		// 		haveChild = false
+		// 	}
+		// 	break
+		// } // FOO
+
 		if err == io.EOF {
 			eofSeen = true
 		}
 		// BREAK-FORCING CONDITIONS -----------------------
-		if stopped {
-			sayGoodbye = true
-			break
-		}
+		//if stopped {
+		//	sayGoodbye = true
+		//	break
+		// }
 		if (err != nil && err != io.EOF) || fatalError || q == nil {
 			break
 		}
@@ -701,13 +689,6 @@ func (h *Holder) ParseHolder(p *Parser,
 			if codeBlock.Size() > 0 {
 				h.AddBlock(codeBlock)
 				codeBlock = new(CodeBlock) // pedantry
-			}
-			// XXX should never happen
-			if haveChild {
-				if testing {
-					fmt.Println("*** APPENDING BLOCKQUOTE OUTSIDE LOOP ***")
-				}
-				h.blocks = append(h.blocks, child)
 			}
 			h.dumpAnyPara(false, testing)
 			if lostChild != nil {
@@ -739,11 +720,10 @@ func (h *Holder) ParseHolder(p *Parser,
 			if testing {
 				fmt.Printf("saying goodbye, depth %d ... \n", h.depth)
 			}
-			myStatus := DONE
+			status = DONE
 			if lineProcessed {
-				myStatus = myStatus | LAST_LINE_PROCESSED
+				status |= LAST_LINE_PROCESSED
 			}
-			resp <- myStatus
 			if testing {
 				fmt.Printf("    goodbye said, depth %d\n", h.depth)
 			}

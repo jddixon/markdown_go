@@ -29,9 +29,6 @@ func (bq *Blockquote) GetHtml() (runes []rune) {
 		block, _ := bq.GetBlock(i)
 		runes = append(runes, block.GetHtml()...)
 	}
-	// XXX A HACK
-	//runes = append(runes, '\n')
-	// END HACK
 	runes = append(runes, BLOCKQUOTE_CLOSE...)
 	return
 }

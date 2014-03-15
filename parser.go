@@ -119,18 +119,13 @@ func (p *Parser) readLine() (line *Line) {
 func (p *Parser) Parse() (doc *Document, err error) {
 
 	var (
-		eofSeen    bool
-		lastWasDef bool
+		eofSeen bool
+		// lastWasDef bool
+		status int
 	)
 	doc = p.doc
-	out := make(chan *Line)
-	resp := make(chan int)
-	stop := make(chan bool)
-
-	go doc.ParseHolder(p, out, resp, stop)
-	status := <-resp
-
 	q := p.readLine()
+	q, status = doc.ParseHolder(p, q)
 	err = q.Err
 	if err == io.EOF {
 		eofSeen = true
@@ -143,44 +138,48 @@ func (p *Parser) Parse() (doc *Document, err error) {
 		}
 	}
 	// END
-	for err == nil || err == io.EOF {
-		var (
-			imageDefn *Definition
-			linkDefn  *Definition
-		)
-		if len(q.runes) > 0 {
-			// HANDLE DEFINITIONS -----------------------------------
 
-			// rigidly require that definitions start in the first column
-			if q.runes[0] == '[' { // possible link definition
-				linkDefn, err = q.parseLinkDefinition(p.opt, doc)
-			}
-			if err == nil && linkDefn == nil && q.runes[0] == '!' {
-				imageDefn, err = q.parseImageDefinition(p.opt, doc)
-			}
-		}
-		if imageDefn == nil && linkDefn == nil {
-			lastWasDef = false
-			out <- q // pass line to ParseHolder goroutine
-			status = <-resp
-		} else {
-			lastWasDef = true
-		}
-		if err == io.EOF || eofSeen {
-			break
-		}
-		q = p.readLine()
-		err = q.Err
-		if err == io.EOF {
-			eofSeen = true
-		}
-	}
+	// ParseHolder is no longer a goroutine, so this logic must be
+	// moved into ParseHolder, where it is executed only if depth == 0
+	//for err == nil || err == io.EOF {
+	//	var (
+	//		imageDefn *Definition
+	//		linkDefn  *Definition
+	//	)
+	//	if len(q.runes) > 0 {
+	//		// HANDLE DEFINITIONS -----------------------------------
+
+	//		// rigidly require that definitions start in the first column
+	//		if q.runes[0] == '[' { // possible link definition
+	//			linkDefn, err = q.parseLinkDefinition(p.opt, doc)
+	//		}
+	//		if err == nil && linkDefn == nil && q.runes[0] == '!' {
+	//			imageDefn, err = q.parseImageDefinition(p.opt, doc)
+	//		}
+	//	}
+	//	if imageDefn == nil && linkDefn == nil {
+	//		lastWasDef = false
+	//		out <- q // pass line to ParseHolder goroutine
+	//		status = <-resp
+	//	} else {
+	//		lastWasDef = true
+	//	}
+	//	if err == io.EOF || eofSeen {
+	//		break
+	//	}
+	//	q = p.readLine()
+	//	err = q.Err
+	//	if err == io.EOF {
+	//		eofSeen = true
+	//	}
+	//} // GEEP
+
 	// we do no handshaking with ParseHolder if the last line was
 	// a definition, so we explicitly tell it that we're done and
 	// wait for an acknowledgement.
-	if lastWasDef {
-		stop <- true
-	}
+	//if lastWasDef {
+	//	stop <- true
+	//}
 	// 2014-01-29
 	//status = <-resp
 
