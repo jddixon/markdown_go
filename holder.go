@@ -98,12 +98,10 @@ func (h *Holder) makeSimpleLineSep() (nl *LineSep) {
 }
 func (h *Holder) dumpAnyPara(addNewLine, testing bool) {
 	if h.curPara != nil {
-		// DEBUG
 		if testing {
 			fmt.Printf("depth %d: have dangling h.curPara '%s'\n",
 				h.depth, string(h.curPara.GetHtml()))
 		}
-		// END
 		h.AddBlock(h.curPara)
 		if addNewLine {
 			lineSep := h.makeSimpleLineSep()
@@ -198,9 +196,8 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 	)
 	_ = verbose // still not used
 
-	// -- ok --------------------------------------------------------
+	// -- top -------------------------------------------------------
 
-	// DEBUG
 	if p.opt.Testing {
 		fmt.Printf("entering ParseHolder depth %d: first line is '%s'\n",
 			h.depth, string(q.runes))
@@ -208,9 +205,6 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 			fmt.Printf("    error = %s\n", err.Error())
 		}
 	}
-	// END
-
-	sayGoodbye := true
 
 	// pass through the document line by line
 	for err == nil || err == io.EOF {
@@ -228,71 +222,6 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 		if lineLen == 0 {
 			blankLine = true
 		}
-		//if haveChild {
-		//	if lineLen == 0 && err == io.EOF {
-		//		stopChild <- true
-		//		statusChild = <-fromChild
-		//		haveChild = false
-
-		//		// DEBUG
-		//		if p.opt.Testing {
-		//			fmt.Printf("*** DEPTH %d APPENDING BLOCKQUOTE, BLANK LINE, EOF:  ***\n",
-		//				h.depth)
-		//			fmt.Printf("    statusChild is 0x%x\n", statusChild)
-		//			fmt.Printf("    APPENDED %s\n",
-		//				string(child.GetHtml()))
-		//		}
-		//		// END
-
-		//		// h.blocks = append(h.blocks, child)
-		//		lostChild = child
-		//		lineProcessed = true // we are at EOF
-		//		// child = nil
-
-		//	} else {
-		//		// just copy the line through to the child
-		//		// DEBUG
-		//		if testing {
-		//			fmt.Printf("COPYING TO CHILD %d: %s\n",
-		//				h.depth+1, string(q.runes))
-		//		}
-		//		// END
-		//		toChild <- q
-		//		statusChild = <-fromChild
-		//		lineProcessed = (statusChild == ACK) ||
-		//			// XXX
-		//			(statusChild == (DONE | LAST_LINE_PROCESSED))
-		//		// DEBUG
-		//		if testing {
-		//			fmt.Printf("child %d status = 0x%x : ",
-		//				h.depth, statusChild)
-		//			if lineProcessed {
-		//				fmt.Println("child has processed line")
-		//			} else {
-		//				fmt.Println("child has NOT processed line")
-		//			}
-		//		}
-		//		// END
-		//		// child may have set q.err
-		//		err = q.Err
-		//		if err != nil || (statusChild&DONE != 0) {
-		//			haveChild = false
-		//			if err == nil || err == io.EOF {
-		//				lostChild = child
-		//			}
-		//			// child = nil
-		//		} // FOO
-		//	}
-		//} // GEEP
-
-		/////////////////////////////////////////////////////////////
-		// Old comment, possibly no longer true:
-		//
-		// XXX NOT CORRECTLY HANDLED AT THIS POINT:
-		// XXX (a) blank line
-		// XXX (b) lostChild != nil
-		// XXX (c) ! lineProcessed
-		///////////////////////////////////////////////////////////// GEEP
 
 		if !lineProcessed && h.depth == 0 && !blankLine {
 			// HANDLE DEFINITIONS -----------------------------------
@@ -326,9 +255,9 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 					}
 					if from >= lineLen {
 						blankLine = true
-						// DEBUG
-						fmt.Printf("  BLANK LINE\n")
-						// END
+						if testing {
+							fmt.Printf("  BLANK LINE\n")
+						}
 					}
 				}
 				// the first case arises when > is last character on line
@@ -348,7 +277,6 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 					lineProcessed = (statusChild == ACK) ||
 						(statusChild == (DONE | LAST_LINE_PROCESSED))
 
-					// DEBUG
 					if testing {
 						fmt.Printf("new child status = 0x%x : ", statusChild)
 						if lineProcessed {
@@ -357,7 +285,6 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 							fmt.Println("child has NOT processed line")
 						}
 					}
-					// END
 					// child may have set q.err
 					err = q.Err
 					if err != nil || (statusChild&LAST_LINE_PROCESSED != 0) {
@@ -490,8 +417,10 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 							}
 						}
 						// HEADERS ----------------------------------
-						if b == nil && (err == nil || err == io.EOF) && ch0 == '#' {
+						if b == nil &&
+							(err == nil || err == io.EOF) && ch0 == '#' {
 							b, forceNL, err = q.parseHeader(from + 1)
+
 						}
 
 						// HORIZONTAL RULES ------------------------
@@ -504,10 +433,11 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 
 						// ORDERED LISTS --------------------------
 
-						// XXX We require a space after these starting characters
+						// XXX We require a space after these starting chars
 						if b == nil && (err == nil || err == io.EOF) {
-							myFrom := from
-							for ; myFrom < from+3 && myFrom < lineLen; myFrom++ {
+							var myFrom uint
+							for myFrom = from; myFrom < from+3 && myFrom < lineLen; myFrom++ {
+
 								if !u.IsSpace(q.runes[myFrom]) {
 									break
 								}
@@ -527,10 +457,11 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 
 						// UNORDERED LISTS ------------------------
 
-						// XXX We require a space after these starting characters
+						// XXX We require a space after these starting chars
 						if b == nil && (err == nil || err == io.EOF) {
-							myFrom := from
+							var myFrom uint
 							for myFrom = 0; myFrom < 3 && myFrom < lineLen; myFrom++ {
+
 								if !u.IsSpace(q.runes[myFrom]) {
 									break
 								}
@@ -546,11 +477,6 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 								}
 							}
 						}
-
-						// CODE -----------------------------------
-
-						// XXX STUB
-
 					}
 				}
 
@@ -593,6 +519,7 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 				lineProcessed = true
 			}
 		} // end DEFAULT: PARA
+
 		if fencedCodeBlock == nil && blankLine && !lineProcessed {
 			// we got a blank line
 			ls, err := NewLineSep(q.lineSep)
@@ -607,11 +534,10 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 					lastBlockLineSep = true
 				}
 			}
-		} // FOO
+		}
 
 		// prepare for next iteration ---------------------
 		if err != nil || eofSeen {
-			// DEBUG
 			if testing {
 				fmt.Printf("parseHolder depth %d breaking, error or EOF seen\n",
 					h.depth)
@@ -622,13 +548,10 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 					fmt.Println("    EOF SEEN, so breaking")
 				}
 			}
-			// END
-
 			status = DONE
 			if lineProcessed {
 				status |= LAST_LINE_PROCESSED
 			}
-			sayGoodbye = true
 			break
 		}
 
@@ -636,66 +559,17 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 		q = p.readLine()
 		err = q.Err
 
-		// DEBUG
-		fmt.Printf("IN: line = '%s'\n", string(q.runes))
-		if err != nil {
-			fmt.Printf("    err = %s\n", err.Error())
+		if testing {
+			fmt.Printf("IN: line = '%s'\n", string(q.runes))
+			if err != nil {
+				fmt.Printf("    err = %s\n", err.Error())
+			}
 		}
-		// END
-
-		// select {
-		// case q, ok = <-in:
-		// 	if ok {
-		// 		err = q.Err
-		// 	} else {
-		// 		// DEBUG
-		// 		fmt.Println("select, in: !ok so fatalError")
-		// 		// END
-		// 		fatalError = true
-		// 	}
-		// case stopped, ok = <-stop:
-		// 	// DEBUG
-		// 	if testing {
-		// 		fmt.Printf("HOLDER %d HAS BEEN STOPPED\n", h.depth)
-		// 	}
-		// 	// END GEEP
-		// 	if !ok {
-		// 		// DEBUG
-		// 		if testing {
-		// 			fmt.Println("select, stop: !ok so fatalError")
-		// 		}
-		// 		// END
-		// 		fatalError = true
-		// 	} else {
-		// 	}
-		// 	if !fatalError && haveChild {
-		// 		stopChild <- true
-		// 		statusChild = <-fromChild
-
-		// 		// DEBUG
-		// 		if p.opt.Testing {
-		// 			fmt.Printf("*** DEPTH %d STOPPED: QUEUING CHILD ***\n",
-		// 				h.depth)
-		// 			fmt.Printf("    statusChild is 0x%x\n", statusChild)
-		// 			fmt.Printf("    BLOCKQUOTE: %s\n",
-		// 				string(child.GetHtml()))
-		// 		}
-		// 		// END
-
-		// 		lostChild = child // that is, append it
-		// 		haveChild = false
-		// 	}
-		// 	break
-		// } // FOO
 
 		if err == io.EOF {
 			eofSeen = true
 		}
 		// BREAK-FORCING CONDITIONS -----------------------
-		//if stopped {
-		//	sayGoodbye = true
-		//	break
-		// }
 
 		if (err != nil && err != io.EOF) || fatalError || q == nil {
 			break
@@ -704,13 +578,6 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 		if len(q.runes) == 0 {
 			if testing {
 				fmt.Println("ZERO-LENGTH LINE")
-				// DEBUG
-				if err == nil {
-					fmt.Println("    nil error")
-				} else {
-					fmt.Printf("    error is %s\n", err.Error())
-				}
-				// END
 			}
 			if eofSeen {
 				break
@@ -720,12 +587,10 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 				break
 			}
 		}
-		// DEBUG
 		if testing {
 			fmt.Printf("ParseHolder %d, bottom for loop: next line is '%s'\n",
 				h.depth, string(q.runes))
 		}
-		// END
 	} // END FOR LOOP -----------------------------------------------
 
 	if !fatalError {
@@ -736,7 +601,6 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 			}
 			h.dumpAnyPara(false, testing)
 			if lostChild != nil {
-				// DEBUG
 				if testing {
 					fmt.Printf(
 						"*** DEPTH %d APPENDING LOSTCHILD BLOCKQUOTE ***\n",
@@ -745,11 +609,9 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 					fmt.Printf("    APPENDED %s\n",
 						string(lostChild.GetHtml()))
 				}
-				// END	// GEEP
 				h.AddBlock(lostChild)
 				lastBlockLineSep = false
 			}
-			// DEBUG
 			if testing {
 				fmt.Printf("parseHolder depth %d returning; holder has %d blocks\n",
 					h.depth, len(h.blocks))
@@ -758,19 +620,16 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 						h.depth, i, string(h.blocks[i].GetHtml()))
 				}
 			}
-			// END
 		}
-		if sayGoodbye {
-			if testing {
-				fmt.Printf("saying goodbye, depth %d ... \n", h.depth)
-			}
-			status = DONE
-			if lineProcessed {
-				status |= LAST_LINE_PROCESSED
-			}
-			if testing {
-				fmt.Printf("    goodbye said, depth %d\n", h.depth)
-			}
+		if testing {
+			fmt.Printf("saying goodbye, depth %d ... \n", h.depth)
+		}
+		status = DONE
+		if lineProcessed {
+			status |= LAST_LINE_PROCESSED
+		}
+		if testing {
+			fmt.Printf("    goodbye said, depth %d\n", h.depth)
 		}
 	}
 

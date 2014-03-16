@@ -94,24 +94,20 @@ func (q *Line) parseLinkSpan(opt *Options) (span SpanI, err error) {
 		testing = opt.Testing
 		_ = verbose
 
-		// DEBUG
 		if testing {
 			fmt.Printf("parseLinkSpan: offset %d, text %s\n",
 				offset, string(q.runes[offset:]))
 		}
-		// END
 
 		// look for the end of the linkText
 		for ; offset < uint(len(q.runes)); offset++ {
 			ch := q.runes[offset]
 			if ch == ']' {
 				linkTextEnd = offset
-				// DEBUG
 				if testing {
 					fmt.Printf("linkTextEnd = %d; end is %d\n",
 						offset, uint(len(q.runes))) // DEBUG
 				}
-				// END
 				offset++
 				break
 			}
@@ -153,11 +149,9 @@ func (q *Line) parseLinkSpan(opt *Options) (span SpanI, err error) {
 		}
 		if end > 0 {
 			if titleStart > 0 && titleEnd == 0 {
-				// DEBUG
 				if testing {
 					fmt.Printf("found start of title but not end\n")
 				}
-				// END
 				// just give up
 				end = 0
 			}

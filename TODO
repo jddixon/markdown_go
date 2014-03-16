@@ -1,5 +1,10 @@
 xgo/md/TODO
 
+2014-03-15
+    * clean up parser.go, holder.go, elsewhere as required,			    * DONE
+        removing leftovers from handling blockquotes with			    * DONE
+        goroutines (a rough cleanup, need to look at code again)		* DONE
+
 2014-03-08
     * accept HTML *span* elements
         - verify Markdown IS interpreted in such elements
@@ -40,6 +45,8 @@ xgo/md/TODO
 
 2014-01-09
     * fix: most blockquote tests fail                                   * DONE
+2013-12-28
+    * handle the 11 blockquote tests
 
 2014-01-01
     * link-idref-angle-bracket requires (?) argument for channel 
@@ -49,9 +56,6 @@ xgo/md/TODO
     * then parser should have context stack
     * the various Get() routines should return HTML5 OM, not text
     * need a String() for everything
-
-2013-12-28
-    * handle the 11 blockquote tests
 
 2013-12-26
     * why can't I declare Document.blocks as []BlockI ?
