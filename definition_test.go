@@ -13,6 +13,9 @@ var _ = fmt.Print
 
 func (s *XLSuite) TestReadLine(c *C) {
 
+	if VERBOSITY > 0 {
+		fmt.Println("TEST_READ_LINE")
+	}
 	text1 := "this is line 1"
 	text2 := "and this the second line"
 	text3 := "unterminated stuff"
@@ -56,6 +59,9 @@ func (s *XLSuite) TestReadLine(c *C) {
 
 func (s *XLSuite) TestLinkDefinition(c *C) {
 
+	if VERBOSITY > 0 {
+		fmt.Println("TEST_LINE_DEFINITION")
+	}
 	opt := new(Options) // all default values
 
 	// 1: link definition with optional title
@@ -103,6 +109,9 @@ func (s *XLSuite) TestLinkDefinition(c *C) {
 
 func (s *XLSuite) TestImageDefinition(c *C) {
 
+	if VERBOSITY > 0 {
+		fmt.Println("TEST_IMAGE_DEFINITION")
+	}
 	opt := new(Options) // all default values
 
 	// 1: image definition with optional title

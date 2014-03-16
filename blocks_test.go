@@ -15,6 +15,9 @@ var _ = fmt.Print
 // -- HEADER --------------------------------------------------------
 
 func (s *XLSuite) TestHeader(c *C) {
+	if VERBOSITY > 0 {
+		fmt.Println("TEST_HEADER")
+	}
 	rng := xr.MakeSimpleRNG()
 
 	titles := make([]string, 6)
@@ -108,6 +111,10 @@ func (s *XLSuite) doTestHRule(c *C, char rune, rng *xr.PRNG) {
 	c.Assert(ser, Equals, "<hr />")
 }
 func (s *XLSuite) TestHRule(c *C) {
+
+	if VERBOSITY > 0 {
+		fmt.Println("TEST_HRULE")
+	}
 	rng := xr.MakeSimpleRNG()
 
 	s.doTestHRule(c, '-', rng)

@@ -3,12 +3,16 @@ package md
 // xgo/md/span_seq_test.go
 
 import (
+	"fmt"
 	. "launchpad.net/gocheck"
 )
 
 // Test various kinds of emphasis spans with intermixed text.
 func (s *XLSuite) TestParaEmphAndCode(c *C) {
 
+	if VERBOSITY > 0 {
+		fmt.Println("TEST_PARA_EMPH_AND_CODE")
+	}
 	opt := NewOptions(nil, "", "", false, false)
 	doc, _ := NewDocument(opt) // just a dummy
 	NULL_EOL := []rune{0}
@@ -58,6 +62,9 @@ func (s *XLSuite) TestParaEmphAndCode(c *C) {
 
 // test link span with and without title
 func (s *XLSuite) TestParaLinkSpan(c *C) {
+	if VERBOSITY > 0 {
+		fmt.Println("TEST_PARA_LINKE_SPAN")
+	}
 	opt := NewOptions(nil, "", "", false, false)
 	doc, _ := NewDocument(opt) // just a dummy
 	EOL := []rune{CR}
@@ -95,6 +102,10 @@ func (s *XLSuite) TestParaLinkSpan(c *C) {
 
 // test image span with and without title
 func (s *XLSuite) TestParaImageSpan(c *C) {
+
+	if VERBOSITY > 0 {
+		fmt.Println("TEST_PARA_IMAGE_SPAN")
+	}
 	opt := NewOptions(nil, "", "", false, false)
 	doc, _ := NewDocument(opt) // just a dummy
 	EOL := []rune{CR}

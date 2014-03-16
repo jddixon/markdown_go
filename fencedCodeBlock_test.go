@@ -52,7 +52,9 @@ func (s *XLSuite) doTestFencedBlock(c *C, char rune, rng *xr.PRNG) {
 
 	input := string(text)
 	var rd io.Reader = strings.NewReader(input)
-	options := NewOptions(rd, "", "", false, false)
+
+	//                 reader infile outfile testing verbose
+	options := NewOptions(rd, "", "", true, false)
 	p, err := NewParser(options)
 	c.Assert(err, IsNil)
 	c.Assert(p, NotNil)
@@ -76,6 +78,9 @@ func (s *XLSuite) doTestFencedBlock(c *C, char rune, rng *xr.PRNG) {
 
 }
 func (s *XLSuite) TestFencedBlock(c *C) {
+	if VERBOSITY > 0 {
+		fmt.Println("TEST_FENCED_BLOCK")
+	}
 	rng := xr.MakeSimpleRNG()
 
 	s.doTestFencedBlock(c, '~', rng)
@@ -96,6 +101,9 @@ func (s *XLSuite) makeFence(post rune, length uint, lang string) string {
 }
 
 func (s *XLSuite) TestFenceFound(c *C) {
+	if VERBOSITY > 0 {
+		fmt.Println("TEST_FENCE_FOUND")
+	}
 	rng := xr.MakeSimpleRNG()
 
 	str := s.makeFence('~', uint(3+rng.Intn(3)), "")

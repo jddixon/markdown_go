@@ -1,5 +1,7 @@
 package md
 
+// xgo/md/holder.go
+
 import (
 	"fmt"
 	"io"
@@ -159,22 +161,31 @@ func (q *Line) foundFence(from uint) (found bool, lang string) {
 	return
 }
 
-// XXX MAJOR CHANGE: parameter
-//    in chan *Line
-// replaced by
-//    q *Line
-// and q dropped from var block at top of ParseHolder
-
+// Parse a holder, given a pointer to the main processor and the first
+// line of text.  Returns a status code and a possibly non-empty line
+// pointer.  If the line is not empty, it contains the first line that
+// the holder could not process.
 func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 
+	// get error from the first line ----------------------
+	var eofSeen bool
+	err := q.Err
+	if err == io.EOF {
+		eofSeen = true
+	}
+
+	// default value of out -------------------------------
+	emptyRunes := make([]rune, 0)
+	nullRune := make([]rune, 1) // a single rune with value zero
+	out = NewLine(emptyRunes, nullRune)
+	out.Err = io.EOF
+
+	// set up other local variables -----------------------
 	doc := p.GetDocument()
 	var (
 		codeBlock        = new(CodeBlock)
 		fencedCodeBlock  *FencedCodeBlock
-		eofSeen          bool
-		err              error
 		fatalError       bool
-		iAmDone          bool
 		lineProcessed    bool
 		ch0              rune
 		lastBlockLineSep bool
@@ -189,12 +200,6 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 
 	// -- ok --------------------------------------------------------
 
-	// WAS q = p.readLine()
-	err = q.Err
-	if err == io.EOF {
-		eofSeen = true
-	}
-
 	// DEBUG
 	if p.opt.Testing {
 		fmt.Printf("entering ParseHolder depth %d: first line is '%s'\n",
@@ -208,7 +213,7 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 	sayGoodbye := true
 
 	// pass through the document line by line
-	for (err == nil || err == io.EOF) && !iAmDone {
+	for err == nil || err == io.EOF {
 		var (
 			b           BlockI
 			blankLine   bool
@@ -281,12 +286,31 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 		//} // GEEP
 
 		/////////////////////////////////////////////////////////////
+		// Old comment, possibly no longer true:
+		//
 		// XXX NOT CORRECTLY HANDLED AT THIS POINT:
 		// XXX (a) blank line
 		// XXX (b) lostChild != nil
 		// XXX (c) ! lineProcessed
-		/////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////// GEEP
 
+		if !lineProcessed && h.depth == 0 && !blankLine {
+			// HANDLE DEFINITIONS -----------------------------------
+			var (
+				imageDefn *Definition
+				linkDefn  *Definition
+			)
+			// rigidly require that definitions start in the first column
+			if q.runes[0] == '[' { // possible link definition
+				linkDefn, err = q.parseLinkDefinition(p.opt, doc)
+			}
+			if err == nil && linkDefn == nil && q.runes[0] == '!' {
+				imageDefn, err = q.parseImageDefinition(p.opt, doc)
+			}
+			if imageDefn != nil || linkDefn != nil {
+				lineProcessed = true
+			}
+		}
 		if !lineProcessed {
 			if lineLen > 0 {
 				if h.depth > 0 {
@@ -586,7 +610,7 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 		} // FOO
 
 		// prepare for next iteration ---------------------
-		if err != nil || eofSeen || iAmDone {
+		if err != nil || eofSeen {
 			// DEBUG
 			if testing {
 				fmt.Printf("parseHolder depth %d breaking, error or EOF seen\n",
@@ -610,6 +634,14 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 
 		// -- in ----------------------------------------------------
 		q = p.readLine()
+		err = q.Err
+
+		// DEBUG
+		fmt.Printf("IN: line = '%s'\n", string(q.runes))
+		if err != nil {
+			fmt.Printf("    err = %s\n", err.Error())
+		}
+		// END
 
 		// select {
 		// case q, ok = <-in:
@@ -664,6 +696,7 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 		//	sayGoodbye = true
 		//	break
 		// }
+
 		if (err != nil && err != io.EOF) || fatalError || q == nil {
 			break
 		}
@@ -671,7 +704,18 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 		if len(q.runes) == 0 {
 			if testing {
 				fmt.Println("ZERO-LENGTH LINE")
+				// DEBUG
+				if err == nil {
+					fmt.Println("    nil error")
+				} else {
+					fmt.Printf("    error is %s\n", err.Error())
+				}
+				// END
 			}
+			if eofSeen {
+				break
+			}
+			// XXX previous condition
 			if len(q.lineSep) == 0 && q.lineSep[0] == rune(0) {
 				break
 			}

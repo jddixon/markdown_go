@@ -65,6 +65,9 @@ func (p *Parser) readLine() (line *Line) {
 	if err == io.EOF {
 		err = nil
 		atEOF = true
+		// DEBUG
+		fmt.Println("p.readLine() sees EOF")
+		// END
 	}
 	for err == nil {
 		if ch == CR || ch == LF || ch == rune(0) {
@@ -113,6 +116,14 @@ func (p *Parser) readLine() (line *Line) {
 	}
 	line.Err = err
 
+	//// DEBUG
+	//if line.Err == nil {
+	//	fmt.Printf("p.readLine() returning '%s'\n", string(line.runes))
+	//} else {
+	//	fmt.Printf("p.readLine() returning '%s' and %s\n",
+	//		string(line.runes), line.Err)
+	//}
+	//// END
 	return
 }
 
