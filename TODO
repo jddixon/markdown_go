@@ -6,7 +6,7 @@ xgo/md/TODO
         goroutines (a rough cleanup, need to look at code again)		* DONE
 
 2014-03-08
-    * accept HTML *span* elements
+    * accept HTML *inline* elements
         - verify Markdown IS interpreted in such elements
 
     * accept HTML *block* elements 
