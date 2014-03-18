@@ -1,29 +1,25 @@
 xgo/md/TODO
 
+2014-03-17
+    * any new md work to be done in a branch of that name
+
 2014-03-15
     * clean up parser.go, holder.go, elsewhere as required,			    * DONE
         removing leftovers from handling blockquotes with			    * DONE
         goroutines (a rough cleanup, need to look at code again)		* DONE
-
 2014-03-08
     * accept HTML *inline* elements
         - verify Markdown IS interpreted in such elements
-
     * accept HTML *block* elements 
         - verify Markdown not interpreted in such blocks
-
 2014-03-04
     * look at extensions under https://github.com/karlcow/markdown-testsuite
     * consider //http://kramdown.gettalong.org/syntax.html
-
-    * clean up KLUDGE at holder.go, about L 456
-
+    * clean up KLUDGE at holder.go, about L 456                         * DONE?
 2014-02-19
     * verify can round-trip fencedCodeBlock
-
 2014-02-07
     * automatic email addresses: match randomization algorithm!
-
 2014-02-05
     * FIX: para.go claims that each Para has a LineSeq associated with
         it, but there is no such element in the struct
@@ -32,39 +28,31 @@ xgo/md/TODO
         - CodeBlock.String() should produce this
         - See Metastackflow 125148
         - also https://help.github.com/articles/github-flavored-markdown
-
 2014-01-18
-    * linkReference.go appears to be dead code
-
+    * linkReference.go appears to be dead code, so DROP
 2014-01-14
     * xgoMarkdown should be able to parse source trees like
         /usr/local/src/html5-boilerplace/doc/*.md
         which contain links to file names with a .md extension;
         these should automatically be processed into trees which
         can be rendered as HTML
-
 2014-01-09
     * fix: most blockquote tests fail                                   * DONE
 2013-12-28
     * handle the 11 blockquote tests
-
 2014-01-01
     * link-idref-angle-bracket requires (?) argument for channel 
         to tell parseHolder() that we are done
-
 2013-12-29
     * then parser should have context stack
     * the various Get() routines should return HTML5 OM, not text
     * need a String() for everything
-
 2013-12-26
     * why can't I declare Document.blocks as []BlockI ?
     * test linkRefSpan with dictionary
-
 2013-12-23
     * loops in parseLinkDefinition are messy; rework to follow 
         those in parseImageDef
-
 2013-12-16
     * a line consisting of nothing but hash signs should simply be 
         output as text; in other words, it gets appended to nonSeps
