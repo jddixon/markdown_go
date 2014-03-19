@@ -1,17 +1,20 @@
 xgo/md/TODO
 
+2014-03-18 (edited from -08)
+    * accept HTML *inline* elements
+        - verify Markdown IS interpreted in such elements
+    * accept HTML *block* elements 
+        - verify Markdown not interpreted in such blocks
+
+2014-03-18
+    * drop after74, after89 branches                                    * DONE
 2014-03-17
-    * any new md work to be done in a branch of that name
+    * any new md work to be done in a branch of that name; create it    * DONE
 
 2014-03-15
     * clean up parser.go, holder.go, elsewhere as required,			    * DONE
         removing leftovers from handling blockquotes with			    * DONE
         goroutines (a rough cleanup, need to look at code again)		* DONE
-2014-03-08
-    * accept HTML *inline* elements
-        - verify Markdown IS interpreted in such elements
-    * accept HTML *block* elements 
-        - verify Markdown not interpreted in such blocks
 2014-03-04
     * look at extensions under https://github.com/karlcow/markdown-testsuite
     * consider //http://kramdown.gettalong.org/syntax.html

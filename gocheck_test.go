@@ -12,5 +12,5 @@ type XLSuite struct{}
 var _ = Suite(&XLSuite{})
 
 var (
-	VERBOSITY = 0
+	VERBOSITY = 1
 )
