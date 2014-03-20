@@ -116,7 +116,8 @@ func lower(char rune) (ch rune) {
 func scanForTag(buf []rune, from uint) (
 	offset uint, // one beyond the closing > or 0 if not found
 	tagNdx int, // the tag found
-	empty, nestable bool) {
+	empty, nestable bool, // element attributes
+	err error) {
 
 	bufLen := uint(len(buf))
 	if from >= bufLen-1 {
