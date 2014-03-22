@@ -2,6 +2,12 @@ package md
 
 // xgo/md/inlineHtmlSpan.go
 
+import (
+	"fmt"
+)
+
+var _ = fmt.Print
+
 // So far, just a list of names.  Of these, only <q> may be nested in
 // an element of its own type.
 
@@ -60,9 +66,13 @@ const (
 	IL_TAG_WBR
 )
 
+var tagLen = make([]uint, len(INLINE_TAGS))
 var tagMap map[string]int
 
 func init() {
+	for i := 0; i < len(INLINE_TAGS); i++ {
+		tagLen[i] = uint(len(INLINE_TAGS[i]))
+	}
 	tagMap = make(map[string]int)
 	tagMap["a"] = IL_TAG_A
 	tagMap["abbr"] = IL_TAG_ABBR
@@ -113,6 +123,9 @@ func lower(char rune) (ch rune) {
 // and empty attributes of the element.  XXX It makes more sense to
 // do that through table lookup.
 //
+// XXX PROBABLY SHOULD DROP err - failure to match is not an error,
+// and offset == 0 means not found.
+//
 func scanForTag(buf []rune, from uint) (
 	offset uint, // one beyond the closing > or 0 if not found
 	tagNdx int, // the tag found
@@ -135,25 +148,22 @@ func scanForTag(buf []rune, from uint) (
 		fallthrough
 	case 'i':
 		fallthrough
+	case 'q':
+		// this can only be a single-character tag
+		fallthrough
 	case 's':
 		fallthrough
 	case 'u':
 		if ch1 == '>' {
 			offset = from + 2
 			tagNdx = tagMap[string([]rune{ch0})]
+			if ch0 == 'q' {
+				nestable = true
+			}
 			return
 		} else {
 			maybe = true
 		}
-	// this can only be a single-character tag
-	case 'q':
-		if ch1 == '>' {
-			offset = from + 2
-			tagNdx = IL_TAG_Q
-			nestable = true
-			return
-		}
-		return
 	// these cannot stand alone but can start other tags
 	case 'c':
 		fallthrough
@@ -172,11 +182,121 @@ func scanForTag(buf []rune, from uint) (
 		return
 	}
 
-	if !maybe {
+	// the shortest pattern, "em>", needs three characters to complete
+	if !maybe || from+3 >= bufLen {
 		return
 	}
+	matched := false
+	ch2 := lower(buf[from+2])
+	if ch0 == 'e' {
+		matched = ch1 == 'm' && ch2 == '>'
+		if !matched {
+			return
+		}
+		offset = from + 3
+	} else if ch0 == 'b' {
+		if ch1 == 'r' {
+			matched = ch2 == '>'
+			offset = from + 3
+		} else if ch1 == 'd' {
+			if from+3 < bufLen {
+				matched = ch2 == 'o' && buf[from+3] == '>'
+				offset = from + 4
+			}
+		}
+		if !matched {
+			return
+		}
+	}
+	if !matched {
+		// all other possible matches need at least four characters
+		if from+4 >= bufLen {
+			return
+		}
+		ch3 := lower(buf[from+3])
+		// all of these have 3-character tags
+		if ch0 == 'd' || ch0 == 'i' || ch0 == 'k' || ch0 == 'v' || ch0 == 'w' {
+			// tags are all 3 characters
+			if ch3 != '>' {
+				return
+			}
+			switch ch0 {
+			case 'd':
+				matched = ch1 == 'e' && ch2 == 'l'
+			case 'i':
+				matched = ch1 == 'n' && ch2 == 's'
+			case 'k':
+				matched = ch1 == 'b' && ch2 == 'd'
+			case 'v':
+				matched = ch1 == 'a' && ch2 == 'r'
+			case 'w':
+				matched = ch1 == 'b' && ch2 == 'r'
+			default:
+				fmt.Printf("INTERNAL ERROR: '%c' seen in level 3 switch\n",
+					ch0)
+			}
+			if !matched {
+				return
+			}
+			offset = from + 4
+		}
+		if !matched {
+			// all other possible matches need at least five characters
+			if from+5 >= bufLen {
+				return
+			}
+			ch4 := lower(buf[from+4])
+			if ch0 == 'a' || ch0 == 'c' {
+				if ch4 != '>' {
+					return
+				}
+				if ch0 == 'a' {
+					matched = ch1 == 'b' && ch2 == 'b' && ch3 == 'r'
+				} else {
+					matched = ((ch1 == 'i' && ch2 == 't') ||
+						(ch1 == 'o' && ch2 == 'd')) && ch3 == 'e'
+				}
+				if !matched {
+					return
+				}
+				offset = from + 5
+			} else {
+				if ch0 != 's' {
+					return
+				}
+				// samp, span, small, strong
+				if ch4 == '>' {
+					matched = (ch1 == 'a' && ch2 == 'm' && ch3 == 'p') ||
+						(ch1 == 'p' && ch2 == 'a' && ch3 == 'n')
+					if matched {
+						offset = from + 5
+					}
+				} else if from+6 >= bufLen {
+					ch5 := lower(buf[from+5])
+					if ch5 == '>' {
+						matched = ch1 == 'm' && ch1 == 'a' && ch3 == 'l' && ch4 == 'l'
+						if matched {
+							offset = from + 7
+						}
+					} else if from+7 >= bufLen {
+						if buf[from+6] == '>' {
+							matched = ch1 == 't' && ch2 == 'r' &&
+								ch3 == 'o' && ch4 == 'n' && ch5 == 'g'
+							if matched {
+								offset = from + 8
+							}
+						}
+					}
+				}
+				if !matched {
+					return
+				}
+			}
+			// if we get here, we found a match
+		}
 
-	// XXX STUB XXX
+		// XXX STUB XXX
 
+	}
 	return
 }

@@ -53,9 +53,15 @@ func (s *XLSuite) TestAAAInlineHtmlSpan(c *C) {
 		c.Assert(tagMap[strTag], Equals, i)
 	}
 
+	// spot-check our slice of tag lenths -- first, longest, last
+	c.Assert(tagLen[0], Equals, uint(len(INLINE_TAGS[0])))
+	c.Assert(tagLen[IL_TAG_STRONG], Equals,
+		uint(len(INLINE_TAGS[IL_TAG_STRONG])))
+	c.Assert(tagLen[IL_TAG_WBR], Equals, uint(len(INLINE_TAGS[IL_TAG_WBR])))
+
 	// check the tag scanner; do this for all 22 tags
 
-	// single characer tags
+	// single characer tags (6)
 	s.doCheckOneCharTag(c, IL_TAG_A)
 	s.doCheckOneCharTag(c, IL_TAG_B)
 	s.doCheckOneCharTag(c, IL_TAG_I)
