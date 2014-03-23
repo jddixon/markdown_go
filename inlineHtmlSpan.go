@@ -4,6 +4,7 @@ package md
 
 import (
 	"fmt"
+	"strings"
 )
 
 var _ = fmt.Print
@@ -39,6 +40,11 @@ var (
 		"wbr",
 	}
 )
+var (
+	_tagCount  = len(INLINE_TAGS)
+	isNestable = make([]bool, _tagCount)
+	isEmpty    = make([]bool, _tagCount)
+)
 
 const (
 	IL_TAG_A = iota
@@ -70,6 +76,9 @@ var tagLen = make([]uint, len(INLINE_TAGS))
 var tagMap map[string]int
 
 func init() {
+	isEmpty[IL_TAG_BR] = true
+	isNestable[IL_TAG_Q] = true
+
 	for i := 0; i < len(INLINE_TAGS); i++ {
 		tagLen[i] = uint(len(INLINE_TAGS[i]))
 	}
@@ -129,7 +138,6 @@ func lower(char rune) (ch rune) {
 func scanForTag(buf []rune, from uint) (
 	offset uint, // one beyond the closing > or 0 if not found
 	tagNdx int, // the tag found
-	empty, nestable bool, // element attributes
 	err error) {
 
 	bufLen := uint(len(buf))
@@ -140,6 +148,14 @@ func scanForTag(buf []rune, from uint) (
 	var maybe bool
 	ch0 := lower(buf[from])
 	ch1 := lower(buf[from+1])
+
+	if ch0 == 'q' {
+		if ch1 == '>' {
+			offset = from + 2
+			tagNdx = IL_TAG_Q
+		}
+		return
+	}
 	switch ch0 {
 	// these can either stand alone or start other tags
 	case 'a':
@@ -148,18 +164,12 @@ func scanForTag(buf []rune, from uint) (
 		fallthrough
 	case 'i':
 		fallthrough
-	case 'q':
-		// this can only be a single-character tag
-		fallthrough
 	case 's':
 		fallthrough
 	case 'u':
 		if ch1 == '>' {
 			offset = from + 2
 			tagNdx = tagMap[string([]rune{ch0})]
-			if ch0 == 'q' {
-				nestable = true
-			}
 			return
 		} else {
 			maybe = true
@@ -196,8 +206,22 @@ func scanForTag(buf []rune, from uint) (
 		offset = from + 3
 	} else if ch0 == 'b' {
 		if ch1 == 'r' {
-			matched = ch2 == '>'
-			offset = from + 3
+			// accept any of <br> or <br/> or <br />"
+			if ch2 == '>' {
+				matched = true
+				offset = from + 3
+			} else if bufLen == from+4 {
+				if buf[from+3] == '/' && buf[from+4] == '>' {
+					matched = true
+					offset = from + 5
+				}
+			} else {
+				if buf[from+3] == ' ' && buf[from+4] == '/' && buf[from+5] == '>' {
+					matched = true
+					offset = from + 6
+				}
+			}
+
 		} else if ch1 == 'd' {
 			if from+3 < bufLen {
 				matched = ch2 == 'o' && buf[from+3] == '>'
@@ -241,8 +265,12 @@ func scanForTag(buf []rune, from uint) (
 			offset = from + 4
 		}
 		if !matched {
+			// DEBUG
+			fmt.Printf("checking + 5: ch0 is %c\n", ch0)
+			// END
+
 			// all other possible matches need at least five characters
-			if from+5 >= bufLen {
+			if from+5 > bufLen {
 				return
 			}
 			ch4 := lower(buf[from+4])
@@ -256,14 +284,14 @@ func scanForTag(buf []rune, from uint) (
 					matched = ((ch1 == 'i' && ch2 == 't') ||
 						(ch1 == 'o' && ch2 == 'd')) && ch3 == 'e'
 				}
-				if !matched {
-					return
+				if matched {
+					offset = from + 5
 				}
-				offset = from + 5
 			} else {
 				if ch0 != 's' {
 					return
 				}
+
 				// samp, span, small, strong
 				if ch4 == '>' {
 					matched = (ch1 == 'a' && ch2 == 'm' && ch3 == 'p') ||
@@ -294,9 +322,13 @@ func scanForTag(buf []rune, from uint) (
 			}
 			// if we get here, we found a match
 		}
-
-		// XXX STUB XXX
-
+		// XXX won't work  with <br/>, <br />
+		tag := buf[from : offset-1]
+		strTag := strings.ToLower(string(tag))
+		tagNdx = tagMap[strTag]
+		// DEBUG
+		fmt.Printf("MATCH %s, index %d\n", strTag, tagNdx)
+		// END
 	}
 	return
 }

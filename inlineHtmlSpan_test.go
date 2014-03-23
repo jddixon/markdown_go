@@ -4,7 +4,7 @@ package md
 
 import (
 	"fmt"
-	//xr "github.com/jddixon/xlattice_go/rnglib"
+	// xr "github.com/jddixon/xlattice_go/rnglib"
 	. "launchpad.net/gocheck"
 )
 
@@ -14,9 +14,18 @@ func (s *XLSuite) doScanOK(c *C, text string, from uint) (
 	elm *InlineHtmlElm, err error) {
 
 	runes := []rune(text)
-	offset, tagNdx, empty, nestable, err := scanForTag(runes, from)
+	offset, tagNdx, err := scanForTag(runes, from)
 	c.Assert(err, IsNil)
-	elm = &InlineHtmlElm{tagNdx, empty, nestable, offset, nil}
+	// DEBUG
+	if true {
+		fmt.Printf("%-6s returns offset = %d\n", text, offset)
+	}
+	// END
+	c.Assert(offset > 0, Equals, true)
+	elm = &InlineHtmlElm{
+		tagNdx: tagNdx,
+		end:    offset,
+	}
 	return
 }
 
@@ -28,7 +37,26 @@ func (s *XLSuite) doCheckOneCharTag(c *C, ndx int) {
 	c.Assert(err, IsNil)
 	c.Assert(elm.tagNdx, Equals, ndx)
 	c.Assert(elm.end, Equals, uint(3))
+}
 
+func (s *XLSuite) doCheckOtherTag(c *C, ndx int) {
+	var text string
+	var expected uint
+	tag := INLINE_TAGS[ndx]
+	if isEmpty[ndx] {
+		text = fmt.Sprintf("<%s />", tag)
+		expected = tagLen[ndx] + 4
+	} else {
+		text = fmt.Sprintf("<%s>", tag)
+		expected = tagLen[ndx] + 2
+	}
+	// DEBUG
+	fmt.Printf("checking '%s'\n", text)
+	// END
+	elm, err := s.doScanOK(c, text, 1)
+	c.Assert(err, IsNil)
+	c.Assert(elm.tagNdx, Equals, ndx)
+	c.Assert(elm.end, Equals, expected)
 }
 
 // force me to execute first ;-)
@@ -68,5 +96,26 @@ func (s *XLSuite) TestAAAInlineHtmlSpan(c *C) {
 	s.doCheckOneCharTag(c, IL_TAG_Q)
 	s.doCheckOneCharTag(c, IL_TAG_S)
 	s.doCheckOneCharTag(c, IL_TAG_U)
+
+	s.doCheckOtherTag(c, IL_TAG_ABBR)
+	//s.doCheckOtherTag(c, IL_TAG_BDO)
+	//s.doCheckOtherTag(c, IL_TAG_BR)			// variants missed
+	s.doCheckOtherTag(c, IL_TAG_CITE)
+	s.doCheckOtherTag(c, IL_TAG_CODE)
+	//s.doCheckOtherTag(c, IL_TAG_DEL)
+	//s.doCheckOtherTag(c, IL_TAG_DFN)
+	// s.doCheckOtherTag(c, IL_TAG_EM)
+
+	// XXx WORKING HERE
+
+	s.doCheckOtherTag(c, IL_TAG_INS)
+	s.doCheckOtherTag(c, IL_TAG_KBD)
+	s.doCheckOtherTag(c, IL_TAG_SAMP)
+	s.doCheckOtherTag(c, IL_TAG_SMALL)
+	s.doCheckOtherTag(c, IL_TAG_SPAN)
+	s.doCheckOtherTag(c, IL_TAG_STRONG)
+	s.doCheckOtherTag(c, IL_TAG_SUB)
+	s.doCheckOtherTag(c, IL_TAG_VAR)
+	s.doCheckOtherTag(c, IL_TAG_WBR)
 
 }
