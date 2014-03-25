@@ -19,7 +19,9 @@ var (
 		"abbr",
 		"b",
 		"bdo",
-		"br", // need not be closed
+		"br",   // BR_SIMPLE
+		"br/",  // BR_SHORT
+		"br /", // BR
 		"cite",
 		"code",
 		"del",
@@ -51,6 +53,8 @@ const (
 	IL_TAG_ABBR
 	IL_TAG_B
 	IL_TAG_BDO
+	IL_TAG_BR_SIMPLE
+	IL_TAG_BR_SHORT
 	IL_TAG_BR
 	IL_TAG_CITE
 	IL_TAG_CODE
@@ -76,6 +80,8 @@ var tagLen = make([]uint, len(INLINE_TAGS))
 var tagMap map[string]int
 
 func init() {
+	isEmpty[IL_TAG_BR_SIMPLE] = true
+	isEmpty[IL_TAG_BR_SHORT] = true
 	isEmpty[IL_TAG_BR] = true
 	isNestable[IL_TAG_Q] = true
 
@@ -87,7 +93,9 @@ func init() {
 	tagMap["abbr"] = IL_TAG_ABBR
 	tagMap["b"] = IL_TAG_B
 	tagMap["bdo"] = IL_TAG_BDO
-	tagMap["br"] = IL_TAG_BR
+	tagMap["br"] = IL_TAG_BR_SIMPLE
+	tagMap["br/"] = IL_TAG_BR_SHORT
+	tagMap["br /"] = IL_TAG_BR
 	tagMap["cite"] = IL_TAG_CITE
 	tagMap["code"] = IL_TAG_CODE
 	tagMap["del"] = IL_TAG_DEL
@@ -193,7 +201,7 @@ func scanForTag(buf []rune, from uint) (
 	}
 
 	// the shortest pattern, "em>", needs three characters to complete
-	if !maybe || from+3 >= bufLen {
+	if !maybe || from+2 > bufLen {
 		return
 	}
 	matched := false
@@ -207,18 +215,22 @@ func scanForTag(buf []rune, from uint) (
 	} else if ch0 == 'b' {
 		if ch1 == 'r' {
 			// accept any of <br> or <br/> or <br />"
-			if ch2 == '>' {
-				matched = true
-				offset = from + 3
-			} else if bufLen == from+4 {
-				if buf[from+3] == '/' && buf[from+4] == '>' {
+			if from+2 < bufLen {
+				if buf[from+2] == '>' {
+					matched = true
+					offset = from + 3
+				}
+			}
+			if !matched && from+3 < bufLen {
+				if buf[from+2] == '/' && buf[from+3] == '>' {
+					matched = true
+					offset = from + 4
+				}
+			}
+			if !matched && from+4 < bufLen {
+				if buf[from+2] == ' ' && buf[from+3] == '/' && buf[from+4] == '>' {
 					matched = true
 					offset = from + 5
-				}
-			} else {
-				if buf[from+3] == ' ' && buf[from+4] == '/' && buf[from+5] == '>' {
-					matched = true
-					offset = from + 6
 				}
 			}
 
@@ -231,26 +243,39 @@ func scanForTag(buf []rune, from uint) (
 		if !matched {
 			return
 		}
+		// DEBUG
+		//fmt.Printf("MATCHED A B: '%s', offseet is %d\n",
+		//	string(buf[from:offset]), offset)
+		// END
 	}
 	if !matched {
 		// all other possible matches need at least four characters
-		if from+4 >= bufLen {
+		if from+3 >= bufLen {
 			return
 		}
 		ch3 := lower(buf[from+3])
 		// all of these have 3-character tags
-		if ch0 == 'd' || ch0 == 'i' || ch0 == 'k' || ch0 == 'v' || ch0 == 'w' {
+		if ch0 == 'd' || ch0 == 'i' || ch0 == 'k' || ch0 == 's' ||
+			ch0 == 'v' || ch0 == 'w' {
+
 			// tags are all 3 characters
 			if ch3 != '>' {
-				return
+				if ch0 == 's' {
+					goto MAYBE_S // XXX DIJKSTRA
+				} else {
+					return
+				}
 			}
 			switch ch0 {
 			case 'd':
-				matched = ch1 == 'e' && ch2 == 'l'
+				matched = (ch1 == 'e' && ch2 == 'l') ||
+					(ch1 == 'f' && ch2 == 'n')
 			case 'i':
 				matched = ch1 == 'n' && ch2 == 's'
 			case 'k':
 				matched = ch1 == 'b' && ch2 == 'd'
+			case 's':
+				matched = ch1 == 'u' && ch2 == 'b'
 			case 'v':
 				matched = ch1 == 'a' && ch2 == 'r'
 			case 'w':
@@ -260,20 +285,27 @@ func scanForTag(buf []rune, from uint) (
 					ch0)
 			}
 			if !matched {
+				// DEBUG
+				fmt.Printf("NOT MATCHED: %c %c %c\n", ch0, ch1, ch2)
+				// END
 				return
 			}
 			offset = from + 4
 		}
+	MAYBE_S:
 		if !matched {
 			// DEBUG
-			fmt.Printf("checking + 5: ch0 is %c\n", ch0)
+			// fmt.Printf("  checking + 4: ch0 is %c\n", ch0)
 			// END
 
 			// all other possible matches need at least five characters
-			if from+5 > bufLen {
+			if from+4 >= bufLen {
 				return
 			}
 			ch4 := lower(buf[from+4])
+			// DEBUG
+			//fmt.Printf("  ch0 is %c, ch4 is %c; bufLen %d\n", ch0, ch4, bufLen)
+			// END
 			if ch0 == 'a' || ch0 == 'c' {
 				if ch4 != '>' {
 					return
@@ -292,26 +324,30 @@ func scanForTag(buf []rune, from uint) (
 					return
 				}
 
-				// samp, span, small, strong
 				if ch4 == '>' {
+					// samp, span
 					matched = (ch1 == 'a' && ch2 == 'm' && ch3 == 'p') ||
 						(ch1 == 'p' && ch2 == 'a' && ch3 == 'n')
 					if matched {
 						offset = from + 5
 					}
-				} else if from+6 >= bufLen {
+				} else if from+5 <= bufLen {
+					// small, strong
 					ch5 := lower(buf[from+5])
+					// DEBUG
+					fmt.Printf("ch0 is %c, ch5 is %c\n", ch0, ch5)
+					// END
 					if ch5 == '>' {
-						matched = ch1 == 'm' && ch1 == 'a' && ch3 == 'l' && ch4 == 'l'
+						matched = ch1 == 'm' && ch2 == 'a' && ch3 == 'l' && ch4 == 'l'
 						if matched {
-							offset = from + 7
+							offset = from + 6
 						}
-					} else if from+7 >= bufLen {
+					} else if from+6 <= bufLen {
 						if buf[from+6] == '>' {
 							matched = ch1 == 't' && ch2 == 'r' &&
 								ch3 == 'o' && ch4 == 'n' && ch5 == 'g'
 							if matched {
-								offset = from + 8
+								offset = from + 7
 							}
 						}
 					}
@@ -322,13 +358,14 @@ func scanForTag(buf []rune, from uint) (
 			}
 			// if we get here, we found a match
 		}
-		// XXX won't work  with <br/>, <br />
-		tag := buf[from : offset-1]
-		strTag := strings.ToLower(string(tag))
-		tagNdx = tagMap[strTag]
-		// DEBUG
-		fmt.Printf("MATCH %s, index %d\n", strTag, tagNdx)
-		// END
 	}
+	// XXX won't work  with <br/>, <br />
+	tag := buf[from : offset-1]
+	strTag := strings.ToLower(string(tag))
+	tagNdx = tagMap[strTag]
+	// DEBUG
+	fmt.Printf("MATCH '%s' => %s, index %d\n",
+		string(tag), strTag, tagNdx)
+	// END
 	return
 }

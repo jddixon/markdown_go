@@ -16,11 +16,12 @@ func (s *XLSuite) doScanOK(c *C, text string, from uint) (
 	runes := []rune(text)
 	offset, tagNdx, err := scanForTag(runes, from)
 	c.Assert(err, IsNil)
-	// DEBUG
-	if true {
-		fmt.Printf("%-6s returns offset = %d\n", text, offset)
-	}
-	// END
+	//// DEBUG
+	//if true {
+	//	fmt.Printf("%-6s returns offset %d, tagNdx %d\n",
+	//		text, offset, tagNdx)
+	//}
+	//// END
 	c.Assert(offset > 0, Equals, true)
 	elm = &InlineHtmlElm{
 		tagNdx: tagNdx,
@@ -43,15 +44,17 @@ func (s *XLSuite) doCheckOtherTag(c *C, ndx int) {
 	var text string
 	var expected uint
 	tag := INLINE_TAGS[ndx]
-	if isEmpty[ndx] {
-		text = fmt.Sprintf("<%s />", tag)
-		expected = tagLen[ndx] + 4
-	} else {
-		text = fmt.Sprintf("<%s>", tag)
-		expected = tagLen[ndx] + 2
-	}
+
+	//if isEmpty[ndx] {
+	//	text = fmt.Sprintf("<%s />", tag)
+	//	expected = tagLen[ndx] + 4
+	//} else {
+
+	text = fmt.Sprintf("<%s>", tag)
+	expected = tagLen[ndx] + 2
+
 	// DEBUG
-	fmt.Printf("checking '%s'\n", text)
+	// fmt.Printf("CHECKING ndx %d as '%s'\n", ndx, text)
 	// END
 	elm, err := s.doScanOK(c, text, 1)
 	c.Assert(err, IsNil)
@@ -98,16 +101,15 @@ func (s *XLSuite) TestAAAInlineHtmlSpan(c *C) {
 	s.doCheckOneCharTag(c, IL_TAG_U)
 
 	s.doCheckOtherTag(c, IL_TAG_ABBR)
-	//s.doCheckOtherTag(c, IL_TAG_BDO)
-	//s.doCheckOtherTag(c, IL_TAG_BR)			// variants missed
+	s.doCheckOtherTag(c, IL_TAG_BDO)
+	s.doCheckOtherTag(c, IL_TAG_BR_SIMPLE)
+	s.doCheckOtherTag(c, IL_TAG_BR_SHORT)
+	s.doCheckOtherTag(c, IL_TAG_BR)
 	s.doCheckOtherTag(c, IL_TAG_CITE)
 	s.doCheckOtherTag(c, IL_TAG_CODE)
-	//s.doCheckOtherTag(c, IL_TAG_DEL)
-	//s.doCheckOtherTag(c, IL_TAG_DFN)
-	// s.doCheckOtherTag(c, IL_TAG_EM)
-
-	// XXx WORKING HERE
-
+	s.doCheckOtherTag(c, IL_TAG_DEL)
+	s.doCheckOtherTag(c, IL_TAG_DFN)
+	s.doCheckOtherTag(c, IL_TAG_EM)
 	s.doCheckOtherTag(c, IL_TAG_INS)
 	s.doCheckOtherTag(c, IL_TAG_KBD)
 	s.doCheckOtherTag(c, IL_TAG_SAMP)
