@@ -43,9 +43,11 @@ var (
 	}
 )
 var (
-	_tagCount  = len(INLINE_TAGS)
+	_tagCount = len(INLINE_TAGS)
+	// True if an inline element of the type can be nested
 	isNestable = make([]bool, _tagCount)
-	isEmpty    = make([]bool, _tagCount)
+	// True if the inline element of this type MUST have no children
+	mustBeEmpty = make([]bool, _tagCount)
 )
 
 const (
@@ -80,9 +82,10 @@ var tagLen = make([]uint, len(INLINE_TAGS))
 var tagMap map[string]int
 
 func init() {
-	isEmpty[IL_TAG_BR_SIMPLE] = true
-	isEmpty[IL_TAG_BR_SHORT] = true
-	isEmpty[IL_TAG_BR] = true
+	mustBeEmpty[IL_TAG_BR_SIMPLE] = true
+	mustBeEmpty[IL_TAG_BR_SHORT] = true
+	mustBeEmpty[IL_TAG_BR] = true
+	mustBeEmpty[IL_TAG_WBR] = true
 	isNestable[IL_TAG_Q] = true
 
 	for i := 0; i < len(INLINE_TAGS); i++ {
@@ -117,11 +120,9 @@ func init() {
 }
 
 type InlineHtmlElm struct {
-	tagNdx   int
-	empty    bool // never has any enclosed text, like <br/>
-	nestable bool // can be nested in an element of its own type; <q>
-	end      uint // offset of first char beyond start tag or element
-	body     *SpanSeq
+	tagNdx int
+	end    uint // offset of first char beyond start tag or element
+	body   *SpanSeq
 }
 
 func lower(char rune) (ch rune) {
@@ -136,9 +137,7 @@ func lower(char rune) (ch rune) {
 // that < has been seen and from is sitting on the first character of
 // a candidate tag.  If a well-formed tag is found, return its index
 // and 'offset' just beyond the closing >.  If offset is zero, no
-// inline HTML tag was found.  Otherwise, also return the nestable
-// and empty attributes of the element.  XXX It makes more sense to
-// do that through table lookup.
+// inline HTML tag was found.
 //
 // XXX PROBABLY SHOULD DROP err - failure to match is not an error,
 // and offset == 0 means not found.
@@ -359,9 +358,12 @@ func scanForTag(buf []rune, from uint) (
 			// if we get here, we found a match
 		}
 	}
-	// XXX won't work  with <br/>, <br />
+	// WE FORCE the various forms of <br> to <br />
 	tag := buf[from : offset-1]
 	strTag := strings.ToLower(string(tag))
+	if strTag == "br" || strTag == "br/" {
+		strTag = "br /"
+	}
 	tagNdx = tagMap[strTag]
 	// DEBUG
 	fmt.Printf("MATCH '%s' => %s, index %d\n",

@@ -4,11 +4,13 @@ package md
 
 import (
 	"fmt"
-	// xr "github.com/jddixon/xlattice_go/rnglib"
+	xr "github.com/jddixon/xlattice_go/rnglib"
 	. "launchpad.net/gocheck"
 )
 
 var _ = fmt.Print
+
+var SPACES = []string{"", " ", "  "} // from zero to two
 
 func (s *XLSuite) doScanOK(c *C, text string, from uint) (
 	elm *InlineHtmlElm, err error) {
@@ -16,12 +18,12 @@ func (s *XLSuite) doScanOK(c *C, text string, from uint) (
 	runes := []rune(text)
 	offset, tagNdx, err := scanForTag(runes, from)
 	c.Assert(err, IsNil)
-	//// DEBUG
-	//if true {
-	//	fmt.Printf("%-6s returns offset %d, tagNdx %d\n",
-	//		text, offset, tagNdx)
-	//}
-	//// END
+	// DEBUG
+	if true {
+		fmt.Printf("%-6s returns offset %d, tagNdx %d\n",
+			text, offset, tagNdx)
+	}
+	// END
 	c.Assert(offset > 0, Equals, true)
 	elm = &InlineHtmlElm{
 		tagNdx: tagNdx,
@@ -30,36 +32,45 @@ func (s *XLSuite) doScanOK(c *C, text string, from uint) (
 	return
 }
 
-// TODO: add rng argument, then add random amount of leading space
-func (s *XLSuite) doCheckOneCharTag(c *C, ndx int) {
+// We add random number (0..2 inclusive) of leading and trailing spaces
+func (s *XLSuite) doCheckOneCharTag(c *C, rng *xr.PRNG, ndx int) {
 	tag := INLINE_TAGS[ndx]
-	text := fmt.Sprintf("<%s>  ", tag)
-	elm, err := s.doScanOK(c, text, 1)
+	before := SPACES[rng.Intn(3)]
+	from := uint(len(before)) + 1
+	after := SPACES[rng.Intn(3)]
+	text := fmt.Sprintf("%s<%s>%s", before, tag, after)
+	elm, err := s.doScanOK(c, text, from)
 	c.Assert(err, IsNil)
 	c.Assert(elm.tagNdx, Equals, ndx)
-	c.Assert(elm.end, Equals, uint(3))
+	c.Assert(elm.end, Equals, uint(from+2))
 }
 
-func (s *XLSuite) doCheckOtherTag(c *C, ndx int) {
-	var text string
+// We add random number (0..2 inclusive) of leading and trailing spaces
+func (s *XLSuite) doCheckOtherTag(c *C, rng *xr.PRNG, ndx int) {
 	var expected uint
 	tag := INLINE_TAGS[ndx]
+	before := SPACES[rng.Intn(3)]
+	from := uint(len(before)) + 1
+	after := SPACES[rng.Intn(3)]
 
-	//if isEmpty[ndx] {
-	//	text = fmt.Sprintf("<%s />", tag)
-	//	expected = tagLen[ndx] + 4
-	//} else {
+	text := fmt.Sprintf("%s<%s>%s", before, tag, after)
 
-	text = fmt.Sprintf("<%s>", tag)
-	expected = tagLen[ndx] + 2
-
-	// DEBUG
-	// fmt.Printf("CHECKING ndx %d as '%s'\n", ndx, text)
-	// END
-	elm, err := s.doScanOK(c, text, 1)
+	elm, err := s.doScanOK(c, text, from)
 	c.Assert(err, IsNil)
-	c.Assert(elm.tagNdx, Equals, ndx)
-	c.Assert(elm.end, Equals, expected)
+
+	// We coerce the first two to IL_TAG_BR, which seems to be the
+	// conventional form for Markdown
+	if ndx == IL_TAG_BR_SIMPLE { // just <br>
+		expected = from + tagLen[ndx] + 1
+		c.Assert(elm.tagNdx, Equals, IL_TAG_BR)
+	} else if ndx == IL_TAG_BR_SHORT { // <br/>
+		expected = from + tagLen[ndx] + 2
+		c.Assert(elm.tagNdx, Equals, IL_TAG_BR)
+	} else {
+		c.Assert(elm.tagNdx, Equals, ndx) // handles canonical <br />
+		expected = from + tagLen[ndx] + 1 // the +1 allows for > after tag
+		c.Assert(elm.end, Equals, expected)
+	}
 }
 
 // force me to execute first ;-)
@@ -67,6 +78,8 @@ func (s *XLSuite) TestAAAInlineHtmlSpan(c *C) {
 	if VERBOSITY > 0 {
 		fmt.Println("TEST_INLINE_HTML_SPAN")
 	}
+
+	rng := xr.MakeSimpleRNG()
 
 	// check the lower() function
 	c.Assert(lower('A'), Equals, 'a')
@@ -93,31 +106,31 @@ func (s *XLSuite) TestAAAInlineHtmlSpan(c *C) {
 	// check the tag scanner; do this for all 22 tags
 
 	// single characer tags (6)
-	s.doCheckOneCharTag(c, IL_TAG_A)
-	s.doCheckOneCharTag(c, IL_TAG_B)
-	s.doCheckOneCharTag(c, IL_TAG_I)
-	s.doCheckOneCharTag(c, IL_TAG_Q)
-	s.doCheckOneCharTag(c, IL_TAG_S)
-	s.doCheckOneCharTag(c, IL_TAG_U)
+	s.doCheckOneCharTag(c, rng, IL_TAG_A)
+	s.doCheckOneCharTag(c, rng, IL_TAG_B)
+	s.doCheckOneCharTag(c, rng, IL_TAG_I)
+	s.doCheckOneCharTag(c, rng, IL_TAG_Q)
+	s.doCheckOneCharTag(c, rng, IL_TAG_S)
+	s.doCheckOneCharTag(c, rng, IL_TAG_U)
 
-	s.doCheckOtherTag(c, IL_TAG_ABBR)
-	s.doCheckOtherTag(c, IL_TAG_BDO)
-	s.doCheckOtherTag(c, IL_TAG_BR_SIMPLE)
-	s.doCheckOtherTag(c, IL_TAG_BR_SHORT)
-	s.doCheckOtherTag(c, IL_TAG_BR)
-	s.doCheckOtherTag(c, IL_TAG_CITE)
-	s.doCheckOtherTag(c, IL_TAG_CODE)
-	s.doCheckOtherTag(c, IL_TAG_DEL)
-	s.doCheckOtherTag(c, IL_TAG_DFN)
-	s.doCheckOtherTag(c, IL_TAG_EM)
-	s.doCheckOtherTag(c, IL_TAG_INS)
-	s.doCheckOtherTag(c, IL_TAG_KBD)
-	s.doCheckOtherTag(c, IL_TAG_SAMP)
-	s.doCheckOtherTag(c, IL_TAG_SMALL)
-	s.doCheckOtherTag(c, IL_TAG_SPAN)
-	s.doCheckOtherTag(c, IL_TAG_STRONG)
-	s.doCheckOtherTag(c, IL_TAG_SUB)
-	s.doCheckOtherTag(c, IL_TAG_VAR)
-	s.doCheckOtherTag(c, IL_TAG_WBR)
+	s.doCheckOtherTag(c, rng, IL_TAG_ABBR)
+	s.doCheckOtherTag(c, rng, IL_TAG_BDO)
+	s.doCheckOtherTag(c, rng, IL_TAG_BR_SIMPLE)
+	s.doCheckOtherTag(c, rng, IL_TAG_BR_SHORT)
+	s.doCheckOtherTag(c, rng, IL_TAG_BR)
+	s.doCheckOtherTag(c, rng, IL_TAG_CITE)
+	s.doCheckOtherTag(c, rng, IL_TAG_CODE)
+	s.doCheckOtherTag(c, rng, IL_TAG_DEL)
+	s.doCheckOtherTag(c, rng, IL_TAG_DFN)
+	s.doCheckOtherTag(c, rng, IL_TAG_EM)
+	s.doCheckOtherTag(c, rng, IL_TAG_INS)
+	s.doCheckOtherTag(c, rng, IL_TAG_KBD)
+	s.doCheckOtherTag(c, rng, IL_TAG_SAMP)
+	s.doCheckOtherTag(c, rng, IL_TAG_SMALL)
+	s.doCheckOtherTag(c, rng, IL_TAG_SPAN)
+	s.doCheckOtherTag(c, rng, IL_TAG_STRONG)
+	s.doCheckOtherTag(c, rng, IL_TAG_SUB)
+	s.doCheckOtherTag(c, rng, IL_TAG_VAR)
+	s.doCheckOtherTag(c, rng, IL_TAG_WBR)
 
 }
