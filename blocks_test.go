@@ -6,7 +6,7 @@ import (
 	"fmt"
 	xr "github.com/jddixon/xlattice_go/rnglib"
 	"io"
-	. "launchpad.net/gocheck"
+	. "gopkg.in/check.v1"
 	"strings"
 )
 

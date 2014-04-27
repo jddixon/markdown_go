@@ -4,8 +4,8 @@ package md
 
 import (
 	"fmt"
+	. "gopkg.in/check.v1"
 	"io"
-	. "launchpad.net/gocheck"
 	"strings"
 )
 

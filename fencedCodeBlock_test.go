@@ -5,8 +5,8 @@ package md
 import (
 	"fmt"
 	xr "github.com/jddixon/xlattice_go/rnglib"
+	. "gopkg.in/check.v1"
 	"io"
-	. "launchpad.net/gocheck"
 	"strings"
 )
 

@@ -4,7 +4,7 @@ package md
 
 import (
 	"fmt"
-	. "launchpad.net/gocheck"
+	. "gopkg.in/check.v1"
 )
 
 // Test various kinds of emphasis spans with intermixed text.
