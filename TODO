@@ -1,5 +1,12 @@
 xgo/md/TODO
 
+2014-06-04 (prep for splitting off as separate project on github)
+    * move xgoMarkdown from xgo/cmd into md/cmd subdirectory            * DONE
+    * create local version.go                                           * DONE
+    * create local CHANGES                                              * DONE
+    * create local README.md doc/ doc/index.md                          * DONE
+    * add local LICENSE.md                                              * DONE
+
 2014-03-18 (edited from -08)
     * accept HTML *inline* elements
         - verify Markdown IS interpreted in such elements
