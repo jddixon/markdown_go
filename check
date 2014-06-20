@@ -1,0 +1,1 @@
+cmd/xgoMarkdown -i markdown-testsuite/tests -o tmp $1
