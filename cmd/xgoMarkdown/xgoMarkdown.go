@@ -36,8 +36,8 @@ var (
 
 func main() {
 	var (
-		err error
-		nameWithExt []string		// input file names with extensions
+		err         error
+		nameWithExt []string // input file names with extensions
 	)
 
 	flag.Usage = Usage
