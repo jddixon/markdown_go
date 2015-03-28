@@ -1,5 +1,9 @@
 xgo/md/TODO
 
+2015-03-08
+    * change to use https://github.com/jgm/CommonMark as source for
+        markdown tests
+
 2014-06-04 (prep for splitting off as separate project on github)
     * move xgoMarkdown from xgo/cmd into md/cmd subdirectory            * DONE
     * create local version.go                                           * DONE
