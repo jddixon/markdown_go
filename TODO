@@ -1,4 +1,16 @@
-xgo/md/TODO
+markdown_go/TODO
+
+2015-03-30
+    * executable needs name other than xgoMarkdown (cannot be simply
+        markdown_go !)
+    * standard test should compare "cmark commonmark/spec.txt" 
+        output (spec.html) with that from xgoMarkdown
+    * executable must not REQUIRE a .md extension
+        - if .md is present, use name, otherwise try appending .md
+    * create output directory if it doesn't exist                       * DONE
+
+2015-03-28
+    * split from xgo/md, making this project markdown_go                * DONE
 
 2015-03-08
     * change to use https://github.com/jgm/CommonMark as source for

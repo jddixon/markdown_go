@@ -4,7 +4,7 @@ package md
 
 import (
 	"fmt"
-	xr "github.com/jddixon/xlattice_go/rnglib"
+	xr "github.com/jddixon/rnglib_go"
 	. "gopkg.in/check.v1"
 )
 

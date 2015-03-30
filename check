@@ -1,1 +1,4 @@
-cmd/xgoMarkdown -i markdown-testsuite/tests -o tmp $1
+echo 
+echo $1
+cmd/xgoMarkdown/xgoMarkdown -i markdown-testsuite/tests -o tmp $1
+diff markdown-testsuite/tests/$1.out tmp/$1.html
