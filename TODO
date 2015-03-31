@@ -1,12 +1,34 @@
 markdown_go/TODO
 
+2015-03-31
+    * FIX: exe lows up on spec.txt -- error is not captured
+    * check.all 
+        - blockquote-nested-multiplereturn-level1 panics
+        - blockquote-nested-return-level1 panics
+        - list-blockquote fails
+        - list-code fails
+        - list-multiparagraphs fails
+        - list-multiparagraphs-tabs fails
+        - paragraph-trailing-tab fails
+        - unordered-list-paragraphs fails
+        - unordered-list-with-indented-content fails
+    * write python script which convents commonmark/test-dumped.json
+        into directory of pairs: NNN.md and NNN.out
+        - then write script check.common.pairs which runs through 
+            these systematically
+    * low-priority: fix markdown-testsuite to conform to commonmark
+        - ok to just drop non-conforming tests that fail
+        - but should identify covering commonmark test
+
 2015-03-30
     * executable needs name other than xgoMarkdown (cannot be simply
         markdown_go !)
-    * standard test should compare "cmark commonmark/spec.txt" 
-        output (spec.html) with that from xgoMarkdown
-    * executable must not REQUIRE a .md extension
-        - if .md is present, use name, otherwise try appending .md
+    * standard test should compare "cmark commonmark/spec.txt"          * DONE
+        output (spec.html) with that from xgoMarkdown                   * DONE
+        - this is check.spec                                            * DONE
+    * executable must not REQUIRE a .md extension                       * DONE
+        - if .md absent but file exists, use name, otherwise try        * DONE
+            appending .md                                               * DONE
     * create output directory if it doesn't exist                       * DONE
 
 2015-03-28

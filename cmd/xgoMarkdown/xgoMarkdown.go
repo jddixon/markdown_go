@@ -5,7 +5,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	gm "github.com/jddixon/xgo/md"
+	gm "github.com/jddixon/markdown_go"
 	"io"
 	"io/ioutil"
 	"os"
