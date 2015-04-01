@@ -217,6 +217,10 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 		)
 		lineProcessed = false
 		b = nil
+		/////////////////////////////////////////////////////////////
+		// XXX THIS IS CAUSING ERRORS -- around line 339 eol has a 
+		// value differnt from len(q.runes) XXX
+		/////////////////////////////////////////////////////////////
 		lineLen := uint(len(q.runes)) // XXX REDUNDANT
 		eol := uint(len(q.runes))     // XXX identical to lineLen)
 		if lineLen == 0 {
@@ -301,7 +305,22 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 				if !lineProcessed && (err == nil || err == io.EOF) {
 					// if we are in a code block and this isn't code, dump
 					// the code block
+
+					// XXX A HACK: recalculate eol --------
+					eol = uint(len(q.runes))
+					lineLen = eol
+					if lineLen == 0 {
+						blankLine = true
+					}
+					// XXX END HACK -----------------------
+
 					spanLen := eol - from
+					
+					// DEBUG -- what happens if from > eol ??
+					actualEOL := uint(len(q.runes))
+					fmt.Printf("eol %d actualEOL %d lineLen %d from %d spanLen %d\n",
+						eol, actualEOL, lineLen, from, spanLen)
+					// END
 					dumpCode := false
 					if codeBlock.Size() > 0 { // we are in a code block
 						if blankLine {
@@ -436,14 +455,17 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 						// XXX We require a space after these starting chars
 						if b == nil && (err == nil || err == io.EOF) {
 							var myFrom uint
-							for myFrom = from; myFrom < from+3 && myFrom < lineLen; myFrom++ {
+							for myFrom = from; (myFrom < from+3) && (myFrom < lineLen); myFrom++ {
 
 								if !u.IsSpace(q.runes[myFrom]) {
 									break
 								}
 							}
-							if myFrom < lineLen-2 {
-
+							if (lineLen > 2) && (myFrom < lineLen-2) {
+								// DEBUG
+								fmt.Printf("myFrom %d lineLen %d actual EOL %d\n",
+									myFrom, lineLen, uint(len(q.runes)))
+								// END
 								// we are positioned on a non-space character
 								ch0 := q.runes[myFrom]
 								ch1 := q.runes[myFrom+1]

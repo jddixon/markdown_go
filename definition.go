@@ -42,7 +42,7 @@ func (line *Line) parseLinkDefinition(opt *Options, doc *Document) (
 
 	var (
 		ch                   rune
-		eol                  uint
+		EOL                  uint
 		idStart, idEnd       uint
 		offset               uint
 		uriStart, uriEnd     uint
@@ -58,11 +58,11 @@ func (line *Line) parseLinkDefinition(opt *Options, doc *Document) (
 		verbose = opt.Verbose
 		testing = opt.Testing
 		_ = verbose
-		eol = uint(len(line.runes))
+		EOL = uint(len(line.runes))
 		offset = line.offset + 1 // just beyond the bracket
 
 		// collect the id -----------------------------------------------
-		for idStart = offset; offset < eol; offset++ {
+		for idStart = offset; offset < EOL; offset++ {
 			ch = line.runes[offset]
 			if ch == ']' {
 				idEnd = offset // exclusive end
@@ -71,15 +71,15 @@ func (line *Line) parseLinkDefinition(opt *Options, doc *Document) (
 			}
 		}
 		// expect a colon and one or more spaces ------------------------
-		if idEnd > 0 && offset < eol-3 {
-			if line.runes[offset] == ':' {
+		if (idEnd > 0) && (offset+3 < EOL) {
+			if line.runes[offset] == ':' {		// XXX
 				offset++
 				// skip any spaces
-				for ch = line.runes[offset]; offset < eol && u.IsSpace(ch); ch = line.runes[offset] {
+				for ch = line.runes[offset]; offset < EOL && u.IsSpace(ch); ch = line.runes[offset] {
 
 					offset++
 				}
-				if offset < eol {
+				if offset < EOL {
 					uriStart = offset
 				}
 			}
@@ -87,7 +87,7 @@ func (line *Line) parseLinkDefinition(opt *Options, doc *Document) (
 		// collect the uri ----------------------------------------------
 		if uriStart > 0 {
 			// assume that a uri contains no spaces
-			for offset < eol && !u.IsSpace(line.runes[offset]) {
+			for offset < EOL && !u.IsSpace(line.runes[offset]) {
 				offset++
 			}
 			uriEnd = offset
@@ -102,13 +102,13 @@ func (line *Line) parseLinkDefinition(opt *Options, doc *Document) (
 			}
 		}
 		// collect any title
-		if uriEnd > 0 && offset < eol {
+		if uriEnd > 0 && offset < EOL {
 			// skip any spaces
-			for ch = line.runes[offset]; offset < eol && u.IsSpace(ch); ch = line.runes[offset] {
+			for ch = line.runes[offset]; offset < EOL && u.IsSpace(ch); ch = line.runes[offset] {
 
 				offset++
 			}
-			if offset < eol {
+			if offset < EOL {
 				if ch == '\'' || ch == '"' || ch == '(' {
 					openQuote := ch
 					var closeQuote rune
@@ -118,9 +118,11 @@ func (line *Line) parseLinkDefinition(opt *Options, doc *Document) (
 						closeQuote = openQuote
 					}
 					offset++
-					if offset < eol {
+					if offset < EOL {
 						titleStart = offset
-						for ch = line.runes[offset]; offset < eol && ch != closeQuote; ch = line.runes[offset] {
+						for ch = line.runes[offset]; 
+							(offset < EOL - 1) && (ch != closeQuote); 
+							ch = line.runes[offset] {
 
 							offset++
 						}
@@ -133,7 +135,7 @@ func (line *Line) parseLinkDefinition(opt *Options, doc *Document) (
 		}
 		// XXX IF titleStart > 0 but titleEnd == 0, abort parse
 
-		// XXX FOR STRICTNESS require offset = eol - 1
+		// XXX FOR STRICTNESS require offset = EOL - 1
 		if uriEnd > 0 {
 			id := string(line.runes[idStart:idEnd])
 			uri := line.runes[uriStart:uriEnd]
@@ -192,11 +194,11 @@ func (line *Line) parseImageDefinition(opt *Options, doc *Document) (
 		verbose = opt.Verbose
 		testing = opt.Testing
 		_ = verbose
-		eol := uint(len(line.runes))
+		EOL := uint(len(line.runes))
 		offset = line.offset + 2 // just beyond the bracket
 
 		// collect the id -----------------------------------------------
-		for idStart = offset; offset < eol; offset++ {
+		for idStart = offset; offset < EOL; offset++ {
 			ch = line.runes[offset]
 			if ch == ']' {
 				idEnd = offset // exclusive end
@@ -205,15 +207,15 @@ func (line *Line) parseImageDefinition(opt *Options, doc *Document) (
 			}
 		}
 		// expect a colon and zero or more spaces -----------------------
-		if idEnd > 0 && offset < eol-3 {
+		if idEnd > 0 && offset < EOL-3 {
 			if line.runes[offset] == ':' {
 				offset++
 				// skip any spaces
-				for ch = line.runes[offset]; offset < eol && u.IsSpace(ch); ch = line.runes[offset] {
+				for ch = line.runes[offset]; offset < EOL && u.IsSpace(ch); ch = line.runes[offset] {
 
 					offset++
 				}
-				if offset < eol-1 && ch == '(' {
+				if offset < EOL-1 && ch == '(' {
 					offset++
 					uriStart = offset
 				}
@@ -222,32 +224,32 @@ func (line *Line) parseImageDefinition(opt *Options, doc *Document) (
 		// collect the uri ----------------------------------------------
 		if uriStart > 0 {
 			// assume that a uri contains no spaces
-			for ; offset < eol; offset++ {
+			for ; offset < EOL; offset++ {
 				ch = line.runes[offset]
 				if u.IsSpace(ch) || ch == ')' {
 					break
 				}
 			}
-			if offset < eol {
+			if offset < EOL {
 				uriEnd = offset
 			}
 		}
 		// collect any title
-		if uriEnd > 0 && offset < eol {
+		if uriEnd > 0 && offset < EOL {
 			// skip any spaces
-			for ; offset < eol; offset++ {
+			for ; offset < EOL; offset++ {
 				ch = line.runes[offset]
 				if !u.IsSpace(ch) {
 					break
 				}
 			}
-			if offset < eol {
+			if offset < EOL {
 				if ch == '\'' || ch == '"' {
 					quote := ch
 					offset++
-					if offset < eol {
+					if offset < EOL {
 						titleStart = offset
-						for ch = line.runes[offset]; offset < eol && ch != quote; ch = line.runes[offset] {
+						for ch = line.runes[offset]; offset < EOL && ch != quote; ch = line.runes[offset] {
 
 							offset++
 						}
@@ -259,7 +261,7 @@ func (line *Line) parseImageDefinition(opt *Options, doc *Document) (
 				}
 			}
 		}
-		if uriEnd > 0 && offset < eol {
+		if uriEnd > 0 && offset < EOL {
 			if line.runes[offset] != ')' {
 				// expect a closing RPAREN
 				// DEBUG
@@ -277,11 +279,11 @@ func (line *Line) parseImageDefinition(opt *Options, doc *Document) (
 				}
 				// END
 				uriEnd = 0
-			} else if offset != eol-1 {
+			} else if offset != EOL-1 {
 				// DEBUG
 				if testing {
-					fmt.Printf("offset %d but eol is %d\n",
-						offset, eol)
+					fmt.Printf("offset %d but EOL is %d\n",
+						offset, EOL)
 				}
 				// END
 				uriEnd = 0

@@ -42,7 +42,7 @@ func (s *XLSuite) dumpTestPair(c *C, pair *TestPair) {
 	// XXX WORKING HERE XXX The string() is an error; maybe it should 
 	// wrap doc.GetHtml()
 
-	c.Assert(doc.GetHtml(), Equals, string(pair.Html))
+	c.Check(string(doc.GetHtml()), Equals, pair.Html)
 
 	// THIS IS JUST TRASH.  Wrap a Reader around the input string (see
 	// options.go).  Use that to create a Parser.
@@ -83,7 +83,7 @@ func (s *XLSuite) TestAAACommons(c *C) {
 		err = json.Unmarshal(data, &pairs)
 		if err == nil {
 			fmt.Printf("unmarshaled %d tests\n", len(pairs))
-			for i := 0; i < 8; i++ {
+			for i := 0; i < len(pairs); i++ {
 				s.dumpTestPair(c,  &pairs[i] )
 			}
 		}

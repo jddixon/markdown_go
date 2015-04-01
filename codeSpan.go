@@ -3,7 +3,7 @@ package md
 // xgo/md/codeSpan.go
 
 import (
-	"fmt"
+	//"fmt"
 )
 
 // In Markdown input text a code span begins with one or two backticks
@@ -61,24 +61,23 @@ func (q *Line) parseCodeSpan() (span SpanI, err error) {
 	const BACKTICK = '`'
 
 	offset := q.offset
-	eol := uint(len(q.runes))
+	EOL := uint(len(q.runes))
 	found := false
 	doubled := false
 
 	// we require that the cursor is on the first BACKTICK
 	offset++
-	if offset < eol && q.runes[offset] == BACKTICK {
+	if offset < EOL && q.runes[offset] == BACKTICK {
 		doubled = true
 		offset++
-		fmt.Printf("DOUBLED; next char is '%c'", q.runes[offset]) // DEBUG
 	}
 
 	// look for the end of the span
-	for offset < uint(len(q.runes)) {
+	for offset < EOL {
 		ch := q.runes[offset]
 		if ch == BACKTICK {
 			if doubled {
-				if offset < eol-1 && q.runes[offset+1] == BACKTICK {
+				if offset < EOL-1 && q.runes[offset+1] == BACKTICK {
 					offset++
 					found = true
 					break

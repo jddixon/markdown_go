@@ -91,12 +91,13 @@ func (q *Line) parseImageSpan(opt *Options) (span SpanI, err error) {
 	if opt == nil {
 		err = NilOptions
 	} else {
+		EOL    := uint(len(q.runes))
 		verbose = opt.Verbose
 		testing = opt.Testing
 		_ = verbose
 
 		// look for the end of the linkText
-		for ; offset < uint(len(q.runes)); offset++ {
+		for ; offset < EOL; offset++ {
 			ch := q.runes[offset]
 			if ch == ']' {
 				linkTextEnd = offset
@@ -111,10 +112,10 @@ func (q *Line) parseImageSpan(opt *Options) (span SpanI, err error) {
 		}
 		if linkTextEnd > 0 {
 			// optional space
-			if offset < uint(len(q.runes))-1 && q.runes[offset+1] == ' ' {
+			if offset < EOL-1 && q.runes[offset+1] == ' ' {
 				offset++
 			}
-			if q.runes[offset] == '(' {
+			if (offset<EOL) && (q.runes[offset] == '(') {	
 				offset++
 				pathStart = offset
 				// DEBUG
@@ -125,7 +126,7 @@ func (q *Line) parseImageSpan(opt *Options) (span SpanI, err error) {
 			}
 		}
 		if pathStart > 0 {
-			for offset = pathStart; offset < uint(len(q.runes)); offset++ {
+			for offset = pathStart; offset < EOL; offset++ {
 				ch := q.runes[offset]
 				if ch == ')' {
 					end = offset

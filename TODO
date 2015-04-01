@@ -1,6 +1,10 @@
 markdown_go/TODO
 
 2015-03-31
+    * where appropriate rename eol and lineLen EOL
+    * any test involving uints and minus signs is suspect
+
+2015-03-31
     * FIX: exe lows up on spec.txt -- error is not captured
     * check.all 
         - blockquote-nested-multiplereturn-level1 panics
