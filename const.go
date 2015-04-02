@@ -33,7 +33,7 @@ var (
 	CODE_CLOSE       = []rune("</code></pre>\n")
 	EM_OPEN          = []rune("<em>")
 	EM_CLOSE         = []rune("</em>")
-	H_RULE           = []rune("<hr />")
+	H_RULE           = []rune("<hr />\n")
 	LI_OPEN          = []rune("<li>")
 	LI_CLOSE         = []rune("</li>\n")
 	OL_OPEN          = []rune("<ol>\n")

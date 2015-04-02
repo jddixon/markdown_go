@@ -32,7 +32,7 @@ func (sq *SpanSeq) String() string {
 // succeeds it returns a non-nil SpanI.  In such a case any curText
 // is converted to a Text object and appended to the spans output
 // slice, followed by the SpanI.
-
+//
 func (q *Line) parseSpanSeq(opt *Options, doc *Document, from uint,
 	leftTrim bool) (seq *SpanSeq, err error) {
 

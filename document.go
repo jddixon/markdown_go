@@ -114,8 +114,14 @@ func (q *Document) GetHtml() (body []rune) {
 			body = append(body, UL_CLOSE...)
 		}
 		// drop any terminating CR/LF
-		for body[len(body)-1] == '\n' || body[len(body)-1] == '\r' {
-			body = body[:len(body)-1]
+		// 2015-04-01 dropped this action (commonmark needs terminating
+		// newline
+		//for body[len(body)-1] == '\n' || body[len(body)-1] == '\r' {
+		//	body = body[:len(body)-1]
+		//
+		// 2015-04-01 for commonmark
+		if (len(body) == 0) || (body[len(body)-1] != '\n') {
+			body = append(body, '\n')
 		}
 	}
 	// XXX Blockquote is preceded by LF

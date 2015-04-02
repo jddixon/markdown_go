@@ -30,6 +30,10 @@ func (p *Para) Add(seq SpanSeq) (err error) {
 	return
 }
 
+// 2015-04-01: commonmark spec 2.2 requires that tabs be expanded to spaces
+// with a tab stop every 4 spaces.  Examples 1, 2, 229.  It appears that 
+// this rule is applied only to the body of elements, ie, to text.
+//
 func (p *Para) GetHtml() (runes []rune) {
 	runes = append(runes, PARA_OPEN...)
 	for i := 0; i < len(p.seqs); i++ {

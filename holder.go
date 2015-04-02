@@ -317,9 +317,9 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 					spanLen := eol - from
 					
 					// DEBUG -- what happens if from > eol ??
-					actualEOL := uint(len(q.runes))
-					fmt.Printf("eol %d actualEOL %d lineLen %d from %d spanLen %d\n",
-						eol, actualEOL, lineLen, from, spanLen)
+					//actualEOL := uint(len(q.runes))
+					//fmt.Printf("eol %d actualEOL %d lineLen %d from %d spanLen %d\n",
+					//	eol, actualEOL, lineLen, from, spanLen)
 					// END
 					dumpCode := false
 					if codeBlock.Size() > 0 { // we are in a code block
@@ -443,8 +443,7 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 						}
 
 						// HORIZONTAL RULES ------------------------
-						if b == nil && (err == nil || err == io.EOF) &&
-							(ch0 == '-' || ch0 == '*' || ch0 == '_') {
+						if b == nil && (err == nil || err == io.EOF) {
 							b, err = q.parseHRule(from)
 						}
 
@@ -463,8 +462,8 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 							}
 							if (lineLen > 2) && (myFrom < lineLen-2) {
 								// DEBUG
-								fmt.Printf("myFrom %d lineLen %d actual EOL %d\n",
-									myFrom, lineLen, uint(len(q.runes)))
+								//fmt.Printf("myFrom %d lineLen %d actual EOL %d\n",
+								//	myFrom, lineLen, uint(len(q.runes)))
 								// END
 								// we are positioned on a non-space character
 								ch0 := q.runes[myFrom]

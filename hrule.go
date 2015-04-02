@@ -33,6 +33,9 @@ func (h *HRule) GetHtml() []rune {
 // by an arbitrary number of spaces or hyphens.  We enter with the
 // line offset pointing to the special character ('-' or '*' or '_').
 //
+// 2015-04-01: Commonmark allows zero to three spaces at the beginning
+// of the line and any number of spaces at the end of the line.
+//
 // If the parse succeeds we return a pointer to the HRule object.
 // Otherwise the offset is unchanged and b's value is nil.
 func (q *Line) parseHRule(from uint) (b BlockI, err error) {
@@ -41,21 +44,40 @@ func (q *Line) parseHRule(from uint) (b BlockI, err error) {
 		badCharSeen bool
 		eol         uint = uint(len(q.runes))
 		offset      uint = from
-		char        rune = q.runes[offset]
-		charCount   int  = 1
+		char        rune
+		matchCount  int
+		spaceStart  uint = offset
 	)
-	if char == '-' || char == '*' || char == '_' {
-		for offset++; offset < eol; offset++ {
-			ch := q.runes[offset]
-			if ch == char {
-				charCount++
-			} else if !u.IsSpace(ch) {
-				badCharSeen = true
+	if offset < eol {
+		// ignore up to three leading spaces
+		for char = q.runes[offset]; char == ' '; char = q.runes[offset] {
+			if offset + 1 < eol {
+				offset++
+			} else {
+				break
 			}
 		}
-	}
-	if charCount >= 3 && !badCharSeen {
-		b = &HRule{}
+		if (offset < eol) && (offset < spaceStart + 4) && 
+			(char == '-' || char == '*' || char == '_' ){
+	
+			matching := char
+			matchCount++
+			for offset++; offset < eol; offset++ {
+				char = q.runes[offset]
+				if char == matching {
+					matchCount++
+				} else {
+					// we allow spaces mixed in with matching characters
+					if !u.IsSpace(char) {
+						badCharSeen = true
+						break
+					}
+				}
+			}
+		}
+		if matchCount >= 3 && !badCharSeen {
+			b = &HRule{}
+		}
 	}
 	return
 }

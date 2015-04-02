@@ -1,11 +1,31 @@
 markdown_go/TODO
 
+2015-04-01
+    * commonTests_test.go should wrap all tests in Go's version of
+        try/catch
+    * Ex 1,2,229 and section 2.2 of spec: [tab in the first position is 
+        ignored], then tabs are expanded to spaces, with tab tops at 
+        columns 4,8,12,...  Only text is considered in counting.
+
+2015-04-01
+    * REWRITE commonTests as a go program which iterates over all       * DONE
+        examples, with output only where actual != expected.  Output    * DONE
+        is example number, input, expected output, actual output.       * DONE
+
+    * to elminate most commonTests failures, Doc.GetHtml() should       * DONE
+        ensure that last character is newline (\n')                     * DONE
+        - currently 544/545 test outputs contain 'obtained'             * YEP
+            * permitting terminating CR/LF makes this 432               * YEP
+            * adding newline where missing makes it 428                 * YEP
+            * adding newline to H_RULE     makes it 426                 * YEP
+            * more fiddlint with H_RULE    makes it 422                 * YEP
+
 2015-03-31
     * where appropriate rename eol and lineLen EOL
     * any test involving uints and minus signs is suspect
 
 2015-03-31
-    * FIX: exe lows up on spec.txt -- error is not captured
+    * FIX: exe blows up on spec.txt -- error is not captured
     * check.all 
         - blockquote-nested-multiplereturn-level1 panics
         - blockquote-nested-return-level1 panics
@@ -16,10 +36,10 @@ markdown_go/TODO
         - paragraph-trailing-tab fails
         - unordered-list-paragraphs fails
         - unordered-list-with-indented-content fails
-    * write python script which convents commonmark/test-dumped.json
-        into directory of pairs: NNN.md and NNN.out
-        - then write script check.common.pairs which runs through 
-            these systematically
+    * write python script which convents commonmark/test-dumped.json    * DROP
+        into directory of pairs: NNN.md and NNN.out                     * DROP
+        - then write script check.common.pairs which runs through       * DROP
+            these systematically                                        * DROP
     * low-priority: fix markdown-testsuite to conform to commonmark
         - ok to just drop non-conforming tests that fail
         - but should identify covering commonmark test
