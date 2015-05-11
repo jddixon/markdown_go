@@ -88,9 +88,9 @@ func (q *Line) parseSpanSeq(opt *Options, doc *Document, from uint,
 			} else {
 				if len(curText) > 0 {
 					if firstSpan && leftTrim {
-						if testing {
-							fmt.Println("LEFT-TRIMMING")
-						}
+						//if testing {
+						//	fmt.Println("LEFT-TRIMMING")
+						//}
 						// get rid of any leading spaces
 						for len(curText) > 0 {
 							if u.IsSpace(curText[0]) {

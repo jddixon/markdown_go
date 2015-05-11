@@ -1,2 +1,3 @@
 cd ~/dev/go/src/github.com/jddixon/markdown_go
 goSloc check* countem
+pySloc -C go check* bash:countem
