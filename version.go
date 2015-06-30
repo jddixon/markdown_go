@@ -5,6 +5,6 @@ package md
 // initially copied from xgo/const.go, version 0.1.3
 
 const (
-	VERSION      = "0.3.3"
-	VERSION_DATE = "2015-04-02"
+	VERSION      = "0.3.5"
+	VERSION_DATE = "2015-06-30"
 )
