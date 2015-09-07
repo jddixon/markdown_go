@@ -9,9 +9,55 @@
 </head>
 <body>
 <div class="content">
-<p>xgoMarkdown</p>
+<h1 class="libTop">markdown_go</h1>
 
-<p>This is Markdown implemented in the Go language.</p>
+<p>This is <strong>Markdown</strong> implemented in the Go language.</p>
+
+<p>Markdown is a simple protocol for marking up text.  It is widely used for
+formatting software documentation.  Basically Markdown supports the use of
+less frequently used characters to lay out documents.  Normally Markdown is
+used to generate HTML.  So for example, the first line of this document</p>
+
+<pre><code># Markdown_go
+</code></pre>
+
+<p>When this is rurn through Markdown it becomes</p>
+
+<pre><code>\&lt;H1\&gt;Markdown_go\&lt;/H1\&gt;
+</code></pre>
+
+<h2>Implementations</h2>
+
+<p>There have been many implementations of Markdown.  Possibly the best
+description of their syntax has been John Gruber&rsquo;s
+<a href="http://daringfireball.net/projects/markdown/syntax">Daring Fireball&rsquo;s Markdown Syntax</a>.</p>
+
+<p>Recently a concerted effort by a diverse group has given us
+<a href="http://commonmark.org">CommonMark</a>,
+which provides a coherent syntax for Markdown and implementations of the
+new standard in several languages.</p>
+
+<p>There are alternatives to CommonMark, in particular
+<a href="https://help.github.com/articles/github-flavored-markdown/">Github Flavored Markdown</a>,
+<strong>GFM</strong>.
+Because of Github&rsquo;s very strong position in the marke this is likely to remain
+a strong alternative to CommonMark.  However, in the longer run it seems likely
+that GFM and CommonMark will merge.</p>
+
+<h2>Project Status</h2>
+
+<p>Markdown_go has had two objectives.  First and less importantly it is an
+attempt to add a faster markdown to the Go programmer&rsquo;s toolkit.  A second
+and more important objective is to provide a library which will convert
+Markdown-formatted documents into an absstract syntax tree which in turn
+can be converted into, among other things, HTML.</p>
+
+<p>Markdown_go is reasonably far along as an implementation of the Daring
+Fireball spec.  That is, it generates good HTML for all but a few problem
+cases.  However, it does not as yet provide a decent programming interface
+for those interested in generating a syntax tree for further manipulation.</p>
+
+<p>Markdown_go does not as yet conform to the CommonMark spec.</p>
 
 <h2>Licensing</h2>
 <p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />The material on this github.io website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
