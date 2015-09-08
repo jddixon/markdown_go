@@ -1,5 +1,8 @@
 xgo/CHANGES
 
+v0.3.6
+    2015-09-07
+        * improved {README,index}.md                                SLOC 3785
 v0.3.5
     2015-06-30
         * update .gitignore, correct version.go                     SLOC 3785
