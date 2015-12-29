@@ -51,15 +51,15 @@ func (q *Line) parseHRule(from uint) (b BlockI, err error) {
 	if offset < eol {
 		// ignore up to three leading spaces
 		for char = q.runes[offset]; char == ' '; char = q.runes[offset] {
-			if offset + 1 < eol {
+			if offset+1 < eol {
 				offset++
 			} else {
 				break
 			}
 		}
-		if (offset < eol) && (offset < spaceStart + 4) && 
-			(char == '-' || char == '*' || char == '_' ){
-	
+		if (offset < eol) && (offset < spaceStart+4) &&
+			(char == '-' || char == '*' || char == '_') {
+
 			matching := char
 			matchCount++
 			for offset++; offset < eol; offset++ {

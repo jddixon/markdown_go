@@ -56,40 +56,40 @@ func main() {
 		}
 	}
 	if err == nil {
-    	// SANITY CHECKS ////////////////////////////////////////////
-    	if len(fileNames) == 0 {
-    		err = NothingToDo
-    	} else {
-    		for i := 0; (err == nil) && (i < len(fileNames)); i++ {
-    			name := fileNames[i]
+		// SANITY CHECKS ////////////////////////////////////////////
+		if len(fileNames) == 0 {
+			err = NothingToDo
+		} else {
+			for i := 0; (err == nil) && (i < len(fileNames)); i++ {
+				name := fileNames[i]
 				f := filepath.Join(*inDir, name)
 				if _, err = os.Stat(f); os.IsNotExist(err) {
 					if !strings.HasSuffix(f, ".md") {
 						f = f + ".md"
 						_, err = os.Stat(f)
 					}
-    			}
+				}
 				if err != nil {
 					err = SrcFileDoesNotExist
 					fmt.Printf("%s does not exist\n", f)
 				}
-    			nameWithExt = append(nameWithExt, f)
-    		}
-    	}
-    	// DISPLAY STUFF ////////////////////////////////////////////
-    	if *verbose || *justShow {
-    		fmt.Printf("inDir        = %v\n", *inDir)
-    		fmt.Printf("justShow     = %v\n", *justShow)
-    		fmt.Printf("outDir       = %s\n", *outDir)
-    		fmt.Printf("testing      = %v\n", *testing)
-    		fmt.Printf("verbose      = %v\n", *verbose)
-    		if len(nameWithExt) > 0 {
-    			fmt.Println("INFILES:")
-    			for i := 0; i < len(nameWithExt); i++ {
-    				fmt.Printf("%3d: %s\n", i, nameWithExt[i])
-    			}
-    		}
-    	}
+				nameWithExt = append(nameWithExt, f)
+			}
+		}
+		// DISPLAY STUFF ////////////////////////////////////////////
+		if *verbose || *justShow {
+			fmt.Printf("inDir        = %v\n", *inDir)
+			fmt.Printf("justShow     = %v\n", *justShow)
+			fmt.Printf("outDir       = %s\n", *outDir)
+			fmt.Printf("testing      = %v\n", *testing)
+			fmt.Printf("verbose      = %v\n", *verbose)
+			if len(nameWithExt) > 0 {
+				fmt.Println("INFILES:")
+				for i := 0; i < len(nameWithExt); i++ {
+					fmt.Printf("%3d: %s\n", i, nameWithExt[i])
+				}
+			}
+		}
 	}
 	if err != nil {
 		fmt.Printf("\nerror = %s\n", err.Error())

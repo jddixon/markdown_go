@@ -72,7 +72,7 @@ func (line *Line) parseLinkDefinition(opt *Options, doc *Document) (
 		}
 		// expect a colon and one or more spaces ------------------------
 		if (idEnd > 0) && (offset+3 < EOL) {
-			if line.runes[offset] == ':' {		// XXX
+			if line.runes[offset] == ':' { // XXX
 				offset++
 				// skip any spaces
 				for ch = line.runes[offset]; offset < EOL && u.IsSpace(ch); ch = line.runes[offset] {
@@ -120,9 +120,7 @@ func (line *Line) parseLinkDefinition(opt *Options, doc *Document) (
 					offset++
 					if offset < EOL {
 						titleStart = offset
-						for ch = line.runes[offset]; 
-							(offset < EOL - 1) && (ch != closeQuote); 
-							ch = line.runes[offset] {
+						for ch = line.runes[offset]; (offset < EOL-1) && (ch != closeQuote); ch = line.runes[offset] {
 
 							offset++
 						}

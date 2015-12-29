@@ -44,7 +44,7 @@ func (ls *ImageRefSpan) GetHtml() (out []rune) {
 	if def != nil {
 		uri := def.uri
 		title := def.title
-	
+
 		out = append(out, []rune("<img src=\"")...)
 		out = append(out, uri...)
 		out = append(out, '"')
@@ -107,7 +107,7 @@ func (q *Line) parseImageRefSpan(doc *Document) (span SpanI, err error) {
 			if offset < EOL-1 && q.runes[offset+1] == ' ' {
 				offset++
 			}
-			if (offset < EOL - 1) && (q.runes[offset] == '[') {
+			if (offset < EOL-1) && (q.runes[offset] == '[') {
 				offset++
 				idStart = offset
 				fmt.Printf("idStart = %d\n", offset) // DEBUG

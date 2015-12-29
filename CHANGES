@@ -1,5 +1,8 @@
-xgo/CHANGES
+markdown_go/CHANGES
 
+v0.3.7
+    2015-12-29
+        * fixed dead link; gofmt -w .
 v0.3.6
     2015-09-07
         * improved {README,index}.md                                SLOC 3785
@@ -26,3 +29,5 @@ v0.2.0
     2014-06-04
         * created in prep for migration to separate git repo
         * xgoMarkdown moved to md/cmd/xgoMarkdown                   SLOC 3550
+
+
