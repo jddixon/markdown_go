@@ -49,20 +49,20 @@ func (ls *LinkRefSpan) GetHtml() (out []rune) {
 	}
 	def := ls.doc.refDict[key]
 	if def != nil {
-    	uri := def.uri
-    	title := def.title
-    
-    	out = append(out, []rune("<a href=\"")...)
-    	out = append(out, uri...)
-    	if title != nil {
-    		out = append(out, []rune("\" title=\"")...)
-    		out = append(out, title...)
-    	}
-    	out = append(out, []rune("\">")...)
-    	if ls.linkText != nil {
-    		out = append(out, ls.linkText...)
-    	}
-    	out = append(out, []rune("</a>")...)
+		uri := def.uri
+		title := def.title
+
+		out = append(out, []rune("<a href=\"")...)
+		out = append(out, uri...)
+		if title != nil {
+			out = append(out, []rune("\" title=\"")...)
+			out = append(out, title...)
+		}
+		out = append(out, []rune("\">")...)
+		if ls.linkText != nil {
+			out = append(out, ls.linkText...)
+		}
+		out = append(out, []rune("</a>")...)
 	}
 	return
 }
@@ -114,38 +114,38 @@ func (q *Line) parseLinkRefSpan(doc *Document) (span SpanI, err error) {
 			offset, EOL, linkTextEnd)
 		// END
 		if offset < EOL {
-    		if linkTextEnd > 0 {
-    			// optional space
-    			if (offset < EOL) && (q.runes[offset] == ' ') {
-    				offset++
-    			}
-    			if (offset < EOL) && (q.runes[offset] == '[') {		// XXX 
-    				offset++
-    				idStart = offset
-    				fmt.Printf("parseLinkRefSpan: idStart = %d\n", offset) // DEBUG
-    			}
-    		}
-    		// find the end of the ID -----------------------------------
-    		if idStart > 0 {
-    			for offset = idStart; offset < EOL; offset++ {
-    				ch := q.runes[offset]
-    				if ch == ']' {
-    					end = offset
-    					if idEnd == 0 {
-    						idEnd = end
-    					}
-    					break
-    				}
-    			}
-    		}
-    		if end > 0 {
-    			var lrSpan *LinkRefSpan
-    			linkText = q.runes[linkTextStart:linkTextEnd]
-    			id = q.runes[idStart:idEnd]
-    			lrSpan, err = NewLinkRefSpan(doc, linkText, string(id))
-    			span = lrSpan
-    			q.offset = offset + 1
-    		}
+			if linkTextEnd > 0 {
+				// optional space
+				if (offset < EOL) && (q.runes[offset] == ' ') {
+					offset++
+				}
+				if (offset < EOL) && (q.runes[offset] == '[') { // XXX
+					offset++
+					idStart = offset
+					fmt.Printf("parseLinkRefSpan: idStart = %d\n", offset) // DEBUG
+				}
+			}
+			// find the end of the ID -----------------------------------
+			if idStart > 0 {
+				for offset = idStart; offset < EOL; offset++ {
+					ch := q.runes[offset]
+					if ch == ']' {
+						end = offset
+						if idEnd == 0 {
+							idEnd = end
+						}
+						break
+					}
+				}
+			}
+			if end > 0 {
+				var lrSpan *LinkRefSpan
+				linkText = q.runes[linkTextStart:linkTextEnd]
+				id = q.runes[idStart:idEnd]
+				lrSpan, err = NewLinkRefSpan(doc, linkText, string(id))
+				span = lrSpan
+				q.offset = offset + 1
+			}
 		}
 	}
 	return

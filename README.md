@@ -49,4 +49,4 @@ Markdown_go does not as yet conform to the CommonMark spec.
 ## On-line Documentation
 
 More information on the **markdown_go** project can be found
-[here](://jddixon.github.io/markdown_go)
+[here](https://jddixon.github.io/markdown_go)

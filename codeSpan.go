@@ -3,7 +3,7 @@ package md
 // xgo/md/codeSpan.go
 
 import (
-	//"fmt"
+//"fmt"
 )
 
 // In Markdown input text a code span begins with one or two backticks

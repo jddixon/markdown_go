@@ -91,7 +91,7 @@ func (q *Line) parseImageSpan(opt *Options) (span SpanI, err error) {
 	if opt == nil {
 		err = NilOptions
 	} else {
-		EOL    := uint(len(q.runes))
+		EOL := uint(len(q.runes))
 		verbose = opt.Verbose
 		testing = opt.Testing
 		_ = verbose
@@ -115,7 +115,7 @@ func (q *Line) parseImageSpan(opt *Options) (span SpanI, err error) {
 			if offset < EOL-1 && q.runes[offset+1] == ' ' {
 				offset++
 			}
-			if (offset<EOL) && (q.runes[offset] == '(') {	
+			if (offset < EOL) && (q.runes[offset] == '(') {
 				offset++
 				pathStart = offset
 				// DEBUG

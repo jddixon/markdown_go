@@ -218,7 +218,7 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 		lineProcessed = false
 		b = nil
 		/////////////////////////////////////////////////////////////
-		// XXX THIS IS CAUSING ERRORS -- around line 339 eol has a 
+		// XXX THIS IS CAUSING ERRORS -- around line 339 eol has a
 		// value differnt from len(q.runes) XXX
 		/////////////////////////////////////////////////////////////
 		lineLen := uint(len(q.runes)) // XXX REDUNDANT
@@ -315,7 +315,7 @@ func (h *Holder) ParseHolder(p *Parser, q *Line) (out *Line, status int) {
 					// XXX END HACK -----------------------
 
 					spanLen := eol - from
-					
+
 					// DEBUG -- what happens if from > eol ??
 					//actualEOL := uint(len(q.runes))
 					//fmt.Printf("eol %d actualEOL %d lineLen %d from %d spanLen %d\n",
