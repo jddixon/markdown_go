@@ -1,5 +1,8 @@
 markdown_go/TODO
 
+2016-02-25
+    * go test ./... 
+
 2015-04-01
     * commonTests_test.go should wrap all tests in Go's version of
         try/catch

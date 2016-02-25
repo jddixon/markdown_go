@@ -1,6 +1,6 @@
 package md
 
 const (
-	VERSION      = "0.3.7"
-	VERSION_DATE = "2015-12-29"
+	VERSION      = "0.3.8"
+	VERSION_DATE = "2016-02-25"
 )
