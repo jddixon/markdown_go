@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	. "launchpad.net/gocheck"
-	"os"
+	. "gopkg.in/check.v1"
+    "os"
 	"path"
 )
 

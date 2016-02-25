@@ -1,5 +1,8 @@
 markdown_go/CHANGES
 
+v0.3.8
+    2016-02-25
+        * LICENSE update                                            SLOC 3783
 v0.3.7
     2015-12-29
         * fixed dead link; gofmt -w .
@@ -29,5 +32,6 @@ v0.2.0
     2014-06-04
         * created in prep for migration to separate git repo
         * xgoMarkdown moved to md/cmd/xgoMarkdown                   SLOC 3550
+
 
 
