@@ -1,5 +1,8 @@
 markdown_go/CHANGES
 
+v0.3.9
+    2016-05-25
+        * add bkp2U, other bash scripts; .dvcz etc                  SLOC 4028
 v0.3.8
     2016-02-25
         * LICENSE update                                            SLOC 3783
@@ -32,6 +35,7 @@ v0.2.0
     2014-06-04
         * created in prep for migration to separate git repo
         * xgoMarkdown moved to md/cmd/xgoMarkdown                   SLOC 3550
+
 
 
 

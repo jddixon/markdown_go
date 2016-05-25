@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 echo 
 echo $1
 cmd/xgoMarkdown/xgoMarkdown -i markdown-testsuite/tests -o tmp $1
