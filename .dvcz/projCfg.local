@@ -1,0 +1,13 @@
+# markdown_go
+
+dir:clr:tmp
+dir:extern:commonmark
+dir:extern:markdown-testsuite
+
+go:global:cmd/commonTests/commonTests.go
+go:global:cmd/xgoMarkdown/xgoMarkdown.go
+
+bash:local:check
+bash:local:check.all
+bash:local:check.spec
+bash:local:tests.list
