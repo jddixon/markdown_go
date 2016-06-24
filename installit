@@ -4,7 +4,12 @@ if [ ! -z "${DEV_BASE// }" ]
 then
   cd $DEV_BASE/go/src/github.com/jddixon/markdown_go
   
-  echo "\nLOGIC FOR INSTALLING GO SCRIPTS IS NOT IMPLEMENTED"
+  pushd cmd/xgoMarkdown
+  go build && go install
+  popd
+  pushd cmd/commonTests
+  go build && go install
+  popd
   
 else
   echo "DEV_BASE is not defined"

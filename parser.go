@@ -4,7 +4,7 @@ package md
 
 import (
 	"fmt"
-	gl "github.com/jddixon/xgo/lex"
+	gl "github.com/jddixon/xgo_go/lex"
 	"io"
 	u "unicode"
 )
