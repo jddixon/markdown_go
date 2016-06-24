@@ -2,8 +2,8 @@
 project:markdown_go
 package:markdown_go
 mainlang:go
-version:0.3.8
-versionDate:2016-02-25
+version:0.3.9
+versionDate:2016-05-25
 :?dirs?:
 dir:std:ghpDoc
 dir:std:.dvcz
@@ -16,9 +16,14 @@ dir:extern:markdown-testsuite
 :?files?:
 code:std:.dvcz/projCfg
 code:std:.dvcz/projCfg.local
+code:std:.dvcz/builds
+code:std:.dvcz/lastBuildList
+code:std:.dvcz/version
+code:std:.dvczignore
+code:std:.dvczignore.local
 code:std:.gitignore
-code:std:/var/app/sharedev/config/projCfg
 code:std:.gitignore.local
+code:std:/var/app/sharedev/config/projCfg
 txt:std:.copyright
 txt:std:CHANGES
 txt:std:LICENSE.md
