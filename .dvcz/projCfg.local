@@ -1,5 +1,7 @@
 # markdown_go
 
+txt:std:LICENSE-MIT.md
+
 dir:clr:tmp
 dir:extern:commonmark
 dir:extern:markdown-testsuite

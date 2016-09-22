@@ -1,5 +1,8 @@
 markdown_go/CHANGES
 
+v0.3.11
+    2016-09-22
+        * standardize licensing                                     sLOC 4823
 v0.3.10
     2016-06-24
         * add ghpDoc/{css,img}/ ; fix blocks_test.go                SLOC 4792
@@ -38,6 +41,7 @@ v0.2.0
     2014-06-04
         * created in prep for migration to separate git repo
         * xgoMarkdown moved to md/cmd/xgoMarkdown                   SLOC 3550
+
 
 
 
