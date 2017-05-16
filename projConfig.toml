@@ -1,0 +1,23 @@
+projConfig.toml for markdown_go
+
+[meta]
+    version = '0.1.0'
+
+[project]
+    name = 'markdown_go'  # distro name
+    package = 'markdown_go'  # internal name
+    main_lang = 'go'
+    version = '0.3.12'
+    version_date = '2017-05-16'
+    author = 'Jim Dixon'
+    author_email = 'jddixon@gmail.com'
+    copyright = '2014-2016'
+    description = 'Go implementation of Markdown"'
+    dev_status = 'alpha'
+    license = 'mit'
+    relpath = 'go/src/github.com/jddixon/markdown_go'
+    state = 'shared'
+    url = 'https://jddixon.github.io/markdown_go'
+
+[go]
+    cmds=['xgoMarkdown', 'commonTests']
