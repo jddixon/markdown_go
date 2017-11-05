@@ -1,5 +1,8 @@
 markdown_go/CHANGES
 
+v0.3.13
+    2017-11-05
+        *
 v0.3.12
     2017-05-16
         * add projConfig.toml                                       SLOC 4829
@@ -44,6 +47,7 @@ v0.2.0
     2014-06-04
         * created in prep for migration to separate git repo
         * xgoMarkdown moved to md/cmd/xgoMarkdown                   SLOC 3550
+
 
 
 
